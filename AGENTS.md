@@ -99,7 +99,8 @@ services/            синглтоны (pragma Singleton) и JS-библиот�
   Recorder.qml       wf-recorder: область (slurp) или монитор, звук, SIGINT — стоп; IPC record
   Brightness.qml     /sys/class/backlight: value, set() через brightnessctl; опрос 400 мс
   glyphs.js          значки Nerd Font по именам: G.g("wifi"); рисовать Theme.iconFont
-  Cava.qml           полоски звука: cava (raw ascii, 32 полосы) только пока играет и видно (bar media + shell.bar.viz, открытый home + shell.home.viz); bars(n)
+  Cava.qml           полоски звука: cava (raw ascii, 32 полосы) только пока играет и видно (bar media + shell.bar.viz, открытый home + shell.home.viz); bars(n);
+                     shell.viz.source player — source = object.serial потока плеера (процесс MPRIS по dbusName → потомок с потоком вывода PipeWire); IPC cava get
   Lyrics.qml         текст песни для home/Media: LRCLIB /api/get → /api/search, кэш ~/.cache/ochre/lyrics/<md5>.json, parseLrc, current/next по позиции
   Countdown.qml      таймер: endsAt (время конца, не остаток) / pausedLeft, parse(«25m», «1h30m», «5:00»), ~/.local/state/ochre/timer.json; IPC timer
   Game.qml           игровой режим shell.game: niriFiles подменяет GAME_OFF поверх своих значений, Notifs.dnd — при shell.game.dnd; IPC game
@@ -717,6 +718,10 @@ invoke); остальные съезжают на её место (`move` в Col
   прозрачность неактивных) отдают «выключено», поэтому выключение возвращает ровно свои значения. Новый тяжёлый эффект niri —
   добавить в `GAME_OFF`. `Notifs.dnd` — эффективное значение (`shell.notify.dnd || game && shell.game.dnd`), `toggleDnd` меняет
   сохранённое. Уведомление о включении шлётся до `Settings.set` (таймер 300 мс) — иначе его заглушил бы DND самого режима.
+- **cava по одному приложению**: `source = <object.serial>` потока вывода приложения работает (cava 1.0 подключается к нему, как
+  `pw-record --target`). Поток принадлежит не процессу MPRIS, а его потомку (Electron/Chromium: аудиопроцесс), поэтому сверка —
+  вверх по `/proc/<pid>/stat`. На паузе Chromium поток убирает — полосок нет, весь звук вместо них не подставляется. Смена потока —
+  новый конфиг `ochre-cava-<serial>.conf` и перезапуск процесса через таймер (тем же тактом Process не перезапустить).
 - **Ошибки (Errors).** `qs log -f` читает лог с начала, поэтому «Reloading configuration...» очищает ошибки qs — после неё
   идут только ошибки нового кода. Ошибка в модуле панели приходит по разу с каждой панели (×N — число мониторов).
   Свой попап вместо встроенного Quickshell — `Quickshell.inhibitReloadPopup()`. У niri номер строки в `╭─[файл:N:…]` —

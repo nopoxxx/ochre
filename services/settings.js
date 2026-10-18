@@ -339,6 +339,8 @@ function sections(outputs, layout, home) {
             { key: "shell.home.anim", label: "анимация", type: "enum", options: SHELL_ANIMS, def: "slide", hint: SHELL_ANIM_HINT },
             { key: "shell.home.lyrics", label: "текст песни", type: "bool", def: true, hint: "текущая строка под треком — LRCLIB (lrclib.net), ищется, пока меню открыто" },
             { key: "shell.home.viz", label: "полоски звука", type: "bool", def: true, hint: "▁▃▅▇ в «сейчас играет», пока меню открыто; нужен cava" },
+            { key: "shell.viz.source", label: "звук для полосок", type: "enum", options: ["player", "system"], def: "player",
+              hint: "player — только приложение, которое играет музыку (YouTube Music, Spotify…); system — всё, что звучит, и звонки тоже. И в home, и на панели" },
 
             { header: "погода" },
             { key: "shell.weather.city", label: "город", type: "text", def: "", hint: "например Москва или Berlin; пусто — по IP (ipinfo.io). Данные — Open-Meteo, без ключа" },
