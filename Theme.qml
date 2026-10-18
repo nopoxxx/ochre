@@ -25,6 +25,12 @@ Singleton {
         blue: blue, purple: purple, red: red
     })[Settings.get("shell.accent")] ?? ochre
 
+    // цвет по имени из настроек (акценты, цвета разметки скриншота): white/black — fg/bg
+    function named(n) {
+        return ({ ochre: ochre, yellow: yellow, orange: orange, green: green, aqua: aqua, blue: blue, purple: purple,
+                  red: red, white: fg, black: bg })[n] ?? gray;
+    }
+
     readonly property string font: "Terminess Nerd Font Mono"
     // значки Nerd Font: в Mono-версии они ужаты в клетку и не читаются (см. services/glyphs.js)
     readonly property string iconFont: "Terminess Nerd Font"

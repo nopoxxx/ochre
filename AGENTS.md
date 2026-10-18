@@ -63,7 +63,7 @@ ErrorsWindow.qml     ~/log/errors в углу монитора с фокусом
 CalGrid.qml          месяц как `cal` — общий для CalPopup и секции календаря в home
 ClipboardWindow.qml  история буфера (cliphist): список с поиском слева, запись целиком справа (текст/картинка)
 ShotWindow.qml       скриншот с разметкой (по мотивам rishot, MIT): заморозка экранов, область/экран/окно, инструменты, экспорт
-SettingsWindow.qml   окно настроек в стиле menuconfig: строки из S.sections(), поиск (/), действия — runAction()
+SettingsWindow.qml   окно настроек: разделы со значками слева, карточки групп справа, у строки свой элемент (тумблер, кнопки вариантов, ползунок, поле…); S.sections(), поиск, runAction()
 DisplaysWindow.qml   мониторы: карта, режим/масштаб/поворот/расположение/VRR/основной, откат через 15 с
 BindsWindow.qml      бинды niri: список с поиском, редактор (сочетание/действие/подпись), конфликты
 NotifPopups.qml      стопка всплывающих уведомлений (namespace ochre-notify)
@@ -246,10 +246,21 @@ docs/                документация — GitHub Pages из main /docs (
 - Уже открытые GTK-окна новый CSS не перечитывают (проверено: переключение gtk-theme туда-обратно не помогает) —
   только после перезапуска приложения. Новые окна получают изменения сразу.
 
-**Черновик.** Значения (`bool`, `enum`, `int`, `float`) меняются не сразу: ←→, Space, клик и `r` (по умолчанию) пишут
+**Черновик (клавиатура).** Значения (`bool`, `enum`, `int`, `float`) с клавиатуры меняются не сразу: ←→, Space и `r` (по умолчанию) пишут
 `win.draft = {key, value}` (`propose`), строка показывает `было → ‹ станет ›` и кнопку `[↵]`; применяет только ↵
 (`activate` → `apply`), Esc или смена строки (`onCurChanged`) — отменяют. ↵ без черновика значение не меняет.
 `text` и `combo` и так подтверждаются ↵; строки модулей bar/ (зона, порядок) меняются сразу.
+
+**Мышь в настройках** меняет сразу, без черновика (`win.pick(i, v)`, `nudge`, `resetNow`): bool — тумблер, enum — кнопки
+(`fitsSegments`: ≤ 6 вариантов и ≤ 40 знаков) или выпадающий список (`drop`, `openDrop`), `shell.accent`/`shell.shot.color` — цветные
+квадраты (`swatchKeys`, `Theme.named`), int/float — `− ▕███░░▏ +` (полосу можно тянуть), text — поле в строке (`finishEdit(commit, text)`),
+combo — кнопка захвата и ✕, action — кнопка «открыть»/«выполнить» (`opens`), module — кнопки зон и ↑↓ порядка; ↺ — по умолчанию.
+**Перетаскивание** модулей bar/ и секций home/ (не в поиске): `MouseArea` строки двигает `ghost` (`drag.target`, порог 6 px),
+`DropArea` строк (верхняя половина — перед ней, нижняя — перед следующей в зоне) и карточек (`groups[].zone` — пустая зона
+тоже принимает) пишут `dropTarget`; конец перетаскивания — `finishDrag()` → `S.placeModule(l, id, zone, before, key)`.
+У края списка — автопрокрутка (таймер). Линия акцентом — куда встанет.
+Строки — карточки по группам (`groups`: заголовок + `{row, index}`, index — номер в `rows` для клавиатуры); прокрутка к текущей —
+`scrollTo` из делегата. Элементы — `Component` (`toggleC`, `segmentsC`, …), грузит их `Loader` строки (`parent.r`, `parent.idx`).
 
 **Окно настроек.** Открытый раздел помнит `Settings.page` (окно возвращается к нему); `Settings.show(id)`
 открывает нужный, IPC `settings open <id>`. `/` — поиск: `S.searchRows(sections, query)` ищет каждое
@@ -367,6 +378,14 @@ ochre/keys.kdl        свои бинды из окна биндов — пиш�
 
 ### 4.4c Меню home (`HomePanel.qml`, `home/`, `services/Home.qml`)
 
+- **Вид** — `shell.home.style`, секции те же, меняется раскладка: `control` (компактная панель под баром, высота по содержимому;
+  wi-fi и bluetooth убраны с главной и открываются страницей по › на плитке Quick или `o` — `canPage`, `openPage`, `page`),
+  `column` (колонка во всю высоту, карточки), `dashboard` (три колонки посередине, колонка секции — `dash` в `HOME_SECTIONS`),
+  `classic` (строки «── title ──»). Секция — в «слоте» (`Component slot`): в карточных видах слот рисует рамку и заголовок
+  (▾ — свернуть, `shell.home.collapsed` — список id), а секции ставит `bare` — своя строка заголовка скрыта. У каждого контейнера
+  (`repMain`, `rep0..2`, `repPage`) свой Repeater по своему списку id; фокус клавиатуры идёт по `slots()` в порядке контейнеров.
+  Свёрнутая или скрытая секция в обходе пропускается.
+
 - Открывают клик по `user` на панели (`Home.toggle(bar.screen.name)` — на мониторе этой панели), `Mod+A`,
   `qs ipc call home toggle`. Окно — `PanelWindow` на весь экран, кроме места панели (`barSpace`: панель остаётся
   кликабельной, клик по `user` закрывает меню), клик мимо колонки закрывает. Колонка выезжает от края
@@ -450,6 +469,8 @@ Scale { yScale: reveal.ys }]`, а `keyboardFocus` — Exclusive только п�
 `body` (рамка и заголовок), потому что TypeOn не может прятать собственного родителя. ShaderEffect с текстурой
 в `qml -platform offscreen` не рисуется (программный рендер) — для проверки там годится только сам ShaderEffectSource.
 Навигация везде одинакова: ↑↓ / j k (в полях ввода — Ctrl+J/K), ←→ / h l, ↵, Esc/q, Tab — разделы.
+Мышью: в меню — `‹` и клик по уровню пути в заголовке (`win.up(depth)`), боковая кнопка «назад»; кнопки home (`home/Btn.qml`) — в
+рамке с полями, `tile: true` — плитка (значок, название, `sub` — состояние) для быстрых переключателей в две колонки.
 Выделение строки — `▌ ` акцентом и фон `Theme.bg1`; изменённое значение — ` *`.
 Наведение мыши выделяет строку только при реальном сдвиге курсора (`lastMouse`).
 
@@ -569,7 +590,7 @@ invoke); остальные съезжают на её место (`move` в Col
 | `notify` | `dnd`, `clear`, `hide` (убрать всплывающие, история остаётся) | services/Notifs.qml |
 | `shot` | `region`, `window`, `edit <путь>`, `ocr`, `pick` | ShotWindow.qml |
 | `clipboard` | `toggle` | ClipboardWindow.qml |
-| `home` | `toggle`, `open`, `close` | services/Home.qml |
+| `home` | `toggle`, `open`, `close`, `page <wifi\|bluetooth>` (вид control: сразу страница) | services/Home.qml |
 | `record` | `toggle`, `region`, `screen`, `stop` | services/Recorder.qml |
 | `shell` | `reload` (Quickshell.reload(true): без перезапуска процесса) | shell.qml |
 | `timer` | `start <срок [подпись]>`, `pause` (пауза/продолжить), `stop`, `get` | services/Countdown.qml |

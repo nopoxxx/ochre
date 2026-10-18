@@ -324,10 +324,19 @@ Scope {
                 text: "M"
             }
 
+            // на уровень выше — кнопкой ‹, кликом по пути в заголовке или боковой кнопкой мыши «назад»
+            function up(depth) {
+                if (depth < base) { root.open = false; return; }
+                stack = stack.slice(0, depth);
+                input.text = "";
+                input.forceActiveFocus();
+            }
+
             // клик мимо окна закрывает меню
             MouseArea {
                 anchors.fill: parent
-                onClicked: root.open = false
+                acceptedButtons: Qt.LeftButton | Qt.BackButton
+                onClicked: mouse => mouse.button === Qt.BackButton ? win.back() : root.open = false
             }
 
             Rectangle {
@@ -346,16 +355,44 @@ Scope {
                     Scale { origin.y: -title.height / 2; yScale: reveal.ys }
                 ]
 
-                MouseArea { anchors.fill: parent }
+                MouseArea {
+                    anchors.fill: parent
+                    acceptedButtons: Qt.BackButton
+                    onClicked: win.back()
+                }
 
-                // заголовок на линии рамки: ┌─[ ~/packages/install/ ]────
+                // заголовок на линии рамки: ┌─[ ~/packages/install/ ]──── — каждый уровень пути кликается
                 Rectangle {
                     x: Theme.pad
                     y: -height / 2
                     width: title.implicitWidth
                     height: title.implicitHeight
                     color: Theme.bg
-                    T { id: title; text: "[ " + win.path + " ]"; color: Theme.accent; font.bold: true }
+                    Row {
+                        id: title
+                        T { text: "[ "; color: Theme.accent; font.bold: true }
+                        Repeater {
+                            model: win.stack.length
+                            T {
+                                required property int index
+                                readonly property bool last: index === win.stack.length - 1
+                                readonly property bool can: !last && index + 1 >= win.base
+                                text: (index === 0 ? "~" : win.stack[index].label) + "/"
+                                color: can && crumb.containsMouse ? Theme.fg : Theme.accent
+                                font.bold: true
+                                font.underline: can && crumb.containsMouse
+                                MouseArea {
+                                    id: crumb
+                                    anchors.fill: parent
+                                    enabled: parent.can
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: win.up(parent.index + 1)
+                                }
+                            }
+                        }
+                        T { text: " ]"; color: Theme.accent; font.bold: true }
+                    }
                 }
 
                 ColumnLayout {
@@ -368,6 +405,14 @@ Scope {
                         Layout.fillWidth: true
                         spacing: 0
 
+                        // ‹ — на уровень выше (на нижней границе — закрыть)
+                        T {
+                            visible: win.stack.length > win.base
+                            font.family: Theme.iconFont
+                            text: String.fromCodePoint(0xF0141) + " "
+                            color: backHover.containsMouse ? Theme.accent : Theme.gray
+                            MouseArea { id: backHover; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: win.back() }
+                        }
                         T { text: "❯ "; color: Theme.accent; font.bold: true }
 
                         TextInput {
@@ -432,7 +477,7 @@ Scope {
                         id: list
 
                         Layout.fillWidth: true
-                        implicitHeight: cell.height * 1.25 * root.rows
+                        implicitHeight: cell.height * 1.5 * root.rows
                         clip: true
                         model: win.results
                         highlightMoveDuration: 0
@@ -450,7 +495,7 @@ Scope {
                             readonly property bool armed: win.armed !== "" && win.armed === win.keyOf(item)
 
                             width: list.width
-                            height: cell.height * 1.25
+                            height: cell.height * 1.5
                             color: current ? Theme.bg1 : "transparent"
 
                             RowLayout {

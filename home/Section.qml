@@ -15,6 +15,7 @@ ColumnLayout {
     property int count: 0
     property int cur: 0
     property bool focused: false
+    property bool bare: false        // в карточке (HomePanel рисует рамку с заголовком) — своей строки «── title ──» нет
     default property alias content: body.data
 
     function isCur(i) { return focused && cur === i; }
@@ -30,6 +31,7 @@ ColumnLayout {
     spacing: 2
 
     RowLayout {
+        visible: !sec.bare
         Layout.fillWidth: true
         Layout.topMargin: 4
         spacing: 0

@@ -62,21 +62,22 @@ const DEFAULT_LAYOUT = {
 // ── секции меню home (клик по user@host, Mod+A) ────────────────────
 // file — home/<file>.qml, label — подпись в настройках (= заголовок секции). Секция без устройства (bluetooth, батарея, подсветка) прячется сама.
 
+// dash — колонка секции в виде dashboard (0 — управление, 1 — медиа и время, 2 — списки)
 const HOME_SECTIONS = [
-    { id: "user", label: "whoami", file: "User", desc: "user@host, время работы, ядро" },
-    { id: "quick", label: "быстро", file: "Quick", desc: "переключатели: wifi, bluetooth, ночной режим, не беспокоить, микрофон" },
-    { id: "levels", label: "звук и экран", file: "Levels", desc: "громкость, микрофон, яркость (если есть подсветка экрана)" },
-    { id: "media", label: "сейчас играет", file: "Media", desc: "плеер: обложка, трек, прогресс, кнопки; несколько плееров — ‹ › переключают" },
-    { id: "weather", label: "погода", file: "Weather", desc: "погода Open-Meteo: сейчас и на несколько дней; город — ниже, в погоде" },
-    { id: "calendar", label: "календарь", file: "Calendar", desc: "календарь месяца: ←→ — листать" },
-    { id: "todo", label: "todo", file: "Todo", desc: "список дел ~/.config/ochre/todo.txt: ↵ — сделано, a — добавить, del — удалить, e — редактор" },
-    { id: "notes", label: "заметки", file: "Notes", desc: "начало ~/.config/ochre/notes.md; ↵ — открыть в редакторе" },
-    { id: "notifs", label: "уведомления", file: "Notifs", desc: "последние уведомления: ↵ — действие, del — убрать" },
-    { id: "system", label: "система", file: "System", desc: "cpu, память, диск, температура" },
-    { id: "power", label: "питание", file: "Power", desc: "батарея и профиль питания (power-profiles-daemon)" },
-    { id: "wifi", label: "wi-fi", file: "Wifi", desc: "сети Wi-Fi: подключиться, отключиться, пароль" },
-    { id: "bluetooth", label: "bluetooth", file: "Bluetooth", desc: "устройства bluetooth: подключить, сопряжение, забыть" },
-    { id: "actions", label: "действия", file: "Actions", desc: "запись экрана, настройки, блокировка, сон, выход, перезагрузка, выключение" }
+    { id: "user", dash: 0, label: "whoami", file: "User", desc: "user@host, время работы, ядро" },
+    { id: "quick", dash: 0, label: "быстро", file: "Quick", desc: "переключатели: wifi, bluetooth, ночной режим, не беспокоить, микрофон" },
+    { id: "levels", dash: 0, label: "звук и экран", file: "Levels", desc: "громкость, микрофон, яркость (если есть подсветка экрана)" },
+    { id: "media", dash: 1, label: "сейчас играет", file: "Media", desc: "плеер: обложка, трек, прогресс, кнопки; несколько плееров — ‹ › переключают" },
+    { id: "weather", dash: 1, label: "погода", file: "Weather", desc: "погода Open-Meteo: сейчас и на несколько дней; город — ниже, в погоде" },
+    { id: "calendar", dash: 1, label: "календарь", file: "Calendar", desc: "календарь месяца: ←→ — листать" },
+    { id: "todo", dash: 2, label: "todo", file: "Todo", desc: "список дел ~/.config/ochre/todo.txt: ↵ — сделано, a — добавить, del — удалить, e — редактор" },
+    { id: "notes", dash: 2, label: "заметки", file: "Notes", desc: "начало ~/.config/ochre/notes.md; ↵ — открыть в редакторе" },
+    { id: "notifs", dash: 2, label: "уведомления", file: "Notifs", desc: "последние уведомления: ↵ — действие, del — убрать" },
+    { id: "system", dash: 1, label: "система", file: "System", desc: "cpu, память, диск, температура" },
+    { id: "power", dash: 0, label: "питание", file: "Power", desc: "батарея и профиль питания (power-profiles-daemon)" },
+    { id: "wifi", dash: 2, label: "wi-fi", file: "Wifi", desc: "сети Wi-Fi: подключиться, отключиться, пароль" },
+    { id: "bluetooth", dash: 2, label: "bluetooth", file: "Bluetooth", desc: "устройства bluetooth: подключить, сопряжение, забыть" },
+    { id: "actions", dash: 0, label: "действия", file: "Actions", desc: "запись экрана, настройки, блокировка, сон, выход, перезагрузка, выключение" }
 ];
 
 const DEFAULT_HOME = {
@@ -143,6 +144,17 @@ function moveModule(l, id, d, key) {
     n[from] = n[from].filter(x => x !== id);
     n[to].push(id);
     return n;
+}
+
+// перетаскивание в окне настроек: id — в зону zone перед элементом before (null — в конец зоны)
+function placeModule(l, id, zone, before, key) {
+    const L = LAYOUTS[key ?? "shell.bar.layout"];
+    const n = normalizeLayout(l, key);
+    const out = {};
+    for (const z of L.zones) out[z] = n[z].filter(x => x !== id);
+    const i = before && before !== id ? out[zone].indexOf(before) : -1;
+    out[zone].splice(i >= 0 ? i : out[zone].length, 0, id);
+    return out;
 }
 
 // поставить в зону (в конец); строки раскладки в окне настроек меняют зону черновиком и применяют этим
@@ -320,6 +332,8 @@ function sections(outputs, layout, home) {
 
             { header: "меню" },
             act("home", "открыть", "клик по user@host на панели или Mod+A"),
+            { key: "shell.home.style", label: "вид", type: "enum", options: ["control", "column", "dashboard", "classic"], def: "control",
+              hint: "control — центр управления под панелью, wi-fi и bluetooth — страницами (› на плитке); column — колонка у края, секции карточками; dashboard — три колонки посередине; classic — как раньше" },
             { key: "shell.home.side", label: "край экрана", type: "enum", options: ["left", "right"], def: "left" },
             { key: "shell.home.width", label: "ширина, символов", type: "int", min: 40, max: 80, step: 2, def: 52 },
             { key: "shell.home.anim", label: "анимация", type: "enum", options: SHELL_ANIMS, def: "slide", hint: SHELL_ANIM_HINT },

@@ -14,7 +14,6 @@ Section {
 
     readonly property var sink: Pipewire.defaultAudioSink
     readonly property var source: Pipewire.defaultAudioSource
-    readonly property int cells: Math.max(8, Settings.get("shell.home.width") - 18)
 
     PwObjectTracker { objects: [sec.sink, sec.source].filter(x => x) }
 
@@ -57,7 +56,6 @@ Section {
             readonly property bool mic: modelData.kind === "source"
 
             Layout.fillWidth: true
-            cells: sec.cells
             current: sec.isCur(index)
             icon: bright ? G.g("bright") : mic ? G.g(off ? "micOff" : "mic") : G.g(off ? "volOff" : "vol")
             label: bright ? "яркость" : mic ? "mic" : "vol"
