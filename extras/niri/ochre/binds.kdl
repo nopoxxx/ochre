@@ -14,6 +14,8 @@ binds {
     Mod+Alt+R hotkey-overlay-title="Record the Screen" { spawn "qs" "ipc" "call" "record" "toggle"; }
     Mod+Shift+S hotkey-overlay-title="Screenshot" { spawn "qs" "ipc" "call" "shot" "region"; }
     Print hotkey-overlay-title="Screenshot" { spawn "qs" "ipc" "call" "shot" "region"; }
+    Mod+Shift+T hotkey-overlay-title="Copy Text from the Screen" { spawn "qs" "ipc" "call" "shot" "ocr"; }
+    Mod+Shift+C hotkey-overlay-title="Pick a Color" { spawn "qs" "ipc" "call" "shot" "pick"; }
     Mod+S hotkey-overlay-title="Settings" { spawn "qs" "ipc" "call" "settings" "toggle"; }
     Super+Alt+L hotkey-overlay-title="Lock the Screen" { spawn "qs" "ipc" "call" "lock" "lock"; }
 }

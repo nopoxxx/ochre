@@ -22,6 +22,8 @@ optdepends=(
     'gammastep: ночной режим'
     'wf-recorder: запись экрана'
     'slurp: запись выделенной области'
+    'cava: полоски звука в media и home'
+    'tesseract: текст со скриншота в буфер (с tesseract-data-eng, tesseract-data-rus)'
     'pavucontrol: микшер в настройках'
     'paru: обновления AUR на панели и меню packages/'
     'greetd: экран входа ochre (ochre greeter)'

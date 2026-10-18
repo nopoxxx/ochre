@@ -119,7 +119,26 @@ Section {
                 T { text: " " + sec.fmt(sec.player?.length); color: Theme.gray }
             }
 
-            Row {
+            // текст песни: текущая строка и следующая (services/Lyrics.qml)
+            T {
+                Layout.fillWidth: true
+                visible: Settings.get("shell.home.lyrics") && Lyrics.key !== "" && sec.player === Lyrics.player && text !== ""
+                elide: Text.ElideRight
+                text: Lyrics.lines.length ? (Lyrics.current || "♪") : Lyrics.loading ? "♪ ищу текст…"
+                    : Lyrics.instrumental ? "♪ инструментал" : Lyrics.plain ? "♪ текст без разметки времени" : ""
+                color: Lyrics.lines.length ? Theme.accent : Theme.gray
+                font.bold: Lyrics.lines.length > 0
+            }
+            T {
+                Layout.fillWidth: true
+                visible: Settings.get("shell.home.lyrics") && Lyrics.lines.length > 0 && Lyrics.next !== "" && sec.player === Lyrics.player
+                elide: Text.ElideRight
+                text: Lyrics.next
+                color: Theme.gray
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
                 spacing: sec.panel.cell.advanceWidth
                 Repeater {
                     model: sec.buttons
@@ -132,6 +151,15 @@ Section {
                         current: sec.isCur(index)
                         onClicked: { sec.pick(index); sec.activate(index); }
                     }
+                }
+                // ▁▃▅▇ на остаток строки — cava (shell.home.viz)
+                T {
+                    Layout.fillWidth: true
+                    visible: Cava.levels.length > 0 && (sec.player?.isPlaying ?? false)
+                    readonly property int n: Math.max(4, Math.floor(width / sec.panel.cell.advanceWidth))
+                    text: Cava.bars(n)
+                    color: Theme.accent
+                    clip: true
                 }
             }
         }

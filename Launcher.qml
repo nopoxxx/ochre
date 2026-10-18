@@ -88,7 +88,8 @@ Scope {
         packages: String.fromCodePoint(0xF03D7),
         system: String.fromCodePoint(0xF0425),
         about: String.fromCodePoint(0xF02FD),
-        shot: String.fromCodePoint(0xF0100)
+        shot: String.fromCodePoint(0xF0100),
+        timer: String.fromCodePoint(0xF051B)
     })
 
     readonly property var menu: ({
@@ -99,6 +100,13 @@ Scope {
             // пауза — чтобы закрывающееся меню не попало в замороженный кадр
             { label: "screenshot", icon: icons.shot, desc: "снимок с разметкой (Mod+Shift+S); w — окно", alias: ["скриншот", "снимок"], run: () => spawn(["sh", "-c", 'sleep 0.3; exec "$@"', "sh", ...Ochre.ipcArgv(["shot", "region"])]) },
             { label: "setup", icon: icons.setup, desc: "все настройки, мониторы, сеть, звук (Mod+S)", alias: ["settings", "настройки"], run: () => Settings.show("") },
+            // описания без Countdown.left: привязка пересоздавала бы menu каждую секунду, а узлы сравниваются по ссылке
+            { label: "timer", icon: icons.timer, desc: "таймер; любой срок — запросом в корне: timer 25m чай",
+              alias: ["таймер"], children: [
+                ...["5m", "10m", "15m", "25m", "45m", "1h"].map(t => ({ label: t, desc: "запустить на " + Countdown.fmt(Countdown.parse(t)),
+                    run: () => Countdown.start(Countdown.parse(t), "") })),
+                { label: "stop", desc: "остановить таймер", alias: ["стоп"], run: () => Countdown.stop() }
+            ] },
             { label: "packages", icon: icons.packages, desc: "установить, удалить, обновить", children: [
                 { label: "install", desc: "из репозиториев pacman", provider: "repo" },
                 { label: "aur", desc: "поиск в AUR через paru", provider: "aur" },
@@ -112,7 +120,8 @@ Scope {
                 { label: "reboot", desc: "перезагрузка", alias: ["restart"], confirm: true, run: () => spawn(["systemctl", "reboot"]) },
                 { label: "poweroff", desc: "выключение", alias: ["shutdown", "выключить"], confirm: true, run: () => spawn(["systemctl", "poweroff"]) }
             ] },
-            { label: "about", icon: icons.about, desc: "о системе: fastfetch", run: () => about() }
+            { label: "about", icon: icons.about, desc: "о системе: fastfetch", run: () => about() },
+            { label: "help", icon: icons.about, desc: "главные клавиши и подсказки (ochre --help)", alias: ["помощь", "справка", "клавиши"], run: () => Ochre.ipc("welcome", "open") }
         ]
     })
 
@@ -224,8 +233,19 @@ Scope {
                 return { label: "=", desc: r.error || "+ - * / % ^ ( )  sqrt ln log sin cos …  pi e" };
             }
 
+            // «timer 25m чай» в корне меню — запустить таймер (services/Countdown.qml)
+            readonly property var timerItem: {
+                const m = node === root.menu ? query.match(/^(?:timer|таймер)\s+(.+)$/i) : null;
+                const p = m ? Countdown.parseSpec(m[1]) : null;
+                if (!p) return null;
+                return { label: "timer " + Countdown.fmt(p.sec) + (p.label ? " " + p.label : ""),
+                         desc: "↵ — запустить таймер" + (Countdown.active ? " (текущий заменится)" : ""),
+                         run: () => Countdown.start(p.sec, p.label) };
+            }
+
             readonly property var results: {
                 if (calc) return [{ item: calc, pos: [] }];
+                if (timerItem) return [{ item: timerItem, pos: [] }];
                 if (!items) return [];
                 const q = query;
                 if (!q || node.provider === "aur") return items.map(it => ({ item: it, pos: [] }));

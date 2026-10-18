@@ -12,6 +12,8 @@ Singleton {
     property var layoutNames: []
     property int layoutIdx: 0
     property bool overview: false
+    property bool configFailed: false   // последняя загрузка конфига niri не удалась (ConfigLoaded.failed)
+    property var casts: []          // демонстрации экрана (niri ≥ 26.04): {stream_id, kind, target, is_active, pid, pw_node_id}
 
     readonly property var focusedWorkspace: workspaces.find(w => w.is_focused) ?? null
     readonly property var focusedWindow: Object.values(windows).find(w => w.is_focused) ?? null
@@ -85,6 +87,15 @@ Singleton {
             const map = {};
             for (const k in windows) map[k] = Object.assign({}, windows[k], { is_focused: windows[k].id === id });
             windows = map;
+        } else if (ev.ConfigLoaded) {
+            configFailed = ev.ConfigLoaded.failed;
+        } else if (ev.CastsChanged) {
+            casts = ev.CastsChanged.casts;
+        } else if (ev.CastStartedOrChanged) {
+            const cast = ev.CastStartedOrChanged.cast;
+            casts = casts.filter(c => c.stream_id !== cast.stream_id).concat([cast]);
+        } else if (ev.CastStopped) {
+            casts = casts.filter(c => c.stream_id !== ev.CastStopped.stream_id);
         } else if (ev.KeyboardLayoutsChanged) {
             layoutNames = ev.KeyboardLayoutsChanged.keyboard_layouts.names;
             layoutIdx = ev.KeyboardLayoutsChanged.keyboard_layouts.current_idx;

@@ -7,7 +7,7 @@ import qs
 import qs.services
 import "../services/glyphs.js" as G
 
-// Быстрые переключатели: wifi, bluetooth, ночной режим, «не беспокоить», микрофон, запись экрана.
+// Быстрые переключатели: wifi, bluetooth, ночной режим, «не беспокоить», игровой режим, микрофон, запись экрана.
 // ←→ — выбор, ↵ / Space / клик — переключить. Нет устройства или программы — кнопка серая.
 Section {
     id: sec
@@ -38,6 +38,8 @@ Section {
           run: () => NightLight.toggle() },
         { icon: G.g(Notifs.dnd ? "dnd" : "bell"), text: "dnd", on: Notifs.dnd, active: true, onColor: Theme.purple,
           run: () => Notifs.toggleDnd() },
+        { icon: G.g("game"), text: "game", on: Game.on, active: true, onColor: Theme.green,
+          run: () => Game.toggle() },
         { icon: G.g(micMuted ? "micOff" : "mic"), text: micMuted ? "mic: off" : "mic", on: !micMuted && source !== null,
           active: source?.audio !== undefined && source !== null,
           run: () => sec.source.audio.muted = !sec.micMuted },

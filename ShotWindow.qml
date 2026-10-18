@@ -9,12 +9,15 @@ import "services/settings.js" as S
 // Скриншот с разметкой (по мотивам rishot, github.com/ryoku-dev/ryoshot, MIT).
 // Экраны замирают (ScreencopyView, live: false): тянешь область, клик или Space — весь экран, w — окно
 // (niri pick-window → screenshot-window: окно целиком, и тайловое тоже). Дальше — разметка поверх и экспорт:
-// ↵ — действие из настроек (system/ → скриншоты), ^C — копировать, ^S — сохранить.
+// ↵ — действие из настроек (system/ → скриншоты), ^C — копировать, ^S — сохранить, ^O — текст (tesseract) в буфер.
+// i — пипетка (niri pick-color: цвет под курсором в буфер как #rrggbb).
 // Разметка хранится в координатах экрана, область только обрезает — её можно менять ручками, не сдвигая нарисованное.
 // Экспорт — grabToImage обрезки (замороженный кадр + эффекты + разметка) в родном разрешении экрана.
 //   qs ipc call shot region   — область / экран (Mod+Shift+S, Print)
 //   qs ipc call shot window   — сразу выбор окна
 //   qs ipc call shot edit <путь> — разметить готовую картинку
+//   qs ipc call shot ocr      — выбрать область и сразу распознать текст (Mod+Shift+T)
+//   qs ipc call shot pick     — пипетка (Mod+Shift+C)
 Scope {
     id: root
 
@@ -34,6 +37,7 @@ Scope {
     property real factor: 1             // пикселей экрана на логический пиксель
     property string message: ""
     property double textClosedAt: 0     // Enter, закончивший ввод текста, не должен запускать экспорт
+    property string then: ""            // действие сразу после выбора области (shot ocr), без разметки
 
     readonly property string tmp: (Quickshell.env("XDG_RUNTIME_DIR") || "/tmp") + "/ochre-shot"
 
@@ -62,6 +66,8 @@ Scope {
         function region(): void { root.start("screen"); }
         function window(): void { root.start("window"); }
         function edit(path: string): void { root.openImage(path); }
+        function ocr(): void { root.start("screen", "ocr"); }
+        function pick(): void { root.pickColor(); }
     }
 
     function reset() {
@@ -76,9 +82,10 @@ Scope {
         fill = false;
     }
 
-    function start(m) {
+    function start(m, then) {
         if (open || picker.running || winShot.running) { close(); return; }
         reset();
+        root.then = then ?? "";
         // папка для shot.png — заранее: saveToFile в несуществующую папку молча падает
         Quickshell.execDetached(["mkdir", "-p", tmp]);
         target = Niri.focusedWorkspace?.output ?? Quickshell.screens[0]?.name ?? "";
@@ -93,6 +100,30 @@ Scope {
     function close() {
         open = false;
         reset();
+    }
+
+    // область выбрана, а действие уже задано (shot ocr) — выполнить сразу; таймер — чтобы обрезка успела встать
+    onPhaseChanged: if (phase === "edit" && then) thenTimer.start()
+    Timer { id: thenTimer; interval: 50; onTriggered: root.exportShot(root.then) }
+
+    // ── пипетка: niri сам ждёт клика и печатает «Hex: #rrggbb» ──
+    function pickColor() {
+        close();
+        if (!colorPicker.running) colorPicker.running = true;
+    }
+
+    Process {
+        id: colorPicker
+        command: ["niri", "msg", "pick-color"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const hex = (text.match(/#[0-9a-fA-F]{6}/) ?? [""])[0];
+                if (!hex) return;   // Esc
+                const rgb = (text.match(/rgb\([^)]*\)/) ?? [""])[0];
+                Quickshell.execDetached(["sh", "-c", 'printf %s "$1" | wl-copy; notify-send -a ochre "Цвет скопирован" "$1  $2"',
+                    "sh", hex, rgb]);
+            }
+        }
     }
 
     // ── окно: niri сам ждёт клика по окну, потом снимает его целиком ──
@@ -271,6 +302,7 @@ Scope {
             const home = Quickshell.env("HOME");
             const dir = String(Settings.get("shell.shot.dir")).replace(/^~(?=\/|$)/, home);
             const name = "Screenshot from " + Qt.formatDateTime(new Date(), "yyyy-MM-dd HH-mm-ss") + ".png";
+            if (action === "ocr") { ocr(src); close(); return; }
             Quickshell.execDetached(["sh", "-c", `
                 src=$1 act=$2 dest="$3/$4"
                 case $act in copy|both) wl-copy --type image/png < "$src" ;; esac
@@ -283,6 +315,23 @@ Scope {
                 esac`, "sh", src, action, dir, name, String(Settings.get("shell.shot.notify")), label]);
             close();
         }, size);
+    }
+
+    // текст с картинки в буфер: языки — какие из eng, rus стоят (tesseract-data-*)
+    function ocr(src) {
+        Quickshell.execDetached(["sh", "-c", `
+            if ! command -v tesseract >/dev/null; then
+                notify-send -a ochre -u critical "Нужен tesseract" "sudo pacman -S tesseract tesseract-data-eng tesseract-data-rus"; exit 1
+            fi
+            langs=$(tesseract --list-langs 2>/dev/null | grep -xE 'eng|rus' | paste -sd+)
+            # $(…) сама срезает пустые строки в конце
+            text=$(tesseract "$1" - -l "\${langs:-eng}" 2>/dev/null)
+            if [ -z "$(printf %s "$text" | tr -d '[:space:]')" ]; then
+                notify-send -a ochre "Текст не найден" "на снимке нечего распознать"; exit 0
+            fi
+            printf %s "$text" | wl-copy
+            [ "$2" = true ] && notify-send -a ochre "Текст скопирован" "$(printf %s "$text" | head -n 6)"
+            exit 0`, "sh", src, String(Settings.get("shell.shot.notify"))]);
     }
 
     // латинская буква клавиши независимо от раскладки: при ru event.key для R — «К».
@@ -305,6 +354,7 @@ Scope {
             if (k === Qt.Key_Escape) close();
             else if (k === Qt.Key_Space || k === Qt.Key_Return || k === Qt.Key_Enter) wholeScreen(target);
             else if (ch === "w") pickWindow();
+            else if (ch === "i") pickColor();
             else return;
             event.accepted = true;
             return;
@@ -314,6 +364,8 @@ Scope {
         else if (ctrl && ch === "y") redo();
         else if (ctrl && ch === "c") exportShot("copy");
         else if (ctrl && ch === "s") exportShot("save");
+        else if (ctrl && ch === "o") exportShot("ocr");
+        else if (ch === "i" && !ctrl) pickColor();
         else if (k === Qt.Key_Return || k === Qt.Key_Enter) {
             if (Date.now() - textClosedAt > 300) exportShot(shift ? "both" : Settings.get("shell.shot.enter"));
         }
@@ -670,7 +722,8 @@ Scope {
                     y: Math.round(win.height * 0.08)
                     T {
                         textFormat: Text.StyledText
-                        text: root.keys([["тяни", "область"], ["клик", "весь экран"], ["w", "окно"], ["esc", "выход"]])
+                        text: root.then === "ocr" ? root.keys([["тяни", "область с текстом"], ["клик", "весь экран"], ["esc", "выход"]])
+                            : root.keys([["тяни", "область"], ["клик", "весь экран"], ["w", "окно"], ["i", "пипетка"], ["esc", "выход"]])
                     }
                 }
 
@@ -726,7 +779,7 @@ Scope {
                     Row {
                         spacing: 0
                         Repeater {
-                            model: [["↵", Settings.get("shell.shot.enter"), Settings.get("shell.shot.enter")], ["^C", "copy", "copy"], ["^S", "save", "save"], ["⇧↵", "both", "both"]]
+                            model: [["↵", Settings.get("shell.shot.enter"), Settings.get("shell.shot.enter")], ["^C", "copy", "copy"], ["^S", "save", "save"], ["⇧↵", "both", "both"], ["^O", "ocr", "ocr"]]
                             T {
                                 required property var modelData
                                 textFormat: Text.StyledText
@@ -738,7 +791,7 @@ Scope {
                             textFormat: Text.StyledText
                             color: Theme.gray
                             text: root.message ? `<font color="${Theme.red}">${root.message}</font>`
-                                : root.keys([["1-9", "цвет"], ["[ ]", "толщина"], ["f", "заливка"], ["^Z", "отмена"], ["esc", "выход"]])
+                                : root.keys([["1-9", "цвет"], ["[ ]", "толщина"], ["f", "заливка"], ["i", "пипетка"], ["^Z", "отмена"], ["esc", "выход"]])
                         }
                     }
                 }

@@ -1,4 +1,5 @@
 import Quickshell
+import Quickshell.Io
 import QtQuick
 import qs.services
 
@@ -14,10 +15,19 @@ ShellRoot {
     readonly property var _home: Home             // IPC home: меню открывается и биндом, до первого клика
     readonly property var _night: NightLight      // ночной режим держится с запуска shell
     readonly property var _recorder: Recorder     // IPC record (Mod+Alt+R)
+    readonly property var _countdown: Countdown   // таймер: конец отсчёта, даже если модуль timer убран
+    readonly property var _game: Game             // IPC game (Mod+Shift+G)
+    readonly property var _errors: Errors         // ошибки shell и niri — с запуска, а не с первой ошибки
 
     // поставлен пакетом: pacman меняет файлы под работающим shell, и перезагрузка посреди обновления
     // ломает его — перезапуск только по уведомлению после обновления (ShellUpdate)
     Component.onCompleted: if (Ochre.system) Quickshell.watchFiles = false
+
+    // перечитать весь конфиг (и .js) в том же процессе: без qs kill, который в Quickshell 0.3.2 может упасть на выходе
+    IpcHandler {
+        target: "shell"
+        function reload(): void { Quickshell.reload(true); }
+    }
 
     Variants {
         model: Quickshell.screens
@@ -47,4 +57,7 @@ ShellRoot {
     ClipboardWindow {}
     HomePanel {}
     OsdWindow {}
+    ErrorsWindow {}
+    PolkitWindow {}
+    WelcomeWindow {}
 }

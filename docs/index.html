@@ -190,6 +190,7 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
     <li><a href="#clipboard"><span class="mk">▌</span><span class="br">├─ </span><span class="nm">clipboard</span></a></li>
     <li><a href="#themes"><span class="mk">▌</span><span class="br">├─ </span><span class="nm">themes</span></a></li>
     <li><a href="#lock" class="dir"><span class="mk">▌</span><span class="br">├─ </span><span class="nm">lock/</span></a></li>
+    <li><a href="#game"><span class="mk">▌</span><span class="br">├─ </span><span class="nm">game</span></a></li>
     <li><a href="#notify" class="dir"><span class="mk">▌</span><span class="br">├─ </span><span class="nm">notify/</span></a></li>
     <li><a href="#update"><span class="mk">▌</span><span class="br">├─ </span><span class="nm">update</span></a></li>
     <li><a href="#files"><span class="mk">▌</span><span class="br">├─ </span><span class="nm">files</span></a></li>
@@ -297,6 +298,9 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
     <tr><td><kbd>Mod+Shift+B</kbd></td><td>браузер</td></tr>
     <tr><td><kbd>Mod+Shift+W</kbd></td><td>обои</td></tr>
     <tr><td><kbd>Mod+Shift+S</kbd> <kbd>Print</kbd></td><td><a href="#shot">скриншот с разметкой</a></td></tr>
+    <tr><td><kbd>Mod+Shift+T</kbd></td><td><a href="#shot">текст с экрана</a> в буфер (tesseract)</td></tr>
+    <tr><td><kbd>Mod+Shift+C</kbd></td><td>пипетка: цвет под курсором в буфер</td></tr>
+    <tr><td><kbd>Mod+Shift+G</kbd></td><td>игровой режим</td></tr>
     <tr><td><kbd>Mod+Shift+V</kbd></td><td><a href="#clipboard">история буфера обмена</a></td></tr>
     <tr><td><kbd>Mod+A</kbd></td><td><a href="#home">меню home</a> (или клик по <code>user@host</code>)</td></tr>
     <tr><td><kbd>Mod+Alt+R</kbd></td><td><a href="#home">запись экрана</a>: начать / остановить</td></tr>
@@ -334,8 +338,10 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
     <tr><td><code>workspaces</code></td><td><code>~/ws/{1,[2]}</code> — столы этого монитора; клик — перейти</td></tr>
     <tr><td><code>jobs</code></td><td><code>[N]</code> окон на активном столе</td></tr>
     <tr><td><code>command</code></td><td><code>❯ app # title</code> активного окна с эффектом набора; <span class="c-red">❯</span> красный, если окно просит внимания</td></tr>
-    <tr><td><code>media</code></td><td>плеер (MPRIS): клик — пауза, правый — следующий, средний — предыдущий</td></tr>
+    <tr><td><code>media</code></td><td>плеер (MPRIS) и полоски звука <span class="c-acc">▂▅▇▃</span>, пока играет (нужен cava; <code>bar/ → модули</code>): клик — пауза, правый — следующий, средний — предыдущий</td></tr>
     <tr><td><code>rec</code></td><td><span class="c-red">● REC 01:23</span> — идёт запись экрана; клик — остановить. Без записи не виден</td></tr>
+    <tr><td><code>timer</code></td><td><span class="c-gray">timer</span> <span class="c-acc b">24:59</span> чай — таймер (меню: <code>timer 25m чай</code>): клик — пауза, правый — стоп, колёсико — ±1 мин. Без таймера не виден</td></tr>
+    <tr><td><code>privacy</code></td><td><span class="c-gray">mic</span> <span class="c-orange b">discord</span> <span class="c-gray">cast</span> <span class="c-red b">obs</span> — кто слушает микрофон и кто показывает экран. Выключенный микрофон не в счёт; когда никого нет, модуль не виден</td></tr>
     <tr><td><code>tray</code></td><td><code>[‹ <span class="nf">󰙯</span> <span class="nf">󰓓</span>]</code> — значки Nerd Font или названия; клик — открыть, правый — меню, <code>‹</code> — свернуть в <code>[+N]</code></td></tr>
     <tr><td><code>cpu</code> <code>mem</code></td><td>загрузка с графиком <code>▂▃▅▇</code> и память; клик — процессы как <code>ps</code> с <code>[kill]</code></td></tr>
     <tr><td><code>gpu</code> <code>temp</code></td><td>загрузка и температура (без датчика скрыты)</td></tr>
@@ -367,6 +373,10 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
   <ul>
     <li><code>packages/</code> — <code>install</code> (репозитории pacman), <code>aur</code> (поиск через paru), <code>remove</code>, <code>update</code> (<code>paru -Syu</code>);</li>
     <li><code>system/</code> — <code>lock</code>, <code>suspend</code>, <code>logout</code>, <code>reboot</code>, <code>poweroff</code>;</li>
+    <li><code>help</code> — главные клавиши и подсказки (то же окно показывается один раз при первом запуске);</li>
+    <li><code>timer/</code> — таймер на 5, 10, 15, 25, 45 минут или час, <code>stop</code>; любой срок — запросом в корне: <code>timer 25m чай</code>,
+      <code>timer 1h30m</code>, <code>timer 5:00</code>, <code>timer 90s</code> (просто число — минуты). Идёт на панели: <code>timer 24:59 чай</code>,
+      клик — пауза, правый — стоп, колёсико — ±1 минута; переживает перезапуск shell;</li>
     <li><code>=</code> и выражение — калькулятор: <code>=2^10</code>, <code>=(1,5+2)*3</code>, <code>=sqrt(2)</code>; <kbd>↵</kbd> копирует ответ.
       Есть <code>+ - * / % ^</code>, скобки, <code>sqrt abs round floor ceil ln log sin cos tan</code>, <code>pi</code>, <code>e</code>;</li>
     <li>всё настраиваемое — не в меню, а в окне настроек (<code>setup</code>).</li>
@@ -387,9 +397,12 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
     <tr><td><code>whoami</code></td><td><code>user@host</code>, время работы, система и ядро</td></tr>
     <tr><td><code>быстро</code></td><td>переключатели: Wi-Fi, bluetooth, ночной режим, «не беспокоить», микрофон, запись экрана</td></tr>
     <tr><td><code>звук и экран</code></td><td>громкость, микрофон и яркость (на ноутбуке): <kbd>←→</kbd> ±5%, <kbd>↵</kbd> — mute</td></tr>
-    <tr><td><code>сейчас играет</code></td><td>обложка, трек, прогресс (клик — перемотка), кнопки; несколько плееров — <code>‹ 1/2 ›</code></td></tr>
+    <tr><td><code>сейчас играет</code></td><td>обложка, трек, прогресс (клик — перемотка), кнопки и полоски звука (cava); текущая строка песни из <a href="https://lrclib.net">LRCLIB</a>; несколько плееров — <code>‹ 1/2 ›</code></td></tr>
     <tr><td><code>погода</code></td><td><a href="https://open-meteo.com">Open-Meteo</a>: сейчас и прогноз на несколько дней; <kbd>↵</kbd> — обновить</td></tr>
     <tr><td><code>календарь</code></td><td>месяц как <code>cal</code>: <kbd>←→</kbd> — листать, <kbd>↵</kbd> — сегодня</td></tr>
+    <tr><td><code>todo</code></td><td>список дел из <code>~/.config/ochre/todo.txt</code> (формат todo.txt, можно править руками): <kbd>↵</kbd> — сделано,
+      <kbd>a</kbd> — добавить, <kbd>Del</kbd> — удалить, <kbd>c</kbd> — убрать сделанное, <kbd>e</kbd> — открыть файл</td></tr>
+    <tr><td><code>заметки</code></td><td>начало <code>~/.config/ochre/notes.md</code>; <kbd>↵</kbd> — открыть в редакторе. По умолчанию скрыта</td></tr>
     <tr><td><code>уведомления</code></td><td>последние пять: <kbd>↵</kbd> — действие, <kbd>Del</kbd> — убрать, <code>[clear]</code></td></tr>
     <tr><td><code>система</code></td><td>cpu, память, диск, температуры; <kbd>↵</kbd> — btop</td></tr>
     <tr><td><code>питание</code></td><td>батарея и профиль питания (эконом / баланс / мощность), если есть power-profiles-daemon</td></tr>
@@ -456,6 +469,8 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
   <h2>Бинды</h2>
   <p><code>input/</code> → <code>бинды</code>: все сочетания niri и ochre с поиском — изменить, добавить, отключить, вернуть.
   Сочетание можно нажать или ввести текстом; перед применением конфиг проверяется <code>niri validate</code>, и если не прошёл — изменение откатывается.</p>
+  <p>Без запроса список разбит на группы: ochre, программы, окна, фокус, перемещение, размеры, столы, мониторы, звук и медиа…
+  Своя группа — подпись вида <code>Игры: Steam</code> (от двух биндов с одной приставкой).</p>
 <figure class="shot"><a href="shots/binds-full.webp"><img src="shots/binds.webp" alt="окно биндов" width="780" height="400" loading="lazy"></a><figcaption>все сочетания niri и ochre с поиском; источник — справа</figcaption></figure>
   <p>Бинды собираются из трёх слоёв, следующий перекрывает предыдущий:</p>
   <div class="tbl"><table>
@@ -477,7 +492,10 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
   <h2>Обои</h2>
   <p><kbd>Mod+Shift+W</kbd>: сетка превью локальной коллекции <code>~/Pictures/Wallpapers/</code>, <kbd>Tab</kbd> — поиск на
   <a href="https://wallhaven.cc">wallhaven.cc</a> с бесконечной прокруткой; выбранное скачивается в коллекцию.
-  Режимы заполнения fill / fit / stretch, смена — плавная.</p>
+  Режимы заполнения fill / fit / stretch.</p>
+  <p>Смена обоев — переходом (<code>look/ → обои → переход</code>): <code>type</code> — новые обои печатаются строками с курсором
+  цвета акцента, <code>blocks</code> — проступают клетками, <code>scan</code> — развёрткой сверху вниз, <code>fade</code>, <code>none</code>
+  или <code>random</code>. Скорость — вместе с остальными анимациями shell.</p>
   <p>Первыми в сетке — фирменные обои ochre: <code>horizon</code>, <code>sundown</code>, <code>field</code>, <code>tty</code>.
   Первые три нарисованы под каждый акцент: пока они стоят, смена акцента в <code>look/</code> меняет и их. При первом запуске
   стоит <code>horizon</code>.</p>
@@ -503,13 +521,16 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
   <h2>Скриншоты</h2>
   <p><kbd>Mod+Shift+S</kbd> или <kbd>Print</kbd>: экраны замирают — тяните область, клик или <kbd>Space</kbd> — весь экран,
   <kbd>w</kbd> — окно (кликните по нему; снимается целиком, даже если не помещается на экране). Дальше — разметка и экспорт.</p>
-<div class="mock"><div class="win"><div class="ttl">~/shot/ 1200×800</div><span class="row"><span class="sel"><span class="c-acc">r</span> rect  <span class="c-acc">e</span> ellipse  <span class="c-acc">l</span> line  <span class="c-acc">a</span> arrow  <span class="c-acc">p</span> pen  <span class="c-acc">m</span> marker  <span class="c-acc">t</span> text  <span class="c-acc">n</span> step  <span class="c-acc">b</span> blur  <span class="c-acc">x</span> pixel</span></span><span class="row"><span class="c-gray">цвет</span> <span class="c-red">[█]</span><span class="c-orange"> █ </span><span class="c-yellow"> █ </span><span class="c-green"> █ </span><span class="c-aqua"> █ </span><span class="c-blue"> █ </span><span class="c-purple"> █ </span> █    <span class="c-gray">толщина</span> ‹ 3 ›   <span class="c-gray">заливка</span> [ ]</span><span class="row"><span class="c-gray">[</span>copy<span class="c-gray">]</span> <span class="c-acc">↵</span>   <span class="c-gray">[</span>save<span class="c-gray">]</span> <span class="c-acc">^S</span>   <span class="c-gray">[</span>both<span class="c-gray">]</span> <span class="c-acc">⇧↵</span>   <span class="hints"><i>1-9</i> цвет  <i>[ ]</i> толщина  <i>^Z</i> отмена</span></span></div></div>
+<div class="mock"><div class="win"><div class="ttl">~/shot/ 1200×800</div><span class="row"><span class="sel"><span class="c-acc">r</span> rect  <span class="c-acc">e</span> ellipse  <span class="c-acc">l</span> line  <span class="c-acc">a</span> arrow  <span class="c-acc">p</span> pen  <span class="c-acc">m</span> marker  <span class="c-acc">t</span> text  <span class="c-acc">n</span> step  <span class="c-acc">b</span> blur  <span class="c-acc">x</span> pixel</span></span><span class="row"><span class="c-gray">цвет</span> <span class="c-red">[█]</span><span class="c-orange"> █ </span><span class="c-yellow"> █ </span><span class="c-green"> █ </span><span class="c-aqua"> █ </span><span class="c-blue"> █ </span><span class="c-purple"> █ </span> █    <span class="c-gray">толщина</span> ‹ 3 ›   <span class="c-gray">заливка</span> [ ]</span><span class="row"><span class="c-gray">[</span>copy<span class="c-gray">]</span> <span class="c-acc">↵</span>   <span class="c-gray">[</span>save<span class="c-gray">]</span> <span class="c-acc">^S</span>   <span class="c-gray">[</span>both<span class="c-gray">]</span> <span class="c-acc">⇧↵</span>   <span class="c-gray">[</span>ocr<span class="c-gray">]</span> <span class="c-acc">^O</span>   <span class="hints"><i>1-9</i> цвет  <i>[ ]</i> толщина  <i>^Z</i> отмена</span></span></div></div>
   <ul>
     <li>инструменты: прямоугольник и эллипс (<kbd>f</kbd> — с заливкой), линия, стрелка, карандаш, маркер, текст, нумерованные шаги, размытие, пиксели;</li>
     <li>цвет — <kbd>1</kbd>…<kbd>9</kbd>, толщина — <kbd>[</kbd> <kbd>]</kbd> или колёсико, отмена — <kbd>Ctrl+Z</kbd> / <kbd>⌫</kbd>, повтор — <kbd>Ctrl+Y</kbd>;</li>
     <li>ручки по краям меняют область — нарисованное остаётся на месте;</li>
     <li><kbd>↵</kbd> — копировать (или сохранить — настраивается), <kbd>Ctrl+C</kbd> — копировать, <kbd>Ctrl+S</kbd> — сохранить в <code>~/Pictures/Screenshots</code>,
-    <kbd>Shift+↵</kbd> — и то и другое; снимок — в родном разрешении экрана.</li>
+    <kbd>Shift+↵</kbd> — и то и другое; снимок — в родном разрешении экрана;</li>
+    <li><kbd>Ctrl+O</kbd> — распознать текст в области и положить в буфер (tesseract, английский и русский);
+    <kbd>Mod+Shift+T</kbd> — то же сразу: выделили — текст в буфере;</li>
+    <li><kbd>i</kbd> или <kbd>Mod+Shift+C</kbd> — пипетка: кликните по точке экрана, цвет <code>#rrggbb</code> — в буфере.</li>
   </ul>
   <p>Папка, действие <kbd>↵</kbd> и уведомление — <code>system/</code> → <code>скриншоты</code>. Клавиши инструментов работают в любой раскладке.
   Разметить готовую картинку: <code>qs ipc call shot edit ~/картинка.png</code>.</p>
@@ -566,6 +587,14 @@ Password: <span class="blink">█</span></div>
 </section>
 
 <!-- ─────────────────────────── notify ─────────────────────────── -->
+<section class="win" id="game">
+  <div class="ttl">~/docs/game</div>
+  <h2>Игровой режим</h2>
+  <p><kbd>Mod+Shift+G</kbd>, кнопка <code>[game]</code> в home или <code>windows/ → игровой режим</code>: niri работает без анимаций,
+  теней и прозрачности неактивных окон, уведомления показываются только критичные (отключается там же — «не беспокоить»).
+  Ваши настройки при этом не меняются: выключили режим — всё как было.</p>
+</section>
+
 <section class="win" id="notify">
   <div class="ttl">~/docs/notify/</div>
   <h2>Уведомления</h2>
@@ -643,6 +672,12 @@ Password: <span class="blink">█</span></div>
 <span class="p">❯ </span>qs ipc call shot region         <span class="cm"># скриншот; shot window — сразу окно, shot edit &lt;путь&gt; — разметить файл</span>
 <span class="p">❯ </span>qs ipc call lock lock           <span class="cm"># блокировка; lock preview — предпросмотр без пароля</span>
 <span class="p">❯ </span>qs ipc call notify dnd          <span class="cm"># «не беспокоить»; notify clear — очистить историю, notify hide — убрать всплывающие</span>
+<span class="p">❯ </span>qs ipc call timer start "25m чай" <span class="cm"># таймер; timer pause, timer stop, timer get</span>
+<span class="p">❯ </span>qs ipc call welcome open        <span class="cm"># окно первого запуска: клавиши и подсказки</span>
+<span class="p">❯ </span>qs ipc call shell reload        <span class="cm"># перечитать конфиг shell без перезапуска</span>
+<span class="p">❯ </span>qs ipc call game toggle         <span class="cm"># игровой режим; game on, game off, game get</span>
+<span class="p">❯ </span>qs ipc call errors get          <span class="cm"># ошибки shell и niri текстом; errors open, errors clear</span>
+<span class="p">❯ </span>qs ipc call privacy get         <span class="cm"># кто слушает микрофон и показывает экран</span>
 <span class="p">❯ </span>qs ipc call settings set shell.accent blue   <span class="cm"># любая настройка из Mod+S; "" — по умолчанию, settings get &lt;ключ&gt; — прочитать</span></code></pre>
 </section>
 
@@ -667,8 +702,18 @@ Password: <span class="blink">█</span></div>
   (пришлите PR) или переключить трей на названия: <code>bar/ → трей → names</code>.</p>
 
   <h3>как перезапустить shell</h3>
-<pre class="cmd"><code><span class="p">❯ </span>pkill -x qs; niri msg action spawn -- qs</code></pre>
+<pre class="cmd"><code><span class="p">❯ </span>while qs kill; do :; done; sleep 2; niri msg action spawn -- qs</code></pre>
   <p>Или <code>system/</code> → <code>перезапустить shell</code> в настройках.</p>
+
+  <h3>кто спрашивает пароль для pkexec и systemctl</h3>
+  <p>Сам shell: окно <code>~/polkit/</code> в стиле <code>[sudo] password for …</code>, вверху — что именно просит права. Вместо него
+  можно вернуть polkit-gnome: <code>system/ → ochre → polkit-агент</code>.</p>
+
+  <h3>в углу появилось окно ~/log/errors</h3>
+  <p>Это ошибки: в QML shell (<code>файл:строка</code> от <code>~/.config/quickshell/</code>) или в конфиге niri — тогда niri
+  работает на прошлой версии конфига. <code>[скопировать]</code> кладёт текст в буфер — для issue. Исправленная ошибка QML
+  исчезает после перезагрузки shell, ошибка niri — как только конфиг снова загрузится. Закрытое окно появится снова
+  только на новую ошибку; совсем отключить — <code>system/ → ochre → показывать ошибки</code>.</p>
 
   <h3>хочу поправить код</h3>
   <p>Shell — обычный QML и JS в <code>~/.config/quickshell/</code>. Карта проекта, соглашения и подводные камни —

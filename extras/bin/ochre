@@ -13,9 +13,14 @@ case "${1:-}" in
     "") exec qs -p "$dir" ;;
     ipc) shift; exec qs ipc -p "$dir" "$@" ;;
     restart)
-        # qs kill гасит по одному экземпляру — до ошибки «нет экземпляров»
-        n=0
-        while [ $n -lt 10 ] && qs kill -p "$dir" >/dev/null 2>&1; do n=$((n + 1)); done
+        # qs kill гасит по одному экземпляру — до ошибки «нет экземпляров»; Quickshell может упасть на выходе,
+        # и сторож падений поднимет его снова — поэтому раундами, пока qs list не пуст
+        for r in 1 2 3; do
+            n=0
+            while [ $n -lt 10 ] && qs kill -p "$dir" >/dev/null 2>&1; do n=$((n + 1)); done
+            sleep 1.5
+            qs list -p "$dir" 2>&1 | grep -q Instance || break
+        done
         if [ -n "${NIRI_SOCKET:-}" ]; then exec niri msg action spawn -- qs -p "$dir"; fi
         exec qs -p "$dir" -d
         ;;

@@ -27,6 +27,7 @@
 ## 2. Запуск и проверка
 
 ```sh
+qs ipc call shell reload                  # перечитать весь конфиг (и .js) в том же процессе — для проверки правок
 qs kill; niri msg action spawn -- qs      # перезапустить shell (так же делает Mod+S → system/ → перезапустить shell)
 ochre restart; ochre ipc call …             # то же для пакета (qs kill / qs ipc -p /usr/share/ochre)
 qs ipc call <target> <function>             # дёрнуть IPC (таблица в §6)
@@ -50,11 +51,14 @@ T.qml                базовый Text (шрифт/цвет темы, NativeRe
 Bar.qml              PanelWindow панели: три BarZone, автоскрытие, floating-стиль, openPopups
 BarZone.qml          Row модулей по списку id; Loader по bar/<file>.qml; разделители между видимыми
 TuiPopup.qml         PopupWindow в TUI-рамке с заголовком [ title ] — база всех попапов панели
-Background.qml       обои на слое Background (namespace ochre-wallpaper), плавная смена, fill/fit/stretch
-Launcher.qml         меню Mod+D — только действия: apps/ wallpaper setup packages/ system/ about; провайдеры, нечёткий поиск, поиск по всему меню из корня, калькулятор `=`
+Background.qml       обои на слое Background (namespace ochre-wallpaper), fill/fit/stretch; переходы type/blocks/scan/fade (shell.wallpaper.transition): маска из прямоугольников → MultiEffect
+Launcher.qml         меню Mod+D — только действия: apps/ wallpaper setup timer/ packages/ system/ about help; провайдеры, нечёткий поиск, поиск по всему меню из корня, калькулятор `=`, «timer 25m чай»
 WallPicker.qml       выбор обоев: local и wallhaven, сетка превью, бесконечная прокрутка
 HomePanel.qml        меню home — панель во всю высоту у края: секции home/ по shell.home.layout, фокус с клавиатуры
 OsdWindow.qml        индикатор громкости и яркости при изменении (namespace ochre-osd, клики насквозь)
+PolkitWindow.qml     polkit-агент (Quickshell.Services.Polkit) и окно пароля в стиле sudo; при shell.polkit гасит polkit-gnome
+WelcomeWindow.qml    первый запуск: «ochre --help» — клавиши и подсказки, строки печатаются; отметка ~/.local/state/ochre/welcome; меню → help
+ErrorsWindow.qml     ~/log/errors в углу монитора с фокусом: ошибки QML и niri как лог компилятора (services/Errors.qml)
 CalGrid.qml          месяц как `cal` — общий для CalPopup и секции календаря в home
 ClipboardWindow.qml  история буфера (cliphist): список с поиском слева, запись целиком справа (текст/картинка)
 ShotWindow.qml       скриншот с разметкой (по мотивам rishot, MIT): заморозка экранов, область/экран/окно, инструменты, экспорт
@@ -94,6 +98,12 @@ services/            синглтоны (pragma Singleton) и JS-библиот�
   Recorder.qml       wf-recorder: область (slurp) или монитор, звук, SIGINT — стоп; IPC record
   Brightness.qml     /sys/class/backlight: value, set() через brightnessctl; опрос 400 мс
   glyphs.js          значки Nerd Font по именам: G.g("wifi"); рисовать Theme.iconFont
+  Cava.qml           полоски звука: cava (raw ascii, 32 полосы) только пока играет и видно (bar media + shell.bar.viz, открытый home + shell.home.viz); bars(n)
+  Lyrics.qml         текст песни для home/Media: LRCLIB /api/get → /api/search, кэш ~/.cache/ochre/lyrics/<md5>.json, parseLrc, current/next по позиции
+  Countdown.qml      таймер: endsAt (время конца, не остаток) / pausedLeft, parse(«25m», «1h30m», «5:00»), ~/.local/state/ochre/timer.json; IPC timer
+  Game.qml           игровой режим shell.game: niriFiles подменяет GAME_OFF поверх своих значений, Notifs.dnd — при shell.game.dnd; IPC game
+  Errors.qml         ошибки: `qs log -f --pid $PPID` своего экземпляра (scene: @файл[строка], caused by) и niri (ConfigLoaded.failed → `niri validate`); IPC errors
+  Privacy.qml        кто пишет микрофон (linkGroups PipeWire: Stream/Input/Audio ← невыключенный Audio/Source) и показывает экран (Niri.casts); IPC privacy
   DefaultApps.qml    оболочка входа и браузер по умолчанию (shell.sh, shell.browser): сверка с системой, chsh, xdg-settings
   fuzzy.js           match(query, str) → {score, pos} | null; highlight(str, pos, color) для StyledText
   calc.js            evaluate(expr) → {value} | {error}: свой разбор арифметики для `=` в меню (без eval)
@@ -104,10 +114,12 @@ bar/                 модули панели и их попапы
   User Workspaces Jobs Command          inline-модули (часть «приглашения»)
   Media Tray Cpu Mem Gpu Temp NetSpeed Net Vol Bat Upd ShellUpd Notify Kbd Clock
   Rec Home           ● REC во время записи; значок меню home (для тех, кто убрал user@host)
+  Countdown          timer 04:32 — таймер (не Timer.qml: перекрыл бы тип QtQuick Timer во всём bar/)
+  Privacy            mic app · cast app — кто слушает микрофон и показывает экран (services/Privacy.qml)
   CalPopup ProcsPopup MixerPopup VolBar TrayMenu NotifyCenter ShellUpdPopup   попапы/части
 
 home/                секции меню home (HomePanel): Section.qml — база, Btn.qml — [кнопка], Gauge.qml — ползунок
-  User Quick Levels Media Weather Calendar Notifs System Power Wifi Bluetooth Actions
+  User Quick Levels Media Weather Calendar Todo Notes Notifs System Power Wifi Bluetooth Actions
 
 extras/              не грузится shell'ом; эталонные конфиги для install.sh и ручной установки
   niri/config.kdl    полный config.kdl ochre (свои бинды niri; include ochre/main.kdl в начале, ochre/keys.kdl в конце)
@@ -178,14 +190,14 @@ docs/                документация — GitHub Pages из main /docs (
 
 | id | title | что внутри |
 |---|---|---|
-| `look` | вид | акцент, размер шрифта; темы Qt/GTK и шрифт в приложениях; обои (выбрать, wallhaven, заполнение); строк и анимация меню; индикаторы (OSD); скорость анимаций shell |
-| `windows` | окна | отступы, колонки, рамка фокуса, обводка, тени, скругление, прозрачность неактивных, CSD, анимации niri (вкл, стиль, замедление) |
+| `look` | вид | акцент, размер шрифта; темы Qt/GTK и шрифт в приложениях; обои (выбрать, wallhaven, переход, заполнение); строк и анимация меню; индикаторы (OSD); скорость анимаций shell |
+| `windows` | окна | отступы, колонки, рамка фокуса, обводка, тени, скругление, прозрачность неактивных, CSD, анимации niri (вкл, стиль, замедление); игровой режим |
 | `input` | ввод | клавиатура; клавиши (бинды, подсказка niri, мьют); горячие углы; мышь и тачпад; курсор |
 | `bar` | панель | модули по зонам; панель; prompt; вид модулей (часы, график cpu, трей) |
 | `home` | меню home | секции (показаны / скрыты, порядок); край, ширина, анимация; погода; ночной режим; запись экрана |
 | `notify` | уведомления | DND, положение, время, максимум, критичные, эффект набора, анимация, проверить |
 | `lock` | блокировка | idle, эхо пароля, часы, фраза под приглашением (motd), обои, предпросмотр, заблокировать |
-| `system` | система | устройства (мониторы, сеть, звук); приложения: терминал, файловый менеджер, оболочка, браузер; скриншоты; конфиги; ochre (обновить, проверка, перезапуск, greeter) |
+| `system` | система | устройства (мониторы, сеть, звук); приложения: терминал, файловый менеджер, оболочка, браузер; скриншоты; конфиги; ochre (обновить, проверка, polkit-агент, окно ошибок, перезапуск, greeter) |
 
 Новую настройку кладите туда, где её будут искать; раздел и группу (`header`) поиск тоже учитывает.
 Строка — `{header}` или `{key, label, type, def, hint, …}`. Типы:
@@ -261,7 +273,7 @@ wallhaven, lockPreview ставит `Settings.returnHere` — закрываяс
 config.kdl            пользовательский; include "ochre/main.kdl" и В САМОМ КОНЦЕ include "ochre/keys.kdl"
 ochre/main.kdl        include остальных: input displays layout window-rules cursor animations misc binds
 ochre/input.kdl …     генерирует Settings из S.niriFiles() — вручную не править
-ochre/binds.kdl       spawn-at-startup "qs" + бинды ochre (Mod+Return, Mod+E, Mod+Shift+B, Mod+D, Mod+Space, Mod+Shift+W, Mod+Shift+V, Mod+A, Mod+Alt+R, Mod+Shift+S, Print, Mod+S, Super+Alt+L)
+ochre/binds.kdl       spawn-at-startup "qs" + бинды ochre (Mod+Return, Mod+E, Mod+Shift+B, Mod+D, Mod+Space, Mod+Shift+W, Mod+Shift+V, Mod+A, Mod+Alt+R, Mod+Shift+S, Print, Mod+Shift+T, Mod+Shift+C, Mod+Shift+G, Mod+S, Super+Alt+L)
 ochre/keys.kdl        свои бинды из окна биндов — пишет Binds.qml (S.keysKdl), подключён последним → перекрывает
 ```
 
@@ -287,6 +299,9 @@ ochre/keys.kdl        свои бинды из окна биндов — пиш�
 - `replaceKey(old, new, …)`: старое сочетание из конфига — отключается (`off`), своё — удаляется.
 - Отключение = `Combo hotkey-overlay-title=null { spawn "true"; }`.
 - Список действий niri — из `niri msg action --help`; пресеты ochre — `BindsWindow.presets`.
+- Группы без запроса — `S.groupBinds(list)`: строки `{header, count}` между биндами. Группа — приставка подписи `Группа: …`
+  (`titleGroup`, только если таких биндов ≥ 2: у ochre есть одиночные `Browser: helium`), иначе `bindGroup()` по действию;
+  порядок — `BIND_GROUPS`, свои — сразу после ochre. ↑↓ — `win.step()`, заголовки пропускаются; у строк-заголовков `b` нет.
 - `Binds.keyName(key, text)` (Qt-клавиша → keysym niri) и `Binds.comboOf(event)` — общие для окна биндов и строк `combo`.
 - Свои сочетания из настроек — `MUTE_BINDS` в settings.js (`niri.key.micMute`, `niri.key.audioMute` → `wpctl set-mute`
   источника/приёмника по умолчанию, `allow-when-locked`): пишутся в `binds.kdl`, только если значение проходит `COMBO_RE`.
@@ -314,7 +329,9 @@ ochre/keys.kdl        свои бинды из окна биндов — пиш�
 | workspaces | Workspaces | `~/ws/{1,[2]}` — столы этого монитора с окнами + активный; клик (колёсико — вся панель) |
 | jobs | Jobs | `[N]` окон на активном столе |
 | command | Command | `❯ app  # title` активного окна, эффект набора; ❯ красный при urgent |
-| media | Media | MPRIS: клик пауза, правый next, средний prev |
+| media | Media | MPRIS + `Cava.bars(8)` пока играет: клик пауза, правый next, средний prev |
+| timer | Countdown | `timer 04:32 чай`: клик пауза, правый стоп, колёсико ±1 мин; без таймера скрыт |
+| privacy | Privacy | `mic vesktop` (оранжевый) · `cast obs` (красный); никого — скрыт; синглтон создаётся модулем |
 | tray | Tray | `[‹ 󰙯 󰓓]` значками (`S.trayGlyph` по `S.TRAY_ICONS`, иначе первая буква) или названиями (`shell.bar.trayStyle`), сворачивается в `[+N]`; правый клик — TrayMenu (свой DBusMenu) |
 | cpu / mem | Cpu / Mem | загрузка (+ спарклайн) / память; клик — ProcsPopup (ps, [kill]) |
 | gpu / temp | Gpu / Temp | amdgpu busy+temp / k10temp·coretemp·zenpower; без датчика скрыты |
@@ -340,7 +357,7 @@ ochre/keys.kdl        свои бинды из окна биндов — пиш�
 (`shell.bar.layout`: зоны left/center/right/off; `shell.home.layout`: on/off). `normalizeLayout(l, key)`,
 `moveModule(l, id, d, key)`, `reorderModule(l, id, d, key)`, `zoneOf(l, id, key)`, `layoutRows(key, layout)`;
 без `key` — панель. Элемент, которого нет в сохранённой раскладке (вышел с обновлением), встаёт в свою зону по умолчанию
-**после соседа** из `def` (`rec` — сразу за `media`), а не в конец. Новая раскладка — запись в `LAYOUTS`, строки
+**после соседа** из `def` (`rec` — сразу за `media`), а если соседа слева нет (выключен) — **перед соседом справа**, и только потом в конец. Новая раскладка — запись в `LAYOUTS`, строки
 `layoutRows(key, …)` в `sections()`, умолчание отдаёт `defaultOf`.
 
 ### 4.4c Меню home (`HomePanel.qml`, `home/`, `services/Home.qml`)
@@ -375,6 +392,10 @@ ochre/keys.kdl        свои бинды из окна биндов — пиш�
   дальше `wl-copy` / копия в `shell.shot.dir` и уведомление — через `execDetached`, окно закрывается сразу.
 - Клавиши инструментов — по скан-коду (`letter()`): в ru-раскладке `event.key` для R — «К». Enter, закончивший ввод текста,
   экспорт не запускает (`textClosedAt`). `Mod+Shift+S`/`Print` — в `binds.kdl`; в эталонном `config.kdl` niri остались `Ctrl/Alt+Print`.
+- **Текст и цвет.** `^O` (кнопка `[ocr]`) — экспорт в `ocr()`: tesseract с языками из eng/rus, какие стоят, текст — `wl-copy`;
+  нет tesseract — critical-уведомление с командой установки. `shot ocr` (`Mod+Shift+T`) — `start("screen", "ocr")`: после выбора
+  области `then` сразу запускает экспорт, без разметки. Пипетка (`i`, `shot pick`, `Mod+Shift+C`) — не по кадру, а `niri msg pick-color`:
+  окно закрывается, niri ждёт клика, из вывода берётся `#rrggbb` → буфер.
 - Настройки `shell.shot.*`: `dir`, `enter` (copy/save/both), `notify`, а `tool`/`color`/`width` — последние выбранные.
 
 ### 4.5 Полноэкранные окна (Launcher, WallPicker, Settings, Displays, Binds, lock preview)
@@ -441,6 +462,8 @@ Esc/Backspace/← на нём закрывают окно, а не подним�
 синонимы, сравниваются как имя (`settings` → `setup`). `confirm: true` (logout, reboot, poweroff) — запуск
 только со второго ↵ (`win.armed`, «точно? ↵»), сбрасывается сменой строки или запроса.
 Запрос с `=` (кроме provider'ов пакетов) — калькулятор `services/calc.js`, одна строка с ответом, ↵ — `wl-copy`.
+Запрос `timer <срок> [подпись]` в корне — одна строка `timerItem` (`Countdown.parseSpec`), ↵ — запуск. В узлах `menu` не должно быть
+привязок к часто меняющимся значениям (`Countdown.left`): `menu` пересоздастся, а `node === root.menu` и стек держат старые объекты.
 
 **DisplaysWindow**: любое изменение → `begin()` снимает снимок `niri.out.*`, 15 с на `y`;
 иначе (или `n`/Esc) `revert()` через `replacePrefix`. Последний включённый монитор выключить нельзя.
@@ -496,7 +519,7 @@ invoke); остальные съезжают на её место (`move` в Col
 
 - `ShellUpdate`: через минуту после старта и раз в `shell.update.hours` — `git fetch` в
   `Quickshell.shellDir`, список `HEAD..@{u}`; `update()` — `git pull --ff-only` и перезапуск через
-  отвязанный `sh` (`Ochre.restartScript`: `qs kill` до ошибки, потом `niri msg action spawn -- qs …`), уведомление шлёт уже новый shell.
+  отвязанный `sh` (`Ochre.restartScript`: `qs kill` до ошибки раундами, пока `qs list` не пуст, потом `niri msg action spawn -- qs …`), уведомление шлёт уже новый shell.
 - Пакет (`Ochre.system`): не git — `ochre ↑` скрыт, «обновить» в настройках только объясняет. PKGBUILD пишет `VERSION`;
   раз в минуту `ShellUpdate` перечитывает его и при смене шлёт уведомление с кнопкой «перезапустить».
 - `Updates`: `checkupdates` + `paru -Qua` раз в час; `run()` — `paru -Syu` в окне `ochre-term`.
@@ -519,6 +542,10 @@ invoke); остальные съезжают на её место (`move` в Col
 | `/usr/local/share/ochre/` | копия shell для greeter git-установки, root | install-greeter.sh |
 | `~/.cache/cliphist/db` | история буфера | cliphist (через Clipboard) |
 | `~/Videos/Screencasts/` (`shell.rec.dir`) | записи экрана `rec_<дата>.mp4` | Recorder |
+| `~/.cache/ochre/lyrics/<md5>.json` | ответы LRCLIB (и «не найдено» — `[]`); ошибка сети не кэшируется | Lyrics |
+| `~/.local/state/ochre/welcome` | время, когда закрыли окно первого запуска; нет файла — окно покажется | WelcomeWindow |
+| `~/.local/state/ochre/timer.json` | таймер: endsAt, pausedLeft, total, label | Countdown |
+| `~/.config/ochre/todo.txt`, `notes.md` | список дел (todo.txt: «x » — сделано) и заметки | home/Todo, вы; notes — только вы |
 | `$XDG_RUNTIME_DIR/ochre-clip/` | картинки из истории для предпросмотра | ClipboardWindow |
 
 ## 6. IPC (`qs ipc call <target> <fn>`)
@@ -532,12 +559,19 @@ invoke); остальные съезжают на её место (`move` в Col
 | `binds` | `toggle` | BindsWindow.qml |
 | `lock` | `lock`, `locked`, `preview` | LockScreen.qml |
 | `notify` | `dnd`, `clear`, `hide` (убрать всплывающие, история остаётся) | services/Notifs.qml |
-| `shot` | `region`, `window`, `edit <путь>` | ShotWindow.qml |
+| `shot` | `region`, `window`, `edit <путь>`, `ocr`, `pick` | ShotWindow.qml |
 | `clipboard` | `toggle` | ClipboardWindow.qml |
 | `home` | `toggle`, `open`, `close` | services/Home.qml |
 | `record` | `toggle`, `region`, `screen`, `stop` | services/Recorder.qml |
+| `shell` | `reload` (Quickshell.reload(true): без перезапуска процесса) | shell.qml |
+| `timer` | `start <срок [подпись]>`, `pause` (пауза/продолжить), `stop`, `get` | services/Countdown.qml |
+| `welcome` | `open`, `close` (первый запуск: ochre --help) | WelcomeWindow.qml |
+| `game` | `toggle`, `on`, `off`, `get` | services/Game.qml |
+| `errors` | `open`, `clear`, `get` (текстом, как `[скопировать]`) | services/Errors.qml |
+| `privacy` | `get` (кто слушает / показывает), `dump` (потоки, связи и casts — отладка) | services/Privacy.qml |
 
-Новые IPC-функции нужно объявлять с типами (`function x(): void`, аргументы `name: string`).
+Новые IPC-функции нужно объявлять с типами (`function x(): void`, аргументы `name: string`). Имя `show` не годится:
+`qs ipc call <t> show` выводит список функций вместо вызова — открывать окно функцией `open`.
 У пакета вместо `qs ipc` — `ochre ipc` (= `qs ipc -p /usr/share/ochre`); сам shell вызывает себя через `Ochre.ipc()`.
 
 ## 7. Рецепты
@@ -600,6 +634,9 @@ invoke); остальные съезжают на её место (`move` в Col
 - `niri validate` шейдеры не компилирует: ошибку niri покажет только в журнале и молча вернёт анимацию по умолчанию.
   Новый шейдер проверять `glslangValidator -S frag` с заголовком `#version 100`, `precision highp float;` и униформами
   `niri_*` из примеров niri; в сыром KDL `r"…"` нельзя кавычек.
+- JS-движок QML (Qt 6.12) — не свежий V8: **нет `??=` / `||=`** (ошибка разбора всего .js — модуль недоступен, перезагрузка не
+  проходит) и **нет `Array.prototype.flatMap` и `String.prototype.trimEnd/trimStart`** (TypeError при вызове). `?.`, `??`, `Object.values`, шаблонные строки — есть.
+  Проверка в node этого не ловит — смотреть в окно ошибок после `qs ipc call shell reload`.
 - Глифы Nerd Font вне BMP — два UTF-16 знака: длину и срез для анимации печати считать через `Array.from`.
   В `Terminess Nerd Font Mono` значки ужаты в клетку и не читаются — Tray рисует их обычным `Terminess Nerd Font`.
   Новый глиф в `TRAY_ICONS` проверять по шрифту (fontTools, имена вида `md-discord`); в иконке элемента трея
@@ -623,7 +660,28 @@ invoke); остальные съезжают на её место (`move` в Col
 - `gammastep -O` под Wayland не выходит, а держит цвет, пока жив: ночной режим = запущенный процесс.
 - `wf-recorder` дописывает файл только по SIGINT (`Process.signal(2)`); kill оставит битый mp4.
 - `normalizeLayout` хранит `off` явно: модуль, которого нет ни в одной зоне, считается новым.
+- У Item есть свойства-якоря `left`, `right`, `top`, `bottom`… (FINAL): `property int left` в секции или модуле — «Cannot override FINAL property», компонент не создаётся.
+- `niri msg action screenshot-screen` кроме файла **всегда кладёт снимок в буфер обмена** (и в историю cliphist). Для проверок
+  своего кода лучше `item.grabToImage(r => r.saveToFile(…))`: например, переходы обоев — копия Background.qml с заглушками
+  вместо сервисов в маленьком окне отдельного `qs -p <папка>` (не запускать там настоящие сервисы: Clipboard гасит чужой wl-paste).
 - Repeater отдаёт копии объектов — сравнивать по `name`/`id`, а не `===` (см. DisplaysWindow).
+- **polkit**: агент в сессии один. polkit-gnome запускает `config.kdl` (spawn-at-startup) одновременно с shell, поэтому
+  PolkitWindow при `shell.polkit` гасит его (`pkill -f`) и создаёт `PolkitAgent` (LazyLoader); через 2 с не `isRegistered` — ещё раз
+  (до 4 попыток, потом critical). Выключили — `setsid polkit-gnome`, если он не запущен. После неверного пароля flow сам ждёт
+  новый ввод (`authenticationFailed` → «Sorry, try again.»). Проверка без ввода: `pkexec true &` → окно `ochre-polkit` → `kill` pkexec закрывает его.
+- **Игровой режим** не пишет `niri.*`: `niriFiles(get0, …)` оборачивает `get` — при `shell.game` ключи из `GAME_OFF` (анимации, тени,
+  прозрачность неактивных) отдают «выключено», поэтому выключение возвращает ровно свои значения. Новый тяжёлый эффект niri —
+  добавить в `GAME_OFF`. `Notifs.dnd` — эффективное значение (`shell.notify.dnd || game && shell.game.dnd`), `toggleDnd` меняет
+  сохранённое. Уведомление о включении шлётся до `Settings.set` (таймер 300 мс) — иначе его заглушил бы DND самого режима.
+- **Ошибки (Errors).** `qs log -f` читает лог с начала, поэтому «Reloading configuration...» очищает ошибки qs — после неё
+  идут только ошибки нового кода. Ошибка в модуле панели приходит по разу с каждой панели (×N — число мониторов).
+  Свой попап вместо встроенного Quickshell — `Quickshell.inhibitReloadPopup()`. У niri номер строки в `╭─[файл:N:…]` —
+  начало фрагмента, а не ошибка: точная строка — последняя `N │` перед меткой `· ╰──` (`parseNiri`).
+- **`qs kill` может уронить Quickshell на выходе** (0.3.2, крах в wl_proxy при разрушении окон), и сторож падений — процесс,
+  запущенный при входе, — поднимает shell снова. Запуск поверх него даёт две панели: гасить до «No running instances»
+  (`qs list --all`) с паузой, и только потом spawn — так делают `Ochre.restartScript` и `ochre restart`.
+- `Niri.casts` — демонстрации экрана из событий `CastsChanged`/`CastStartedOrChanged`/`CastStopped` (niri ≥ 26.04). У PipeWire-демонстрации
+  зритель — узел, подключённый к `pw_node_id`; у wlr-screencopy (wf-recorder) узла нет, есть только `pid`.
 - `Niri.windows` — объект по id; `Niri.workspaces` отсортированы по `idx`; номер стола относится к монитору.
   `niri msg action focus-monitor` **переносит курсор в центр монитора** — вызывать его только для другого
   монитора (`Niri.focusWorkspaceOn`), иначе курсор уходит с панели и следующая прокрутка попадает в окно.

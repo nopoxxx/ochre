@@ -23,6 +23,8 @@ Singleton {
 
     // перезапуск через отвязанный процесс: он переживёт выход самого quickshell. qs kill гасит по одному
     // экземпляру этого конфига — до ошибки «нет экземпляров»; другие конфиги quickshell не трогаем
-    readonly property string restartScript: 'n=0; while [ $n -lt 10 ] && qs kill "$@" >/dev/null 2>&1; do n=$((n+1)); done; '
-        + 'sleep 0.5; niri msg action spawn -- qs "$@"'
+    // qs kill может уронить Quickshell на выходе, и сторож падений сразу поднимает его снова — запуск поверх дал бы
+    // две панели: гасим раундами, пока `qs list` не пуст
+    readonly property string restartScript: 'for r in 1 2 3; do n=0; while [ $n -lt 10 ] && qs kill "$@" >/dev/null 2>&1; do n=$((n+1)); done; '
+        + 'sleep 1.5; qs list "$@" 2>&1 | grep -q Instance || break; done; niri msg action spawn -- qs "$@"'
 }

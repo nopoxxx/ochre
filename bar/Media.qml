@@ -2,8 +2,9 @@ import Quickshell.Services.Mpris
 import QtQuick
 import qs
 import qs.bar
+import qs.services
 
-// ♪ artist – title — клик: пауза, правый: следующий, средний: предыдущий
+// ♪ artist – title ▂▅▇▃ — клик: пауза, правый: следующий, средний: предыдущий; полоски — cava (shell.bar.viz)
 Seg {
     id: root
 
@@ -17,7 +18,7 @@ Seg {
 
     available: player !== null && track !== ""
     label: player?.isPlaying ? "♪" : "‖"
-    value: track
+    value: track + (player?.isPlaying && Cava.levels.length && Settings.get("shell.bar.viz") ? " " + Cava.bars(8) : "")
     valueColor: player?.isPlaying ? Theme.fg : Theme.gray
 
     onLeftClicked: if (player?.canTogglePlaying) player.togglePlaying()

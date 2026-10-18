@@ -17,7 +17,8 @@ Singleton {
     property int unread: 0
     property bool centerOpen: false   // пока открыта история, карточки не мешают поверх неё
     property int _seq: 0
-    readonly property bool dnd: Settings.get("shell.notify.dnd")
+    // игровой режим глушит уведомления, не трогая сохранённое значение
+    readonly property bool dnd: Settings.get("shell.notify.dnd") || Game.on && Settings.get("shell.game.dnd")
 
     // на экране — только ключи: ListModel не пересоздаёт остальные карточки при добавлении новой
     readonly property alias popups: popupModel
@@ -101,7 +102,7 @@ Singleton {
     }
 
     function markRead() { unread = 0; }
-    function toggleDnd() { Settings.set("shell.notify.dnd", !dnd); }
+    function toggleDnd() { Settings.set("shell.notify.dnd", !Settings.get("shell.notify.dnd")); }
 
     ListModel { id: popupModel }
 

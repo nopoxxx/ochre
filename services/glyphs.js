@@ -19,7 +19,7 @@ const cp = {
     battery: 0xF0079, charging: 0xF0084, balanced: 0xF04C5, saver: 0xF032A, performance: 0xF14DE,
     cpu: 0xF0EE0, mem: 0xF035B, disk: 0xF02CA, temp: 0xF050F, calendar: 0xF00ED, clock: 0xF0150,
     headphones: 0xF02CB, mouse: 0xF037D, keyboard: 0xF030C, phone: 0xF011C, speaker: 0xF04C3,
-    monitor: 0xF0379, account: 0xF0004
+    monitor: 0xF0379, account: 0xF0004, game: 0xF0297
 };
 
 function g(name) { return cp[name] ? String.fromCodePoint(cp[name]) : ""; }

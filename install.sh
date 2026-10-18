@@ -338,7 +338,7 @@ PKGS=(
     polkit-gnome gnome-keyring xdg-desktop-portal-gnome xdg-desktop-portal-gtk qt6ct adw-gtk-theme
     ttf-terminus-nerd noto-fonts noto-fonts-emoji
     wl-clipboard cliphist brightnessctl playerctl pavucontrol fastfetch base-devel
-    gammastep wf-recorder slurp
+    gammastep wf-recorder slurp tesseract tesseract-data-eng tesseract-data-rus cava
     "$TERMINAL"
 )
 read -ra sp <<<"${SHELL_PKGS[$SHELL_CHOICE]}"

@@ -10,6 +10,7 @@ import "services/settings.js" as S
 // Бинды niri: все действующие сочетания с поиском, правка, добавление, отключение.
 //   ↵ изменить   ^a добавить   ^d отключить   ^r вернуть исходный   esc выход
 // В редакторе сочетание можно нажать (если niri его не перехватывает) или ввести текстом.
+// Без запроса список разбит на группы (S.groupBinds: по подписи «Группа: …» или по действию), с запросом — по совпадению.
 //   qs ipc call binds toggle
 Scope {
     id: root
@@ -58,7 +59,7 @@ Scope {
             readonly property var results: {
                 const q = search.text.trim();
                 const all = Binds.all;
-                if (!q) return all.map(b => ({ b, pos: [] }));
+                if (!q) return S.groupBinds(all);
                 const out = [];
                 for (const b of all) {
                     const byCombo = Fuzzy.match(q, b.combo);
@@ -68,8 +69,27 @@ Scope {
                 }
                 return out.sort((a, b) => b.score - a.score);
             }
+            readonly property int found: results.filter(r => r.b).length
+
+            // ↑↓ — через заголовки групп; d = 0 — встать на ближайший бинд (после смены списка)
+            function step(d) {
+                let i = list.currentIndex + d;
+                const dir = d < 0 ? -1 : 1;
+                while (results[i]?.header) i += dir;
+                if (i < 0 || i >= results.length) {   // упёрлись в край — назад к ближайшему бинду
+                    i = list.currentIndex;
+                    while (results[i]?.header) i -= dir;
+                }
+                if (!results[i]?.b) return;
+                list.currentIndex = i;
+                // заголовок группы над первым биндом — тоже на экране
+                if (results[i - 1]?.header) list.positionViewAtIndex(i - 1, ListView.Contain);
+            }
             // бинды читаются асинхронно — сначала список пуст и currentIndex = -1
-            onResultsChanged: list.currentIndex = Math.max(0, Math.min(list.currentIndex, results.length - 1))
+            onResultsChanged: {
+                list.currentIndex = Math.max(0, Math.min(list.currentIndex, results.length - 1));
+                step(0);
+            }
 
             readonly property var cur: results[list.currentIndex]?.b ?? null
 
@@ -198,8 +218,8 @@ Scope {
                             Keys.onPressed: event => {
                                 const k = event.key, ctrl = event.modifiers & Qt.ControlModifier;
                                 if (k === Qt.Key_Escape) root.open = false;
-                                else if (k === Qt.Key_Down || (ctrl && k === Qt.Key_J)) list.incrementCurrentIndex();
-                                else if (k === Qt.Key_Up || (ctrl && k === Qt.Key_K)) list.decrementCurrentIndex();
+                                else if (k === Qt.Key_Down || (ctrl && k === Qt.Key_J)) win.step(1);
+                                else if (k === Qt.Key_Up || (ctrl && k === Qt.Key_K)) win.step(-1);
                                 else if (k === Qt.Key_Return || k === Qt.Key_Enter) { if (win.cur) win.startEdit(win.cur); }
                                 else if (ctrl && k === Qt.Key_A) win.startEdit(null);
                                 else if (ctrl && k === Qt.Key_D) { if (win.cur) Binds.disable(win.cur.combo); }
@@ -209,7 +229,7 @@ Scope {
                             }
                         }
 
-                        T { text: win.results.length + "/" + Binds.all.length; color: Theme.gray }
+                        T { text: win.found + "/" + Binds.all.length; color: Theme.gray }
                     }
 
                     // старые установки: свои бинды не подключены
@@ -245,14 +265,25 @@ Scope {
 
                             required property var modelData
                             required property int index
-                            readonly property var b: modelData.b
+                            readonly property var b: modelData.b ?? null
                             readonly property bool current: ListView.isCurrentItem
 
                             width: list.width
                             height: win.lineH
                             color: current ? Theme.bg1 : "transparent"
 
+                            // ── окна (4) ───────
+                            T {
+                                visible: !line.b
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: parent.width
+                                clip: true
+                                text: "── " + (line.modelData.header ?? "") + " (" + (line.modelData.count ?? 0) + ") " + "─".repeat(120)
+                                color: Theme.gray
+                            }
+
                             RowLayout {
+                                visible: !!line.b
                                 anchors { fill: parent; rightMargin: Theme.pad }
                                 spacing: 0
 
@@ -260,28 +291,28 @@ Scope {
                                 T {
                                     Layout.preferredWidth: cell.advanceWidth * 24
                                     textFormat: Text.StyledText
-                                    text: Fuzzy.highlight(line.b.combo, line.modelData.pos, Theme.orange)
-                                    color: line.b.off ? Theme.gray : Theme.blue
+                                    text: Fuzzy.highlight((line.b?.combo ?? ""), line.modelData.pos, Theme.orange)
+                                    color: line.b?.off ? Theme.gray : Theme.blue
                                     font.bold: line.current
-                                    font.strikeout: line.b.off === true   // у биндов config и ochre поля off нет
+                                    font.strikeout: line.b?.off === true   // у биндов config и ochre поля off нет
                                 }
                                 T {
                                     Layout.fillWidth: true
                                     Layout.minimumWidth: 0
                                     elide: Text.ElideRight
-                                    text: line.b.off ? "отключено" : (line.b.title || line.b.action)
-                                    color: line.b.off ? Theme.gray : line.current ? Theme.fg : Qt.darker(Theme.fg, 1.15)
+                                    text: line.b?.off ? "отключено" : (line.b?.title || line.b?.action || "")
+                                    color: line.b?.off ? Theme.gray : line.current ? Theme.fg : Qt.darker(Theme.fg, 1.15)
                                 }
                                 T {
-                                    text: "  " + ({ config: "config", ochre: "ochre", own: "своё", changed: "изменено" })[line.b.source]
-                                    color: line.b.source === "changed" || line.b.source === "own" ? Theme.accent : Theme.gray
+                                    text: "  " + (({ config: "config", ochre: "ochre", own: "своё", changed: "изменено" })[line.b?.source] ?? "")
+                                    color: line.b?.source === "changed" || line.b?.source === "own" ? Theme.accent : Theme.gray
                                 }
                             }
 
                             MouseArea {
                                 anchors.fill: parent
-                                onClicked: list.currentIndex = line.index
-                                onDoubleClicked: win.startEdit(line.b)
+                                onClicked: if (line.b) list.currentIndex = line.index
+                                onDoubleClicked: if (line.b) win.startEdit(line.b)
                             }
                         }
                     }

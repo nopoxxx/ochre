@@ -33,6 +33,8 @@ const MODULES = [
     { id: "jobs", file: "Jobs", inline: true, desc: "[3] — число окон на текущем столе" },
     { id: "command", file: "Command", inline: true, desc: "❯ активное окно как набранная команда" },
     { id: "media", file: "Media", desc: "♪ плеер: клик — пауза, правый — следующий, средний — предыдущий" },
+    { id: "privacy", file: "Privacy", desc: "mic app · cast app — кто слушает микрофон и показывает экран; иначе скрыт" },
+    { id: "timer", file: "Countdown", desc: "timer 04:32 — таймер (меню: timer 25m чай); клик — пауза, правый — стоп; иначе скрыт" },
     { id: "tray", file: "Tray", desc: "[трей] текстом: клик — открыть, правый — меню" },
     { id: "cpu", file: "Cpu", desc: "загрузка cpu, клик — процессы" },
     { id: "mem", file: "Mem", desc: "память, клик — процессы" },
@@ -54,7 +56,7 @@ const MODULES = [
 const DEFAULT_LAYOUT = {
     left: ["user", "workspaces", "jobs", "command"],
     center: [],
-    right: ["media", "rec", "tray", "cpu", "mem", "net", "vol", "bat", "shellupd", "updates", "notify", "kbd", "clock"]
+    right: ["media", "rec", "privacy", "timer", "tray", "cpu", "mem", "net", "vol", "bat", "shellupd", "updates", "notify", "kbd", "clock"]
 };
 
 // ── секции меню home (клик по user@host, Mod+A) ────────────────────
@@ -67,6 +69,8 @@ const HOME_SECTIONS = [
     { id: "media", label: "сейчас играет", file: "Media", desc: "плеер: обложка, трек, прогресс, кнопки; несколько плееров — ‹ › переключают" },
     { id: "weather", label: "погода", file: "Weather", desc: "погода Open-Meteo: сейчас и на несколько дней; город — ниже, в погоде" },
     { id: "calendar", label: "календарь", file: "Calendar", desc: "календарь месяца: ←→ — листать" },
+    { id: "todo", label: "todo", file: "Todo", desc: "список дел ~/.config/ochre/todo.txt: ↵ — сделано, a — добавить, del — удалить, e — редактор" },
+    { id: "notes", label: "заметки", file: "Notes", desc: "начало ~/.config/ochre/notes.md; ↵ — открыть в редакторе" },
     { id: "notifs", label: "уведомления", file: "Notifs", desc: "последние уведомления: ↵ — действие, del — убрать" },
     { id: "system", label: "система", file: "System", desc: "cpu, память, диск, температура" },
     { id: "power", label: "питание", file: "Power", desc: "батарея и профиль питания (power-profiles-daemon)" },
@@ -76,7 +80,7 @@ const HOME_SECTIONS = [
 ];
 
 const DEFAULT_HOME = {
-    on: ["user", "quick", "levels", "media", "weather", "calendar", "notifs", "system", "power", "wifi", "bluetooth", "actions"]
+    on: ["user", "quick", "levels", "media", "weather", "calendar", "todo", "notifs", "system", "power", "wifi", "bluetooth", "actions"]
 };
 
 // ── раскладки: модули панели и секции home устроены одинаково ──────
@@ -114,10 +118,13 @@ function normalizeLayout(l, key) {
     for (const m of L.items) {
         if (seen.has(m.id)) continue;
         const z = L.zones.find(z => (L.def[z] ?? []).includes(m.id)) ?? "off";
-        // рядом с соседом по раскладке по умолчанию: rec — после media, а не в конце после clock
+        // рядом с соседом по раскладке по умолчанию: rec — после media, а не в конце после clock;
+        // соседа слева нет (media выключен) — перед соседом справа
         const def = L.def[z] ?? [];
-        const prev = def.slice(0, def.indexOf(m.id)).reverse().find(id => out[z].includes(id));
-        out[z].splice(prev ? out[z].indexOf(prev) + 1 : (def.indexOf(m.id) === 0 ? 0 : out[z].length), 0, m.id);
+        const at = def.indexOf(m.id);
+        const prev = def.slice(0, at).reverse().find(id => out[z].includes(id));
+        const next = def.slice(at + 1).find(id => out[z].includes(id));
+        out[z].splice(prev ? out[z].indexOf(prev) + 1 : next ? out[z].indexOf(next) : out[z].length, 0, m.id);
     }
     return out;
 }
@@ -202,6 +209,8 @@ function sections(outputs, layout, home) {
             { header: "обои" },
             act("picker", "выбрать обои", "локальная коллекция ~/Pictures/Wallpapers (Mod+Shift+W)"),
             act("wallhaven", "найти на wallhaven", "поиск на wallhaven.cc, скачанные — в коллекцию"),
+            { key: "shell.wallpaper.transition", label: "переход", type: "enum", options: ["type", "blocks", "scan", "fade", "none", "random"], def: "type",
+              hint: "type — печатается строками, blocks — клетками, scan — развёрткой, fade — проявляется, random — каждый раз другой" },
             { key: "wallpaper.fill", label: "заполнение", type: "enum", options: ["fill", "fit", "stretch"], def: "fill", hint: "fill — обрезать, fit — вписать с полосами, stretch — растянуть" },
 
             { header: "меню" },
@@ -237,7 +246,12 @@ function sections(outputs, layout, home) {
             { key: "niri.anim", label: "включены", type: "bool", def: true },
             { key: "niri.anim.style", label: "стиль", type: "enum", options: NIRI_ANIMS, def: "default",
               hint: "default — как в niri; snappy — коротко и резко; bouncy — пружины с отскоком; terminal — окно выводится строками с курсором, закрытое гаснет, как кинескоп" },
-            { key: "niri.anim.slowdown", label: "замедление", type: "float", min: 0.25, max: 3, step: 0.25, def: 1 }
+            { key: "niri.anim.slowdown", label: "замедление", type: "float", min: 0.25, max: 3, step: 0.25, def: 1 },
+
+            { header: "игровой режим" },
+            { key: "shell.game", label: "включён", type: "bool", def: false,
+              hint: "анимации, тени и прозрачность неактивных niri выкл. — свои значения вернутся сами; Mod+Shift+G, home → быстро" },
+            { key: "shell.game.dnd", label: "не беспокоить", type: "bool", def: true, hint: "пока включён — только критичные уведомления" }
         ] },
 
         { id: "input", title: "ввод", rows: [
@@ -295,6 +309,7 @@ function sections(outputs, layout, home) {
             { header: "модули" },
             { key: "shell.bar.clock", label: "формат часов", type: "enum", options: ["HH:mm", "HH:mm:ss", "ddd HH:mm", "dd.MM HH:mm"], def: "HH:mm" },
             { key: "shell.bar.cpuGraph", label: "график cpu", type: "bool", def: true, hint: "▂▃▅▇ — история загрузки, как в btop" },
+            { key: "shell.bar.viz", label: "полоски звука в media", type: "bool", def: true, hint: "▁▃▅▇ после трека, пока играет; нужен cava" },
             { key: "shell.bar.trayStyle", label: "трей", type: "enum", options: ["icons", "names"], def: "icons", hint: "icons — значки Nerd Font для известных программ, остальные — первой буквой; names — короткие названия" },
             { key: "shell.bar.trayCollapsed", label: "трей свёрнут", type: "bool", def: false, hint: "на панели переключается кликом по ‹ / +N; просящие внимания видны всегда" },
             { key: "shell.bar.trayTyping", label: "анимация трея", type: "bool", def: true, hint: "названия печатаются при разворачивании и стираются при сворачивании" }
@@ -308,6 +323,8 @@ function sections(outputs, layout, home) {
             { key: "shell.home.side", label: "край экрана", type: "enum", options: ["left", "right"], def: "left" },
             { key: "shell.home.width", label: "ширина, символов", type: "int", min: 40, max: 80, step: 2, def: 52 },
             { key: "shell.home.anim", label: "анимация", type: "enum", options: SHELL_ANIMS, def: "slide", hint: SHELL_ANIM_HINT },
+            { key: "shell.home.lyrics", label: "текст песни", type: "bool", def: true, hint: "текущая строка под треком — LRCLIB (lrclib.net), ищется, пока меню открыто" },
+            { key: "shell.home.viz", label: "полоски звука", type: "bool", def: true, hint: "▁▃▅▇ в «сейчас играет», пока меню открыто; нужен cava" },
 
             { header: "погода" },
             { key: "shell.weather.city", label: "город", type: "text", def: "", hint: "например Москва или Berlin; пусто — по IP (ipinfo.io). Данные — Open-Meteo, без ключа" },
@@ -381,7 +398,9 @@ function sections(outputs, layout, home) {
             { key: "shell.update.check", label: "проверять обновления", type: "bool", def: true, hint: "git fetch в папке shell; нужен git-клон и доступ к репозиторию" },
             { key: "shell.update.hours", label: "раз в, ч", type: "int", min: 1, max: 48, step: 1, def: 6 },
             { key: "shell.update.notify", label: "уведомлять", type: "bool", def: true, hint: "уведомление, когда появились новые коммиты" },
-            act("restartShell", "перезапустить shell", "pkill qs и запуск заново"),
+            { key: "shell.polkit", label: "polkit-агент", type: "bool", def: true, hint: "запрос пароля pkexec, systemctl и т.п. окном ochre вместо polkit-gnome" },
+            { key: "shell.errors", label: "показывать ошибки", type: "bool", def: true, hint: "окно ~/log/errors: ошибки QML shell и конфига niri, как лог компилятора" },
+            act("restartShell", "перезапустить shell", "qs kill и запуск заново"),
             act("greeterUpdate", "обновить greeter", "переустановить экран входа из текущего shell (sudo)")
         ] }
     ];
@@ -624,6 +643,53 @@ function comboKey(c) {
     return mods.concat([key]).join("+");
 }
 
+// группы в окне биндов: подпись «Группа: …» (как у SekaiPop, от двух биндов) — её группа, иначе по действию niri; порядок — BIND_GROUPS
+const BIND_GROUPS = ["ochre", "программы", "окна", "фокус", "перемещение", "размеры", "столы", "мониторы", "звук и медиа",
+                     "скриншоты", "система", "отключено", "прочее"];
+
+function titleGroup(b) {
+    const m = String(b.title ?? "").match(/^([^:]{2,24}):\s+\S/);
+    return m ? m[1].trim() : "";
+}
+
+function bindGroup(b) {
+    const a = String(b.action ?? "");
+    if (b.off || a === "off") return "отключено";
+    if (/^spawn(-sh)? "qs" "ipc"|^spawn(-sh)? "ochre" "ipc"/.test(a)) return "ochre";
+    if (/^spawn/.test(a)) return /wpctl|playerctl|pactl|brightnessctl|pamixer/.test(a) ? "звук и медиа" : "программы";
+    if (/screenshot/.test(a)) return "скриншоты";
+    if (/workspace/.test(a)) return "столы";
+    if (/monitor/.test(a)) return "мониторы";
+    if (/^focus-|^switch-focus/.test(a)) return "фокус";
+    if (/^(move-|consume|expel|swap)/.test(a)) return "перемещение";
+    if (/width|height|maximize|fullscreen|expand-column|center-/.test(a)) return "размеры";
+    if (/^(close-window|toggle-window|toggle-column|toggle-overview)/.test(a)) return "окна";
+    if (/^(quit|power-|suspend|show-hotkey|toggle-keyboard|toggle-debug|do-screen)/.test(a)) return "система";
+    return "прочее";
+}
+
+// список с заголовками групп: [{header, count} | {b, pos: []}]; группы из подписей — после известных, по алфавиту
+function groupBinds(list) {
+    // группа из подписи — только если в ней хотя бы два бинда: «Browser: helium» у ochre одна, её место — по действию
+    const n = {};
+    for (const b of list) { const t = titleGroup(b); if (t) n[t] = (n[t] ?? 0) + 1; }
+    const by = {};
+    for (const b of list) {
+        const t = titleGroup(b), g = n[t] > 1 ? t : bindGroup(b);
+        (by[g] = by[g] ?? []).push(b);   // ??= движок QML не понимает
+    }
+    const names = Object.keys(by).sort((x, y) => {
+        const i = BIND_GROUPS.indexOf(x), j = BIND_GROUPS.indexOf(y);
+        return (i < 0 ? 99 : i) - (j < 0 ? 99 : j) || x.localeCompare(y);
+    });
+    // своя группа из подписи — сразу после «ochre», а не в конце рядом с «прочее»
+    const known = names.filter(n => BIND_GROUPS.includes(n)), own = names.filter(n => !BIND_GROUPS.includes(n));
+    const k = known[0] === "ochre" ? 1 : 0;
+    const order = known.slice(0, k).concat(own, known.slice(k));
+    // flatMap движок QML не знает
+    return order.reduce((out, n) => out.concat([{ header: n, count: by[n].length }], by[n].map(b => ({ b, pos: [] }))), []);
+}
+
 // однострочные бинды из блоков binds { … }: [{ combo, title, hidden, action, source }]
 function parseBinds(text, source) {
     const out = [];
@@ -739,7 +805,11 @@ function text(lines) {
 // outs — { имя: { enabled, mode, scale, transform, x, y, vrr, primary } }, только то, что задано вручную.
 // Возвращает { "input.kdl": текст, … } — все файлы папки ochre/, кроме keys.kdl (его пишет Binds).
 // sel — как выбрать этот экземпляр shell в qs (Ochre.sel): [] для конфига по умолчанию, ["-p", каталог] для пакета
-function niriFiles(get, outs, sel) {
+const GAME_OFF = { "niri.anim": false, "niri.shadow": false, "niri.rules.inactiveOpacity": 100 };
+
+function niriFiles(get0, outs, sel) {
+    // игровой режим: поверх своих значений — без эффектов; сами настройки не меняются и вернутся при выключении
+    const get = k => get0("shell.game") && k in GAME_OFF ? GAME_OFF[k] : get0(k);
     const qsRun = ["qs"].concat(sel ?? []).map(q).join(" ");
     const ipc = (t, f) => " { spawn " + ["qs", "ipc"].concat(sel ?? [], ["call", t, f]).map(q).join(" ") + "; }";
     const accent = ACCENTS[get("shell.accent")] ?? ACCENTS.ochre;
@@ -924,6 +994,9 @@ function niriFiles(get, outs, sel) {
         '    Mod+Alt+R hotkey-overlay-title="Record the Screen"' + ipc("record", "toggle"),
         '    Mod+Shift+S hotkey-overlay-title="Screenshot"' + ipc("shot", "region"),
         '    Print hotkey-overlay-title="Screenshot"' + ipc("shot", "region"),
+        '    Mod+Shift+T hotkey-overlay-title="Copy Text from the Screen"' + ipc("shot", "ocr"),
+        '    Mod+Shift+C hotkey-overlay-title="Pick a Color"' + ipc("shot", "pick"),
+        '    Mod+Shift+G hotkey-overlay-title="Game Mode"' + ipc("game", "toggle"),
         '    Mod+S hotkey-overlay-title="Settings"' + ipc("settings", "toggle"),
         '    Super+Alt+L hotkey-overlay-title="Lock the Screen"' + ipc("lock", "lock"),
         "}"
