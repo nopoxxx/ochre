@@ -1,6 +1,7 @@
 import Quickshell
 import QtQuick
 import qs.services
+import qs.bar
 import "services/settings.js" as S
 
 // Модульная панель: три зоны — left, center, right.
@@ -56,19 +57,48 @@ PanelWindow {
             onWheel: wheel => bar.scroll(wheel.angleDelta.y)
         }
 
-        BarZone {
-            bar: bar
-            ids: bar.layout.left
+        // Зоны не налезают друг на друга: правая (статус) всегда целиком; центральная по центру, а упёрлась
+        // в правую — сдвигается влево; левой (приглашение с заголовком окна) — что осталось, обрезается с «…»
+        TextMetrics { id: cell; font.family: Theme.font; font.pixelSize: Theme.fontSize; text: "M" }
+        readonly property real gapW: cell.advanceWidth * 2
+        readonly property real centerX: {
+            const w = centerZone.implicitWidth;
+            const ideal = (width - w) / 2;
+            return Math.max(Theme.pad, Math.min(ideal, rightZone.x - gapW - w));
+        }
+        readonly property real leftMax: (centerZone.implicitWidth > 0 ? centerX : rightZone.x) - gapW - Theme.pad
+        readonly property bool leftCut: leftZone.implicitWidth > leftMax
+
+        Item {
+            id: leftBox
             anchors { left: parent.left; leftMargin: Theme.pad; verticalCenter: parent.verticalCenter }
+            width: Math.max(0, parent.leftCut ? parent.leftMax - cell.advanceWidth : leftZone.implicitWidth)
+            height: leftZone.implicitHeight
+            clip: parent.leftCut
+
+            BarZone {
+                id: leftZone
+                bar: bar
+                ids: bar.layout.left
+            }
+        }
+        BarText {
+            visible: parent.leftCut && leftBox.width > 0
+            anchors { left: leftBox.right; verticalCenter: parent.verticalCenter }
+            text: "…"
+            color: Theme.gray
         }
 
         BarZone {
+            id: centerZone
             bar: bar
             ids: bar.layout.center
-            anchors.centerIn: parent
+            x: parent.centerX
+            anchors.verticalCenter: parent.verticalCenter
         }
 
         BarZone {
+            id: rightZone
             bar: bar
             ids: bar.layout.right
             anchors { right: parent.right; rightMargin: Theme.pad; verticalCenter: parent.verticalCenter }
