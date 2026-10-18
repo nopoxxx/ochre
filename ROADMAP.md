@@ -16,3 +16,4 @@
 - [x] **Тексты песен** — LRCLIB (синхронный LRC), текущая строка в home/Media, кэш в `~/.cache/ochre/lyrics`.
 - [x] **Переходы обоев** — type (печать строками с курсором), blocks, scan, fade, random — маска + MultiEffect, без своих шейдеров.
 - [x] **Первый запуск** — окно «ochre --help» с клавишами и подсказками, один раз; снова — меню → help, IPC `welcome open`.
+- [x] **Демонстрация экрана** — свой бэкенд xdg-desktop-portal ScreenCast: выбор монитора или окна окном ochre `~/cast/` с превью.

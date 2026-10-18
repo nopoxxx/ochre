@@ -709,6 +709,12 @@ Password: <span class="blink">█</span></div>
   <p>Сам shell: окно <code>~/polkit/</code> в стиле <code>[sudo] password for …</code>, вверху — что именно просит права. Вместо него
   можно вернуть polkit-gnome: <code>system/ → ochre → polkit-агент</code>.</p>
 
+  <h3>что показывает окно ~/cast/ при демонстрации экрана</h3>
+  <p>Discord, браузер или OBS просят показать экран — shell спрашивает, что именно: монитор или окно, с живым превью
+  (<kbd>↵</kbd> — показать, <kbd>Esc</kbd> — отказать). Остановить демонстрацию можно и в приложении, и биндом niri
+  <code>stop-cast</code>. Если shell не запущен, выбор покажет обычный диалог GNOME. Вернуть его насовсем —
+  <code>system/ → ochre → выбор демонстрации экрана</code>.</p>
+
   <h3>в углу появилось окно ~/log/errors</h3>
   <p>Это ошибки: в QML shell (<code>файл:строка</code> от <code>~/.config/quickshell/</code>) или в конфиге niri — тогда niri
   работает на прошлой версии конфига. <code>[скопировать]</code> кладёт текст в буфер — для issue. Исправленная ошибка QML

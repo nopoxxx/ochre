@@ -398,6 +398,7 @@ function sections(outputs, layout, home) {
             { key: "shell.update.check", label: "проверять обновления", type: "bool", def: true, hint: "git fetch в папке shell; нужен git-клон и доступ к репозиторию" },
             { key: "shell.update.hours", label: "раз в, ч", type: "int", min: 1, max: 48, step: 1, def: 6 },
             { key: "shell.update.notify", label: "уведомлять", type: "bool", def: true, hint: "уведомление, когда появились новые коммиты" },
+            { key: "shell.cast", label: "выбор демонстрации экрана", type: "bool", def: true, hint: "окно ochre вместо GTK-диалога, когда Discord, браузер или OBS просят показать экран; выключено — снова GNOME" },
             { key: "shell.polkit", label: "polkit-агент", type: "bool", def: true, hint: "запрос пароля pkexec, systemctl и т.п. окном ochre вместо polkit-gnome" },
             { key: "shell.errors", label: "показывать ошибки", type: "bool", def: true, hint: "окно ~/log/errors: ошибки QML shell и конфига niri, как лог компилятора" },
             act("restartShell", "перезапустить shell", "qs kill и запуск заново"),

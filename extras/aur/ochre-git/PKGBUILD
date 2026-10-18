@@ -13,7 +13,7 @@ depends=(
     ttf-terminus-nerd noto-fonts noto-fonts-emoji
     networkmanager pipewire pipewire-pulse wireplumber upower libnotify pacman-contrib
     wl-clipboard cliphist brightnessctl playerctl fastfetch
-    polkit-gnome gnome-keyring xdg-desktop-portal-gnome xdg-desktop-portal-gtk
+    polkit-gnome gnome-keyring xdg-desktop-portal-gnome xdg-desktop-portal-gtk python-gobject
 )
 optdepends=(
     'qt6ct: Qt-приложения в цветах shell'

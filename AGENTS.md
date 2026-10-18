@@ -58,6 +58,7 @@ HomePanel.qml        меню home — панель во всю высоту у 
 OsdWindow.qml        индикатор громкости и яркости при изменении (namespace ochre-osd, клики насквозь)
 PolkitWindow.qml     polkit-агент (Quickshell.Services.Polkit) и окно пароля в стиле sudo; при shell.polkit гасит polkit-gnome
 WelcomeWindow.qml    первый запуск: «ochre --help» — клавиши и подсказки, строки печатаются; отметка ~/.local/state/ochre/welcome; меню → help
+CastWindow.qml       выбор демонстрации экрана (мониторы, окна, живое превью) по запросу бэкенда портала — services/Cast.qml
 ErrorsWindow.qml     ~/log/errors в углу монитора с фокусом: ошибки QML и niri как лог компилятора (services/Errors.qml)
 CalGrid.qml          месяц как `cal` — общий для CalPopup и секции календаря в home
 ClipboardWindow.qml  история буфера (cliphist): список с поиском слева, запись целиком справа (текст/картинка)
@@ -102,6 +103,7 @@ services/            синглтоны (pragma Singleton) и JS-библиот�
   Lyrics.qml         текст песни для home/Media: LRCLIB /api/get → /api/search, кэш ~/.cache/ochre/lyrics/<md5>.json, parseLrc, current/next по позиции
   Countdown.qml      таймер: endsAt (время конца, не остаток) / pausedLeft, parse(«25m», «1h30m», «5:00»), ~/.local/state/ochre/timer.json; IPC timer
   Game.qml           игровой режим shell.game: niriFiles подменяет GAME_OFF поверх своих значений, Notifs.dnd — при shell.game.dnd; IPC game
+  Cast.qml           демонстрация экрана: пишет файлы портала (ochre.portal, D-Bus .service, niri-portals.conf с пометкой), мост `ochre-portal.py --client`, request/answer; IPC cast
   Errors.qml         ошибки: `qs log -f --pid $PPID` своего экземпляра (scene: @файл[строка], caused by) и niri (ConfigLoaded.failed → `niri validate`); IPC errors
   Privacy.qml        кто пишет микрофон (linkGroups PipeWire: Stream/Input/Audio ← невыключенный Audio/Source) и показывает экран (Niri.casts); IPC privacy
   DefaultApps.qml    оболочка входа и браузер по умолчанию (shell.sh, shell.browser): сверка с системой, chsh, xdg-settings
@@ -126,6 +128,7 @@ extras/              не грузится shell'ом; эталонные кон
   niri/ochre/*.kdl   стартовые заглушки ~/.config/niri/ochre/ (shell перезапишет при запуске)
   niri.kdl           инструкция по ручному подключению к своему config.kdl
   greeter/niri.kdl   конфиг niri для greeter (/etc/greetd/ochre-niri.kdl)
+  portal/ochre-portal.py  бэкенд xdg-desktop-portal ScreenCast на Python (Gio): выбор — у shell через сокет, запись — Mutter API niri; без shell — всё gnome
   install-greeter.sh sudo: greeter (пакет — его файлы, git — копия в /usr/local/share/ochre), каталоги синхронизации, greetd
   bin/ochre          команда пакета: ochre (запуск), ochre ipc …, ochre restart, ochre setup (install.sh --system), ochre greeter
   aur/ochre-git/     PKGBUILD и .install пакета ochre-git (пока не в AUR: makepkg -si); в пакет не попадает
@@ -197,7 +200,7 @@ docs/                документация — GitHub Pages из main /docs (
 | `home` | меню home | секции (показаны / скрыты, порядок); край, ширина, анимация; погода; ночной режим; запись экрана |
 | `notify` | уведомления | DND, положение, время, максимум, критичные, эффект набора, анимация, проверить |
 | `lock` | блокировка | idle, эхо пароля, часы, фраза под приглашением (motd), обои, предпросмотр, заблокировать |
-| `system` | система | устройства (мониторы, сеть, звук); приложения: терминал, файловый менеджер, оболочка, браузер; скриншоты; конфиги; ochre (обновить, проверка, polkit-агент, окно ошибок, перезапуск, greeter) |
+| `system` | система | устройства (мониторы, сеть, звук); приложения: терминал, файловый менеджер, оболочка, браузер; скриншоты; конфиги; ochre (обновить, проверка, выбор демонстрации, polkit-агент, окно ошибок, перезапуск, greeter) |
 
 Новую настройку кладите туда, где её будут искать; раздел и группу (`header`) поиск тоже учитывает.
 Строка — `{header}` или `{key, label, type, def, hint, …}`. Типы:
@@ -543,6 +546,9 @@ invoke); остальные съезжают на её место (`move` в Col
 | `~/.cache/cliphist/db` | история буфера | cliphist (через Clipboard) |
 | `~/Videos/Screencasts/` (`shell.rec.dir`) | записи экрана `rec_<дата>.mp4` | Recorder |
 | `~/.cache/ochre/lyrics/<md5>.json` | ответы LRCLIB (и «не найдено» — `[]`); ошибка сети не кэшируется | Lyrics |
+| `~/.local/share/xdg-desktop-portal/portals/ochre.portal`, `~/.local/share/dbus-1/services/org.freedesktop.impl.portal.desktop.ochre.service` | бэкенд портала и его запуск | Cast |
+| `~/.config/xdg-desktop-portal/niri-portals.conf` | `ScreenCast=ochre;gnome;` — только файл с пометкой `# ochre: generated…`; свой не трогается | Cast |
+| `$XDG_RUNTIME_DIR/ochre-portal.sock` | сокет демона ochre-portal для shell | ochre-portal.py |
 | `~/.local/state/ochre/welcome` | время, когда закрыли окно первого запуска; нет файла — окно покажется | WelcomeWindow |
 | `~/.local/state/ochre/timer.json` | таймер: endsAt, pausedLeft, total, label | Countdown |
 | `~/.config/ochre/todo.txt`, `notes.md` | список дел (todo.txt: «x » — сделано) и заметки | home/Todo, вы; notes — только вы |
@@ -565,6 +571,7 @@ invoke); остальные съезжают на её место (`move` в Col
 | `record` | `toggle`, `region`, `screen`, `stop` | services/Recorder.qml |
 | `shell` | `reload` (Quickshell.reload(true): без перезапуска процесса) | shell.qml |
 | `timer` | `start <срок [подпись]>`, `pause` (пауза/продолжить), `stop`, `get` | services/Countdown.qml |
+| `cast` | `get` (подключён ли демон, ждёт ли выбор), `cancel` (отказать текущему запросу) | services/Cast.qml |
 | `welcome` | `open`, `close` (первый запуск: ochre --help) | WelcomeWindow.qml |
 | `game` | `toggle`, `on`, `off`, `get` | services/Game.qml |
 | `errors` | `open`, `clear`, `get` (текстом, как `[скопировать]`) | services/Errors.qml |
@@ -661,10 +668,24 @@ invoke); остальные съезжают на её место (`move` в Col
 - `wf-recorder` дописывает файл только по SIGINT (`Process.signal(2)`); kill оставит битый mp4.
 - `normalizeLayout` хранит `off` явно: модуль, которого нет ни в одной зоне, считается новым.
 - У Item есть свойства-якоря `left`, `right`, `top`, `bottom`… (FINAL): `property int left` в секции или модуле — «Cannot override FINAL property», компонент не создаётся.
+- **Окно выбора демонстрации без превью — намеренно.** С превью (ScreencopyView чужого монитора, а для окон — ToplevelManager)
+  Quickshell 0.3.2 падал: SIGSEGV в `QPlatformScreen::screen()` из обработчика событий Wayland — Qt получал `wl_output`, который
+  ему не принадлежит. Сначала думали на смену `captureSource` у живого view — снимки (`live: false`) не помогли. В отдельном
+  `qs -p` не воспроизводится. Захват окон (toplevel) на niri и так не даёт кадров. Три падения подряд — сторож сдаётся и shell
+  остаётся выключенным. Новые захваты чужого монитора и ToplevelManager в shell не добавлять, не проверив под нагрузкой.
 - `niri msg action screenshot-screen` кроме файла **всегда кладёт снимок в буфер обмена** (и в историю cliphist). Для проверок
   своего кода лучше `item.grabToImage(r => r.saveToFile(…))`: например, переходы обоев — копия Background.qml с заглушками
   вместо сервисов в маленьком окне отдельного `qs -p <папка>` (не запускать там настоящие сервисы: Clipboard гасит чужой wl-paste).
 - Repeater отдаёт копии объектов — сравнивать по `name`/`id`, а не `===` (см. DisplaysWindow).
+- **Демонстрация экрана (Cast).** Discord → xdg-desktop-portal → бэкенд `org.freedesktop.impl.portal.desktop.ochre`
+  (`extras/portal/ochre-portal.py`, запускает D-Bus). `Start` ждёт ответа shell (D-Bus-вызов без таймаута), потом
+  `org.gnome.Mutter.ScreenCast` niri: `CreateSession` → `RecordMonitor(connector)` / `RecordWindow({window-id: t})` (id окна niri) →
+  `Start` → сигнал `PipeWireStreamAdded(node)` → `streams` порталу; `Session.Closed` от niri (stop-cast) → `Closed` порталу.
+  Shell не подключён в момент `CreateSession` — вся сессия пересылается `…desktop.gnome` (и `Request.Close`, и `Closed`).
+  Портал читает бэкенды из `~/.local/share/xdg-desktop-portal/portals` (sudo не нужен) и настройки — только при запуске:
+  Cast перезапускает его (`try-restart`) после изменения файлов, но не во время демонстраций (`Niri.casts`). Демон старой версии
+  (обновили shell) выходит при следующем подключении shell, если сессий нет. Портал не называет приложение (не flatpak — `app_id`
+  пуст), поэтому в окне — активное окно. Проверка без ввода: свой клиент `org.freedesktop.portal.ScreenCast` + `qs ipc call cast cancel`.
 - **polkit**: агент в сессии один. polkit-gnome запускает `config.kdl` (spawn-at-startup) одновременно с shell, поэтому
   PolkitWindow при `shell.polkit` гасит его (`pkill -f`) и создаёт `PolkitAgent` (LazyLoader); через 2 с не `isRegistered` — ещё раз
   (до 4 попыток, потом critical). Выключили — `setsid polkit-gnome`, если он не запущен. После неверного пароля flow сам ждёт

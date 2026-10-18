@@ -16,6 +16,7 @@ ShellRoot {
     readonly property var _night: NightLight      // ночной режим держится с запуска shell
     readonly property var _recorder: Recorder     // IPC record (Mod+Alt+R)
     readonly property var _countdown: Countdown   // таймер: конец отсчёта, даже если модуль timer убран
+    readonly property var _cast: Cast             // бэкенд портала для демонстрации экрана: файлы и мост к демону
     readonly property var _game: Game             // IPC game (Mod+Shift+G)
     readonly property var _errors: Errors         // ошибки shell и niri — с запуска, а не с первой ошибки
 
@@ -59,5 +60,6 @@ ShellRoot {
     OsdWindow {}
     ErrorsWindow {}
     PolkitWindow {}
+    CastWindow {}
     WelcomeWindow {}
 }
