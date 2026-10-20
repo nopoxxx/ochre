@@ -26,6 +26,7 @@ Singleton {
             migrate: termMigrated ? [termRel, termMigrated, termText] : [],
             osc: termMigrated || (S.TERM_INCLUDE[Term.name] && termText.includes(S.TERM_INCLUDE[Term.name]))
                 ? S.termOsc(S.palette(k => Settings.get(k))) : "",
+            icons: S.iconOverlay(k => Settings.get(k)),
             gsettings: S.themeGsettings(k => Settings.get(k))
         })
         : ""
@@ -45,6 +46,7 @@ Singleton {
         if (s.osc) _osc = s.osc;
         args.push("--", osc);
         args.push(...(s.migrate.length ? s.migrate : ["", "", ""]));
+        args.push(...(s.icons ? [s.icons.name, s.icons.base, s.icons.color, s.icons.index] : ["", "", "", ""]));
         for (const [key, value] of s.gsettings) args.push(key, value);
         writer.command = ["sh", "-c", `
             d=$1; shift
@@ -63,6 +65,29 @@ Singleton {
                 printf '%s' "$3" > "$d/$1.bak-ochre" && printf '%s' "$2" > "$d/$1.ochre-tmp" && mv -f "$d/$1.ochre-tmp" "$d/$1"
             fi
             shift 3
+            # папки Papirus цвета акцента: тема-надстройка из ссылок на folder-<цвет>-*.svg, как у papirus-folders, но без sudo
+            ic=\${XDG_DATA_HOME:-$HOME/.local/share}/icons
+            if [ -n "$1" ]; then
+                for o in "$ic"/ochre-Papirus-*; do
+                    [ -e "$o" ] && [ "$o" != "$ic/$1" ] && rm -rf "$o"
+                done
+                src=
+                for r in "$ic" /usr/local/share/icons /usr/share/icons; do [ -d "$r/$2" ] && { src=$r/$2; break; }; done
+                t=$ic/$1
+                if [ ! -f "$t/index.theme" ] || { [ -n "$src" ] && [ ! -e "$t/48x48/places/folder.svg" ]; }; then
+                    rm -rf "$t"
+                    for z in 22x22 24x24 32x32 48x48 64x64; do
+                        mkdir -p "$t/$z/places"
+                        [ -n "$src" ] && for f in "$src/$z/places/folder-$3"*.svg "$src/$z/places/user-$3"*.svg; do
+                            n=\${f##*/}
+                            case $n in folder-$3.svg|folder-$3-*.svg|user-$3.svg|user-$3-*.svg) ;; *) continue ;; esac
+                            [ -f "$f" ] && [ ! -L "$f" ] && ln -sf "$f" "$t/$z/places/$(printf '%s' "$n" | sed "s/-$3//")"
+                        done
+                    done
+                    printf '%s' "$4" > "$t/index.theme"
+                fi
+            fi
+            shift 4
             # ochre.css — последним среди @import в gtk.css: из одинаковых @define-color побеждает последний,
             # а остатки других тем (noctalia.css и т.п.) иначе перебили бы палитру. @import — до остальных правил
             for v in gtk-3.0 gtk-4.0; do

@@ -156,3 +156,21 @@ test("превью: полоска цветов темы в текущем ре�
     assert.equal(S.themeStrip("gruvbox", getter({ "shell.theme.mode": "light" }))[0], "#f9f5d7");
     assert.equal(S.themeStrip("nope", getter())[0], "#1d2021");
 });
+
+test("иконки: Gruvbox Plus у Gruvbox, у остальных — Papirus с папками цвета акцента", () => {
+    const on = o => getter(Object.assign({ "shell.theme.sync": true }, o));
+    assert.equal(S.iconTheme(on({})), "Gruvbox-Plus-Dark");
+    assert.equal(S.iconOverlay(on({})), null);
+    const nord = on({ "shell.theme.name": "nord", "shell.accent": "aqua" });
+    assert.equal(S.iconTheme(nord), "ochre-Papirus-Dark-teal");
+    const o = S.iconOverlay(nord);
+    assert.deepEqual([o.name, o.base, o.color], ["ochre-Papirus-Dark-teal", "Papirus-Dark", "teal"]);
+    assert.match(o.index, /^Inherits=Papirus-Dark,hicolor$/m);
+    assert.match(o.index, /^\[48x48\/places\]\nContext=Places\nSize=48\nType=Fixed$/m);
+    assert.equal(S.iconTheme(on({ "shell.theme.name": "catppuccin", "shell.theme.mode": "light", "shell.accent": "purple" })), "ochre-Papirus-Light-violet");
+    assert.equal(S.iconTheme(on({ "shell.theme.name": "nord" })), "ochre-Papirus-Dark-yellow");
+    assert.equal(S.iconOverlay(getter({ "shell.theme.sync": false, "shell.theme.name": "nord" })), null);
+    const files = S.themeFiles(nord, "/home/u");
+    assert.match(files["qt6ct/qt6ct.conf"], /^icon_theme=ochre-Papirus-Dark-teal$/m);
+    assert.equal(Object.fromEntries(S.themeGsettings(nord))["icon-theme"], "'ochre-Papirus-Dark-teal'");
+});
