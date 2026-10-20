@@ -245,7 +245,7 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
   </table></div>
   <p>Нужен niri 25.11 или новее — установщик проверит и предложит обновить. Программы из AUR ставятся готовыми сборками из
   <a href="https://aur.chaotic.cx">chaotic-aur</a> (установщик предложит подключить его) — без компиляции, поэтому быстро; чего там нет —
-  собирается из AUR. <code>paru</code> тоже ставится — им пользуется сам shell (обновления, меню <code>packages/</code>). Дальше — клон shell в <code>~/.config/quickshell</code>,
+  собирается из AUR. <code>paru</code> тоже ставится — им пользуется сам shell (обновления, <code>+пакет</code> в меню). Дальше — клон shell в <code>~/.config/quickshell</code>,
   конфиг niri (или два <code>include</code> к вашему) и, по желанию, greeter. Всё, что заменяется, остаётся рядом как <code>*.bak-&lt;дата&gt;</code>.</p>
 
   <h3>флаги</h3>
@@ -340,7 +340,7 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
     <tr><td><code>command</code></td><td><code>❯ app # title</code> активного окна с эффектом набора; <span class="c-red">❯</span> красный, если окно просит внимания</td></tr>
     <tr><td><code>media</code></td><td>плеер (MPRIS) и полоски звука <span class="c-acc">▂▅▇▃</span>, пока играет (нужен cava; <code>bar/ → модули</code>): клик — пауза, правый — следующий, средний — предыдущий</td></tr>
     <tr><td><code>rec</code></td><td><span class="c-red">● REC 01:23</span> — идёт запись экрана; клик — остановить. Без записи не виден</td></tr>
-    <tr><td><code>timer</code></td><td><span class="c-gray">timer</span> <span class="c-acc b">24:59</span> чай — таймер (меню: <code>timer 25m чай</code>): клик — пауза, правый — стоп, колёсико — ±1 мин. Без таймера не виден</td></tr>
+    <tr><td><code>timer</code></td><td><span class="c-gray">timer</span> <span class="c-acc b">24:59</span> чай — таймер (меню: <code>%25m чай</code>): клик — пауза, правый — стоп, колёсико — ±1 мин. Без таймера не виден</td></tr>
     <tr><td><code>privacy</code></td><td><span class="c-gray">mic</span> <span class="c-orange b">discord</span> <span class="c-gray">cast</span> <span class="c-red b">obs</span> — кто слушает микрофон и кто показывает экран. Выключенный микрофон не в счёт; когда никого нет, модуль не виден</td></tr>
     <tr><td><code>tray</code></td><td><code>[‹ <span class="nf">󰙯</span> <span class="nf">󰓓</span>]</code> — значки Nerd Font или названия; клик — открыть, правый — меню, <code>‹</code> — свернуть в <code>[+N]</code></td></tr>
     <tr><td><code>cpu</code> <code>mem</code></td><td>загрузка с графиком <code>▂▃▅▇</code> и память; клик — процессы как <code>ps</code> с <code>[kill]</code></td></tr>
@@ -365,21 +365,31 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
   <h2>Меню</h2>
   <p><kbd>Mod+D</kbd> — меню действий в духе omarchy с нечётким поиском, <kbd>Mod+Space</kbd> — сразу программы.
   Разделы ведут себя как каталоги: <kbd>↵</kbd> или <kbd>→</kbd> — войти, <kbd>Esc</kbd> или <kbd>←</kbd> — на уровень выше.
-  Набор в корне ищет сразу по всему меню: программы и вложенные действия (<code>firefox</code>, <code>update</code>,
-  <code>settings</code>, <code>reboot</code>). <code>logout</code>, <code>reboot</code> и <code>poweroff</code> просят второе <kbd>↵</kbd>.</p>
+  Набор в корне ищет сразу по всему меню: программы, открытые окна и вложенные действия (<code>firefox</code>, <code>update</code>,
+  <code>settings</code>, <code>reboot</code>). Часто запускаемые программы стоят выше остальных — и в <code>apps/</code>, и в поиске. <code>logout</code>, <code>reboot</code> и <code>poweroff</code> просят второе <kbd>↵</kbd>.</p>
 <figure class="shot"><a href="shots/launcher-full.webp"><img src="shots/launcher.webp" alt="меню Mod+D" width="558" height="320" loading="lazy"></a><figcaption><kbd>Mod+D</kbd> — корень меню</figcaption></figure>
 <figure class="shot"><div class="shots"><a href="shots/launcher-blue-full.webp"><img src="shots/launcher-blue.webp" alt="меню в акценте blue" width="558" height="320" loading="lazy"></a><a href="shots/launcher-orange-full.webp"><img src="shots/launcher-orange.webp" alt="меню в акценте orange" width="558" height="320" loading="lazy"></a></div><figcaption>оно же в акцентах blue и orange</figcaption></figure>
-<div class="mock"><div class="win"><div class="ttl">~/</div><span class="row"><span class="c-acc">❯</span> <span class="blink">█</span></span><span class="row"> </span><span class="sel"><span class="c-acc">▌</span> <span class="c-blue">apps/</span>        <span class="c-gray">запуск программ (Mod+Space)</span></span><span class="row">  wallpaper    <span class="c-gray">обои; Tab — wallhaven</span></span><span class="row">  setup        <span class="c-gray">все настройки, мониторы, сеть, звук</span></span><span class="row">  <span class="c-blue">packages/</span>    <span class="c-gray">установить, удалить, обновить</span></span><span class="row">  <span class="c-blue">system/</span>      <span class="c-gray">питание и сессия</span></span><span class="row">  about        <span class="c-gray">о системе: fastfetch</span></span></div></div>
+<div class="mock"><div class="win"><div class="ttl">~/</div><span class="row"><span class="c-acc">❯</span> <span class="blink">█</span></span><span class="row"> </span><span class="sel"><span class="c-acc">▌</span> <span class="c-blue">apps/</span>        <span class="c-gray">запуск программ (Mod+Space)</span></span><span class="row">  wallpaper    <span class="c-gray">обои; Tab — wallhaven</span></span><span class="row">  settings     <span class="c-gray">все настройки, мониторы, сеть, звук</span></span><span class="row">  <span class="c-blue">system/</span>      <span class="c-gray">питание и сессия</span></span><span class="row">  about        <span class="c-gray">о системе: fastfetch</span></span></div></div>
   <ul>
-    <li><code>packages/</code> — <code>install</code> (репозитории pacman), <code>aur</code> (поиск через paru), <code>remove</code>, <code>update</code> (<code>paru -Syu</code>);</li>
     <li><code>system/</code> — <code>lock</code>, <code>suspend</code>, <code>logout</code>, <code>reboot</code>, <code>poweroff</code>;</li>
     <li><code>help</code> — главные клавиши и подсказки (то же окно показывается один раз при первом запуске);</li>
-    <li><code>timer/</code> — таймер на 5, 10, 15, 25, 45 минут или час, <code>stop</code>; любой срок — запросом в корне: <code>timer 25m чай</code>,
-      <code>timer 1h30m</code>, <code>timer 5:00</code>, <code>timer 90s</code> (просто число — минуты). Идёт на панели: <code>timer 24:59 чай</code>,
+  </ul>
+  <p>Остальное — не разделами, а префиксом в начале запроса в корне:</p>
+  <ul>
+    <li><code>&gt; команда</code> — выполнить в плавающем терминале, окно остаётся после команды: <code>&gt; htop</code>;</li>
+    <li><code>@имя</code> — открытые окна niri, недавние сверху; <kbd>↵</kbd> — перейти к окну;</li>
+    <li><code>/имя</code> — нечёткий поиск файлов и папок через <code>fd</code> (по умолчанию в <code>~</code>), <kbd>↵</kbd> — открыть;</li>
+    <li><code>? запрос</code> — поиск в браузере: DuckDuckGo, Google, Startpage, Brave или свой адрес с <code>%s</code>;</li>
+    <li><code>:имя</code> — эмодзи по английскому имени (<code>:thumbs</code>), <kbd>↵</kbd> — в буфер; недавние сверху;</li>
+    <li><code>+пакет</code> — установить: пакеты pacman и первой строкой поиск в AUR через paru; просто <code>+</code> — <code>update</code> (<code>paru -Syu</code>);</li>
+    <li><code>-пакет</code> — удалить установленный (<code>pacman -Rns</code>);</li>
+    <li><code>%</code> — таймер: без срока — 5, 10, 15, 25, 45 минут, час и <code>stop</code>; любой срок — <code>%25m чай</code>,
+      <code>%1h30m</code>, <code>%5:00</code>, <code>%90s</code> (просто число — минуты). Идёт на панели: <code>timer 24:59 чай</code>,
       клик — пауза, правый — стоп, колёсико — ±1 минута; переживает перезапуск shell;</li>
     <li><code>=</code> и выражение — калькулятор: <code>=2^10</code>, <code>=(1,5+2)*3</code>, <code>=sqrt(2)</code>; <kbd>↵</kbd> копирует ответ.
       Есть <code>+ - * / % ^</code>, скобки, <code>sqrt abs round floor ceil ln log sin cos tan</code>, <code>pi</code>, <code>e</code>;</li>
-    <li>всё настраиваемое — не в меню, а в окне настроек (<code>setup</code>).</li>
+    <li>префиксы меняются в <code>settings → вид → меню</code> (например <code>!</code> вместо <code>&gt;</code>); пустой — выключен;</li>
+    <li>всё настраиваемое — не в меню, а в окне настроек (<code>settings</code>).</li>
   </ul>
 </section>
 
@@ -636,7 +646,7 @@ Password: <span class="blink">█</span></div>
   <p>Shell, установленный через <code>git clone</code>, сам раз в несколько часов делает <code>git fetch</code>. Когда вышли новые коммиты,
   на панели появляется <code class="c-acc">ochre ↑N</code>: клик — список изменений и <code>[обновить]</code>
   (<code>git pull --ff-only</code> и перезапуск shell). Частота и уведомление — в <code>system/</code>.</p>
-  <p>Обновления системы — модуль <code>upd</code> или <code>packages/ → update</code> в меню (<code>paru -Syu</code>).</p>
+  <p>Обновления системы — модуль <code>upd</code> или <code>+</code> → <code>update</code> в меню (<code>paru -Syu</code>).</p>
 </section>
 
 <!-- ─────────────────────────── files ─────────────────────────── -->
