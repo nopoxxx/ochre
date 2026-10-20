@@ -20,7 +20,10 @@ PanelWindow {
     WlrLayershell.namespace: "ochre-wallpaper"
     color: Theme.bg0   // виден по краям в режиме fit
 
-    readonly property string path: Wallpaper.imageFor(screen?.name ?? "", Wallpaper.activeWs(screen?.name ?? ""))
+    readonly property string ws: Wallpaper.activeWs(screen?.name ?? "")
+    property string shownWs: ws
+    onWsChanged: Qt.callLater(() => shownWs = ws)
+    readonly property string path: Wallpaper.imageFor(screen?.name ?? "", ws)
     readonly property string src: path ? "file://" + encodeURI(path) : ""
     readonly property int mode: Wallpaper.fill === "fit" ? Image.PreserveAspectFit
         : Wallpaper.fill === "stretch" ? Image.Stretch
@@ -34,7 +37,8 @@ PanelWindow {
 
     onSrcChanged: {
         const want = Settings.get("shell.wallpaper.transition");
-        style = first || !prev.source ? "fade"
+        style = !first && ws !== shownWs ? "none"
+            : first || !prev.source ? "fade"
             : want === "random" ? styles[Math.floor(Math.random() * styles.length)] : want;
         first = false;
         prev.source = cur.source;
@@ -60,7 +64,10 @@ PanelWindow {
         opacity: bg.style === "fade" ? bg.p : 1
         visible: !bg.masked
         onStatusChanged: if (status === Image.Ready) {
-            if (bg.style === "none") bg.p = 1;
+            if (bg.style === "none") {
+                bg.p = 1;
+                prev.source = "";
+            }
             else anim.restart();
         }
     }
