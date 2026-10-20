@@ -7,7 +7,7 @@
 //   unary := ("-" | "+") unary | power
 //   power := atom ("^" unary)?          — правоассоциативно, -2^2 = -4
 //   atom  := число | константа | функция "(" expr ")" | "(" expr ")"
-// Возвращает { value: "строка" } или { error: "текст" }.
+// Возвращает { value: "строка" } или { error: "текст", arg } — текст с %1 переводит вызывающий (I18n.tr(error, arg)).
 
 const CONSTS = { pi: Math.PI, e: Math.E };
 const FUNCS = {
@@ -41,7 +41,7 @@ function tokenize(s) {
         }
         if (ch === "×") { out.push({ t: "*" }); i++; continue; }
         if (ch === "÷") { out.push({ t: "/" }); i++; continue; }
-        throw "непонятный символ «" + ch + "»";
+        throw ["непонятный символ «%1»", ch];
     }
     return out;
 }
@@ -50,7 +50,7 @@ function evaluate(expr) {
     let toks, p = 0;
     const peek = () => toks[p]?.t;
     const take = t => {
-        if (peek() !== t) throw t === ")" ? "не хватает «)»" : "ожидалось «" + t + "»";
+        if (peek() !== t) throw t === ")" ? ["не хватает «)»"] : ["ожидалось «%1»", t];
         p++;
     };
 
@@ -65,7 +65,7 @@ function evaluate(expr) {
         while (peek() === "*" || peek() === "/" || peek() === "%") {
             const op = toks[p++].t;
             const r = parseUnary();
-            if ((op === "/" || op === "%") && r === 0) throw "деление на ноль";
+            if ((op === "/" || op === "%") && r === 0) throw ["деление на ноль"];
             v = op === "*" ? v * r : op === "/" ? v / r : v % r;
         }
         return v;
@@ -82,27 +82,27 @@ function evaluate(expr) {
     }
     function parseAtom() {
         const tok = toks[p];
-        if (!tok) throw "выражение не закончено";
+        if (!tok) throw ["выражение не закончено"];
         if (tok.t === "num") { p++; return tok.v; }
         if (tok.t === "(") { p++; const v = parseExpr(); take(")"); return v; }
         if (tok.t === "id") {
             p++;
             if (tok.v in CONSTS) return CONSTS[tok.v];
             if (tok.v in FUNCS) { take("("); const v = parseExpr(); take(")"); return FUNCS[tok.v](v); }
-            throw "неизвестно: " + tok.v;
+            throw ["неизвестно: %1", tok.v];
         }
-        throw "лишний «" + tok.t + "»";
+        throw ["лишний «%1»", tok.t];
     }
 
     try {
         toks = tokenize(expr);
         if (!toks.length) return { error: "" };
         const v = parseExpr();
-        if (p < toks.length) throw "лишний «" + (toks[p].v ?? toks[p].t) + "»";
+        if (p < toks.length) throw ["лишний «%1»", toks[p].v ?? toks[p].t];
         if (!isFinite(v)) return { error: "результат не число" };
         return { value: format(v) };
     } catch (e) {
-        return { error: String(e) };
+        return Array.isArray(e) ? { error: e[0], arg: e[1] ?? "" } : { error: String(e) };
     }
 }
 

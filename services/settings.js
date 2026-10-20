@@ -211,6 +211,8 @@ function sections(outputs, layout, home) {
             { header: "цвет и шрифт" },
             { key: "shell.accent", label: "акцентный цвет", type: "enum", options: Object.keys(ACCENTS), def: "ochre", hint: "рамки окон shell, prompt, рамка фокуса niri и акцент в приложениях" },
             { key: "shell.fontSize", label: "размер шрифта", type: "int", min: 10, max: 28, step: 1, def: 16 },
+            { key: "shell.lang", label: "язык", type: "enum", options: ["auto", "ru", "en"], def: "auto",
+              hint: "auto — по $LANG (нет перевода — английский); переводы — lang/<код>.json" },
 
             { header: "приложения" },
             { key: "shell.theme.sync", label: "темы Qt и GTK", type: "bool", def: true,
@@ -426,7 +428,9 @@ function sections(outputs, layout, home) {
 // поиск по всем разделам: каждое слово запроса — подстрока подписи, подсказки, ключа, заголовка группы
 // или имени раздела. Строки остаются как есть (плюс section — индекс раздела) и группируются под
 // заголовками «раздел/ · группа» — по одной подписи («размер») не понять, чего она касается.
-function searchRows(secs, query) {
+// tr — перевод (I18n.tr): ищем и по исходной строке, и по переводу; заголовок результата — уже переведённый
+function searchRows(secs, query, tr) {
+    const t = tr ?? (x => x);
     const words = String(query).toLowerCase().split(/\s+/).filter(w => w);
     const out = [];
     secs.forEach((s, i) => {
@@ -434,9 +438,9 @@ function searchRows(secs, query) {
         for (const r of s.rows) {
             if (r.header) { group = r.header; continue; }
             // у модулей панели общий ключ shell.bar.layout — ищем по их id
-            const fields = [r.label, r.hint, r.type === "module" ? r.id : r.key, group, s.id, s.title];
+            const fields = [r.label, r.hint, r.type === "module" ? r.id : r.key, group, s.id, s.title, t(r.label), t(r.hint), t(group), t(s.title)];
             if (!words.every(w => fields.some(x => String(x ?? "").toLowerCase().includes(w)))) continue;
-            const h = s.id + "/ · " + group;
+            const h = s.id + "/ · " + t(group);
             if (h !== shown) out.push({ header: shown = h });
             out.push(Object.assign({ section: i }, r));
         }
