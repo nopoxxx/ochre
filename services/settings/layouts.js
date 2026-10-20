@@ -53,6 +53,7 @@ const HOME_SECTIONS = [
     { id: "notes", dash: 2, label: "заметки", file: "Notes", desc: "начало ~/.config/ochre/notes.md; ↵ — открыть в редакторе" },
     { id: "notifs", dash: 2, label: "уведомления", file: "Notifs", desc: "последние уведомления: ↵ — действие, del — убрать" },
     { id: "system", dash: 1, label: "система", file: "System", desc: "cpu, память, диск, температура" },
+    { id: "usage", dash: 1, label: "экран", file: "Usage", desc: "время за экраном сегодня: всего и по приложениям (по фокусу окон)" },
     { id: "power", dash: 0, label: "питание", file: "Power", desc: "батарея и профиль питания (power-profiles-daemon)" },
     { id: "wifi", dash: 2, label: "wi-fi", file: "Wifi", desc: "сети Wi-Fi: подключиться, отключиться, пароль" },
     { id: "bluetooth", dash: 2, label: "bluetooth", file: "Bluetooth", desc: "устройства bluetooth: подключить, сопряжение, забыть" },

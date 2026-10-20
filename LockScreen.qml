@@ -78,7 +78,10 @@ Scope {
     WlSessionLock {
         id: session
 
-        onLockedChanged: Hooks.run(locked ? "lock" : "unlock")
+        onLockedChanged: {
+            Hooks.run(locked ? "lock" : "unlock");
+            ScreenTime.locked = locked;
+        }
 
         WlSessionLockSurface {
             id: surface
