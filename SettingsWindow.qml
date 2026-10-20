@@ -261,10 +261,10 @@ Scope {
 
             // выпадающий список для перечислений, которым не хватает места на кнопки
             property int drop: -1
-            property point dropAt: Qt.point(0, 0)
+            property var dropItem: null   // кнопка списка: по ней dropBox считает своё место
             function openDrop(i, item) {
                 focusRow(i);
-                dropAt = item.mapToItem(box, 0, item.height);
+                dropItem = item;
                 drop = i;
             }
 
@@ -785,15 +785,41 @@ Scope {
                 Rectangle {
                     id: dropBox
                     readonly property var r: win.rows[win.drop] ?? null
-                    visible: win.drop >= 0 && r !== null
+                    readonly property var opts: r ? win.optionsOf(r) : []
+                    // ширина — по самому длинному варианту (сетка моноширинная), а не от dropCol:
+                    // его дети тянутся по его же ширине — список раздувался в polish-петле
+                    readonly property int maxLen: opts.reduce((n, o) => Math.max(n, Array.from(win.optionLabel(r, o)).length), 0)
+                    // где кнопка сейчас: список едет вместе с ней при прокрутке (contentY — чтобы привязка пересчитывалась)
+                    readonly property rect anchor: {
+                        flick.contentY;
+                        flick.height;
+                        const it = win.dropItem;
+                        if (!it) return Qt.rect(0, 0, 0, 0);
+                        const p = it.mapToItem(box, 0, 0);
+                        return Qt.rect(p.x, p.y, it.width, it.height);
+                    }
+                    // кнопка ушла за край прокрутки — список прячем, а не вешаем в воздухе
+                    readonly property bool inView: {
+                        const f = flick.mapToItem(box, 0, 0);
+                        return anchor.y + anchor.height > f.y && anchor.y < f.y + flick.height;
+                    }
+                    // снизу не помещается — открываем вверх от кнопки
+                    readonly property bool below: anchor.y + anchor.height + 2 + height <= box.height - Theme.pad
+                    visible: win.drop >= 0 && r !== null && !!win.dropItem && inView
                     z: 10
-                    x: Math.min(box.width - width - Theme.pad, win.dropAt.x)
-                    y: Math.min(box.height - height - Theme.pad, win.dropAt.y + 2)
-                    width: Math.max(win.cw * 22, dropCol.implicitWidth + win.cw * 2)
+                    x: Math.max(Theme.pad, Math.min(box.width - width - Theme.pad, anchor.x))
+                    y: below ? anchor.y + anchor.height + 2 : Math.max(Theme.pad, anchor.y - height - 2)
+                    width: Math.max(win.cw * 22, win.cw * (maxLen + 4) + 8)
                     height: dropCol.implicitHeight + 8
                     color: Theme.bg
                     border.color: Theme.accent
                     border.width: 1
+
+                    // клики по рамке и колёсико не проваливаются в строки под списком
+                    MouseArea {
+                        anchors.fill: parent
+                        onWheel: wheel => wheel.accepted = true
+                    }
 
                     Column {
                         id: dropCol
@@ -801,7 +827,7 @@ Scope {
                         y: 4
                         width: parent.width - 8
                         Repeater {
-                            model: dropBox.r ? win.optionsOf(dropBox.r) : []
+                            model: dropBox.opts
                             Rectangle {
                                 required property var modelData
                                 readonly property bool sel: dropBox.r && modelData === win.shown(dropBox.r)
@@ -818,7 +844,13 @@ Scope {
                                     anchors.fill: parent
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
-                                    onClicked: { const i = win.drop; win.drop = -1; win.pick(i, parent.modelData); }
+                                    // drop = -1 сразу уничтожает строки списка вместе с этим обработчиком:
+                                    // всё нужное — в локальные переменные до закрытия
+                                    onClicked: {
+                                        const w = win, i = w.drop, v = parent.modelData;
+                                        w.drop = -1;
+                                        w.pick(i, v);
+                                    }
                                 }
                             }
                         }
