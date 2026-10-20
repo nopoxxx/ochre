@@ -149,3 +149,10 @@ test("greeter: фон niri из темы последнего пользоват
     assert.match(S.greeterNiri(getter({ "shell.theme.name": "nord" })), new RegExp(P.THEMES.nord.dark.bg));
     assert.match(S.greeterNiri(getter({ "shell.theme.mode": "light" })), /#f9f5d7/);
 });
+
+test("превью: полоска цветов темы в текущем режиме", () => {
+    const nord = P.THEMES.nord.dark;
+    assert.deepEqual(S.themeStrip("nord", getter()), [nord.bg, nord.fg, nord.red, nord.green, nord.yellow, nord.blue, nord.purple, nord.aqua, nord.ochre]);
+    assert.equal(S.themeStrip("gruvbox", getter({ "shell.theme.mode": "light" }))[0], "#f9f5d7");
+    assert.equal(S.themeStrip("nope", getter())[0], "#1d2021");
+});
