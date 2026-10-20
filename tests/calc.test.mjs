@@ -3,8 +3,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { load } from "./load.mjs";
 
-const C = load("services/calc.js", ["evaluate"]);
-const F = load("services/fuzzy.js", ["match"]);
+const C = load("services/calc.js");
+const F = load("services/fuzzy.js");
 
 test("calc: приоритет, скобки, степень, функции", () => {
     const v = e => C.evaluate(e).value;

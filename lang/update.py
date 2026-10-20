@@ -114,10 +114,9 @@ def from_sources():
     return found
 
 
+# settings.js грузится тем же загрузчиком, что и тесты: он понимает .import модулей services/settings/
 NODE = r"""
-const fs = require("fs");
-const src = fs.readFileSync(process.argv[1], "utf8").replace(/^\.pragma library\s*$/m, "");
-const S = new Function(src + "\nreturn { sections, MODULES, HOME_SECTIONS, LAYOUTS };")();
+const { S } = await import(process.argv[1]);
 const out = new Set();
 const add = s => { if (typeof s === "string" && s) out.add(s); };
 for (const sec of S.sections([], undefined, undefined)) {
@@ -131,7 +130,7 @@ console.log(JSON.stringify([...out]));
 
 
 def from_schema():
-    res = subprocess.run(["node", "-e", NODE, str(ROOT / "services" / "settings.js")],
+    res = subprocess.run(["node", "--input-type=module", "-e", NODE, (ROOT / "tests" / "load.mjs").as_uri()],
                          capture_output=True, text=True, check=True)
     return {s for s in json.loads(res.stdout) if CYR.search(s)}
 
