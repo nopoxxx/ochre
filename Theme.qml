@@ -29,8 +29,7 @@ Singleton {
     readonly property color aqua: scheme.aqua
     readonly property color orange: scheme.orange
     readonly property color accent: scheme.accent
-    readonly property bool hasLight: Object.prototype.hasOwnProperty.call(S.THEMES, Settings.get("shell.theme.name"))
-        && !!S.THEMES[Settings.get("shell.theme.name")].light
+    readonly property bool hasLight: S.hasLight(k => Settings.get(k))
 
     function setMode(m) { Settings.set("shell.theme.mode", m); }
     function toggleMode() { setMode(Settings.get("shell.theme.mode") === "light" ? "dark" : "light"); }
