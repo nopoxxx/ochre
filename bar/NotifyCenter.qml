@@ -13,7 +13,7 @@ TuiPopup {
     id: pop
 
     readonly property int maxRows: 20
-    readonly property int rowH: Math.ceil(cell.height)
+    readonly property int rowH: Math.ceil(probe.implicitHeight)
     property var collapsed: ({})
     property int cur: 0
 
@@ -112,6 +112,12 @@ TuiPopup {
     }
 
     T {
+        id: probe
+        visible: false
+        text: "M ▾▸"
+    }
+
+    T {
         visible: Notifs.history.length === 0
         text: "-- No entries --"
         color: Theme.gray
@@ -121,7 +127,7 @@ TuiPopup {
         id: list
 
         Layout.preferredWidth: cell.advanceWidth * 64
-        Layout.preferredHeight: Math.min(pop.rows.length, pop.maxRows) * pop.rowH
+        Layout.preferredHeight: Math.min(contentHeight, pop.maxRows * pop.rowH)
         visible: pop.rows.length > 0
         clip: true
         focus: true
@@ -139,7 +145,7 @@ TuiPopup {
             readonly property var g: modelData.g
 
             width: ListView.view.width
-            height: pop.rowH
+            height: Math.max(pop.rowH, Math.ceil(lineText.implicitHeight))
             color: pop.cur === index ? Theme.bg1 : hover.hovered ? Theme.hover : "transparent"
 
             T {
