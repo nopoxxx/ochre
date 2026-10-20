@@ -395,6 +395,7 @@ function niriFiles(get0, outs, sel) {
         '    Mod+Shift+C hotkey-overlay-title="Pick a Color"' + ipc("shot", "pick"),
         '    Mod+Shift+G hotkey-overlay-title="Game Mode"' + ipc("game", "toggle"),
         '    Mod+S hotkey-overlay-title="Settings"' + ipc("settings", "toggle"),
+        '    Mod+Slash hotkey-overlay-title="Keyboard Shortcuts"' + ipc("cheatsheet", "toggle"),
         '    Super+Alt+L hotkey-overlay-title="Lock the Screen"' + ipc("lock", "lock"),
         "}"
     ]);

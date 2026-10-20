@@ -60,6 +60,7 @@ ShellRoot {
     GreeterSync {}
     DisplaysWindow {}
     BindsWindow {}
+    CheatSheet {}
     ClipboardWindow {}
     HomePanel {}
     OsdWindow {}
