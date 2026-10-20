@@ -29,6 +29,9 @@ optdepends=(
     'tesseract: текст со скриншота в буфер (с tesseract-data-eng, tesseract-data-rus)'
     'pavucontrol: микшер в настройках'
     'paru: обновления AUR на панели и меню packages/'
+    'python-icalendar: календари .ics, Google, Outlook и CalDAV (с python-dateutil)'
+    'python-dateutil: повторяющиеся события календарей'
+    'libsecret: пароли CalDAV в связке ключей (secret-tool)'
     'greetd: экран входа ochre (ochre greeter)'
     'kitty: терминал (или alacritty, ghostty, foot)'
 )

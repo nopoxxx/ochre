@@ -24,6 +24,7 @@ ShellRoot {
     readonly property var _sounds: Sounds
     readonly property var _screenTime: ScreenTime // время за экраном считается с запуска, а не с открытия home
     readonly property var _wallPalette: WallPalette
+    readonly property var _calendar: Calendar     // напоминания о событиях, даже если календарь нигде не открыт
 
     // поставлен пакетом: pacman меняет файлы под работающим shell, и перезагрузка посреди обновления
     // ломает его — перезапуск только по уведомлению после обновления (ShellUpdate)

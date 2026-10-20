@@ -361,7 +361,8 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
     <tr><td><code>shellupd</code></td><td><code>ochre ↑N</code> — вышла новая версия shell, см. <a href="#update">update</a></td></tr>
     <tr><td><code>notify</code></td><td><code>log N</code> / <code>dnd</code>: клик — история уведомлений, правый — «не беспокоить»</td></tr>
     <tr><td><code>kbd</code></td><td>раскладка: клик или колёсико — переключить</td></tr>
-    <tr><td><code>clock</code></td><td>часы; клик — календарь как <code>cal</code></td></tr>
+    <tr><td><code>event</code></td><td><span class="c-gray">cal</span> <span class="c-aqua">14:30</span> standup — ближайшее событие <a href="#calendar">календарей</a> на 12 часов; за время напоминания — <span class="c-orange b">через 10м</span>. Клик — календарь, правый — ссылка события. Нет событий — не виден; по умолчанию выключен</td></tr>
+    <tr><td><code>clock</code></td><td>часы; клик — календарь как <code>cal</code> и ближайшие события</td></tr>
     <tr><td><code>home</code></td><td><code>≡</code> — открыть меню home; по умолчанию выключен (его открывает клик по <code>user</code>)</td></tr>
   </table></div>
   <p>Трей показывает значки известных программ — Discord, Steam, Telegram, VPN-клиенты, торренты, облака и др.;
@@ -421,7 +422,7 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
     <tr><td><code>звук и экран</code></td><td>громкость, микрофон и яркость (на ноутбуке): <kbd>←→</kbd> ±5%, <kbd>↵</kbd> — mute</td></tr>
     <tr><td><code>сейчас играет</code></td><td>обложка, трек, прогресс (клик — перемотка), кнопки и полоски звука (cava — только звук этого плеера, не звонки и не системные звуки; <code>home/ → звук для полосок</code>); текущая строка песни из <a href="https://lrclib.net">LRCLIB</a>; кнопка-ухо — распознать песню (songrec, как <kbd>Mod+Shift+M</kbd>); несколько плееров — <code>‹ 1/2 ›</code></td></tr>
     <tr><td><code>погода</code></td><td><a href="https://open-meteo.com">Open-Meteo</a>: сейчас и прогноз на несколько дней; <kbd>↵</kbd> — обновить</td></tr>
-    <tr><td><code>календарь</code></td><td>месяц как <code>cal</code>: <kbd>←→</kbd> — листать, <kbd>↵</kbd> — сегодня</td></tr>
+    <tr><td><code>календарь</code></td><td>месяц как <code>cal</code> (дни с событиями подчёркнуты) и ближайшие события <a href="#calendar">календарей</a>: <kbd>←→</kbd> — листать, <kbd>↵</kbd> — сегодня, клик по дню — его события, <kbd>↵</kbd> на событии — открыть ссылку встречи, <kbd>e</kbd> — <code>calendars.conf</code>, <kbd>r</kbd> — обновить</td></tr>
     <tr><td><code>todo</code></td><td>список дел из <code>~/.config/ochre/todo.txt</code> (формат todo.txt, можно править руками): <kbd>↵</kbd> — сделано,
       <kbd>a</kbd> — добавить, <kbd>Del</kbd> — удалить, <kbd>c</kbd> — убрать сделанное, <kbd>e</kbd> — открыть файл</td></tr>
     <tr><td><code>заметки</code></td><td>начало <code>~/.config/ochre/notes.md</code>; <kbd>↵</kbd> — открыть в редакторе. По умолчанию скрыта</td></tr>
@@ -436,6 +437,22 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
   <p><kbd>Mod+S</kbd> → <code>home/</code>: какие секции показывать и в каком порядке (<kbd>←→</kbd> — показать / скрыть,
   <kbd>Shift+↑↓</kbd> — порядок), край экрана и ширина, город и единицы погоды (пустой город — по IP),
   ночной режим, запись экрана. Секции без устройства — Wi-Fi на десктопе, bluetooth без адаптера, батарея — не видны.</p>
+  <h3 id="calendar">календари</h3>
+  <p>События из .ics, Google, Outlook и CalDAV — в секции <code>календарь</code>, в попапе часов и модуле панели <code>event</code>.
+  Список календарей — <code>~/.config/ochre/calendars.conf</code> (<code>home/</code> → <code>календарь</code> → <code>календари</code>
+  или <kbd>e</kbd> в секции): строка на календарь — имя, адрес и, для CalDAV, пользователь.</p>
+<pre class="cmd"><code>holidays  https://example.com/holidays.ics
+plan      ~/Documents/plan.ics
+google    https://calendar.google.com/calendar/ical/…/private-…/basic.ics
+cloud     https://cloud.example.com/remote.php/dav/calendars/me/  me</code></pre>
+  <p><b>Google</b>: настройки календаря → «Интеграция календаря» → «Секретный адрес в формате iCal».
+  <b>Outlook</b>: параметры → календарь → общие календари → «Опубликовать календарь» → ссылка ICS.
+  <b>CalDAV</b> (Nextcloud, Fastmail, Radicale, Baikal) — адрес календаря или всей коллекции и пользователь; пароль
+  (лучше пароль приложения) — <code>home/</code> → <code>календарь</code> → <code>пароли CalDAV</code>: он хранится в связке
+  ключей (<code>secret-tool</code>), а не в конфиге. Повторы, исключения и перенесённые встречи учитываются.</p>
+  <p>Обновление — раз в 15 минут (<code>обновлять, мин</code>), после правки файла и командой <code>qs ipc call calendar refresh</code>.
+  За 10 минут до начала — уведомление с кнопкой «открыть», если у события есть ссылка (<code>напоминать, мин</code>, 0 — выключить).
+  Нужны <code>python-icalendar</code> и <code>python-dateutil</code> — их ставит <code>install.sh</code>.</p>
   <h3>ночной режим</h3>
   <p>Тёплые цвета экрана через <code>gammastep</code>: переключатель <code>ночь</code> в меню, температура — в настройках.
   «По закату» включает его только от заката до рассвета в городе погоды.</p>
@@ -699,6 +716,7 @@ Password: <span class="blink">█</span></div>
     <tr><td><code>~/.local/state/ochre/</code></td><td>текущие обои и режим заполнения</td></tr>
     <tr><td><code>~/Pictures/Wallpapers/</code></td><td>коллекция обоев и загрузки с wallhaven</td></tr>
     <tr><td><code>~/.cache/cliphist/db</code></td><td>история буфера обмена</td></tr>
+    <tr><td><code>~/.config/ochre/calendars.conf</code></td><td>список календарей — см. <a href="#calendar">календари</a>; события — в <code>~/.cache/ochre/calendar.json</code></td></tr>
     <tr><td><code>~/Videos/Screencasts/</code></td><td>записи экрана (папка — в <code>home/</code>)</td></tr>
     <tr><td><code>/var/lib/ochre-greeter/</code></td><td>копия настроек и обоев для greeter</td></tr>
   </table></div>
@@ -729,6 +747,7 @@ Password: <span class="blink">█</span></div>
 <span class="p">❯ </span>qs ipc call game toggle         <span class="cm"># игровой режим; game on, game off, game get</span>
 <span class="p">❯ </span>qs ipc call errors get          <span class="cm"># ошибки shell и niri текстом; errors open, errors clear, errors report</span>
 <span class="p">❯ </span>qs ipc call privacy get         <span class="cm"># кто слушает микрофон и показывает экран</span>
+<span class="p">❯ </span>qs ipc call calendar get        <span class="cm"># ближайшие события; calendar refresh — обновить сейчас</span>
 <span class="p">❯ </span>qs ipc call screentime get      <span class="cm"># время за экраном сегодня: всего и по приложениям</span>
 <span class="p">❯ </span>qs ipc call settings set shell.accent blue   <span class="cm"># любая настройка из Mod+S; "" — по умолчанию, settings get &lt;ключ&gt; — прочитать</span></code></pre>
 </section>
