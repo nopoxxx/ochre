@@ -29,7 +29,7 @@ Rectangle {
     border.color: !active ? Theme.bg1 : current ? Theme.accent : on ? onColor : hover.hovered ? Theme.gray : Theme.bg2
     border.width: 1
 
-    readonly property color fg: !active ? Theme.bg2 : on ? onColor : current || hover.hovered ? Theme.fg : Qt.darker(Theme.fg, 1.15)
+    readonly property color fg: !active ? Theme.bg2 : on ? onColor : current || hover.hovered ? Theme.fg : Theme.fgDim
 
     Row {
         id: row

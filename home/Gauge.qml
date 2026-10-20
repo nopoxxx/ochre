@@ -34,7 +34,7 @@ RowLayout {
         Row {
             id: lbl
             T { font.family: Theme.iconFont; text: g.icon + " "; color: g.off ? Theme.gray : Theme.accent }
-            T { text: g.label.padEnd(8); color: g.off ? Theme.gray : g.current ? Theme.fg : Qt.darker(Theme.fg, 1.15); font.bold: g.current }
+            T { text: g.label.padEnd(8); color: g.off ? Theme.gray : g.current ? Theme.fg : Theme.fgDim; font.bold: g.current }
         }
         TapHandler { onTapped: g.toggled() }
         HoverHandler { cursorShape: Qt.PointingHandCursor }

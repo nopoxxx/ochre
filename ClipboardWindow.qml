@@ -282,7 +282,7 @@ Scope {
                                             Layout.minimumWidth: 0
                                             textFormat: Text.StyledText
                                             text: Fuzzy.highlight(root.label(row.e), row.modelData.pos, Theme.orange)
-                                            color: row.e.image ? Theme.purple : row.current ? Theme.fg : Qt.darker(Theme.fg, 1.15)
+                                            color: row.e.image ? Theme.purple : row.current ? Theme.fg : Theme.fgDim
                                             font.bold: row.current
                                             elide: Text.ElideRight
                                         }

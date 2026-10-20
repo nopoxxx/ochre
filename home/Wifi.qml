@@ -79,7 +79,7 @@ Section {
             Rectangle {
                 Layout.fillWidth: true
                 implicitHeight: row.implicitHeight
-                color: sec.isCur(item.index) ? Theme.bg1 : hover.hovered ? Qt.darker(Theme.bg1, 1.3) : "transparent"
+                color: sec.isCur(item.index) ? Theme.bg1 : hover.hovered ? Theme.hover : "transparent"
 
                 RowLayout {
                     id: row

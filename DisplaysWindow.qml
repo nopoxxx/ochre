@@ -396,7 +396,7 @@ Scope {
                                 T { text: line.current ? "▌ " : "  "; color: Theme.accent }
                                 T {
                                     text: line.modelData.label
-                                    color: line.current ? Theme.fg : Qt.darker(Theme.fg, 1.15)
+                                    color: line.current ? Theme.fg : Theme.fgDim
                                     font.bold: line.current
                                 }
                                 T { text: win.changed(line.modelData) ? " *" : ""; color: Theme.accent }

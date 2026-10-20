@@ -301,7 +301,7 @@ Scope {
                                     Layout.minimumWidth: 0
                                     elide: Text.ElideRight
                                     text: line.b?.off ? I18n.tr("отключено") : (line.b?.title || line.b?.action || "")
-                                    color: line.b?.off ? Theme.gray : line.current ? Theme.fg : Qt.darker(Theme.fg, 1.15)
+                                    color: line.b?.off ? Theme.gray : line.current ? Theme.fg : Theme.fgDim
                                 }
                                 T {
                                     text: "  " + (({ config: "config", ochre: "ochre", own: I18n.tr("своё"), changed: I18n.tr("изменено") })[line.b?.source] ?? "")

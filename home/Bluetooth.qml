@@ -83,7 +83,7 @@ Section {
 
             Layout.fillWidth: true
             implicitHeight: row.implicitHeight
-            color: sec.isCur(index) ? Theme.bg1 : hover.hovered ? Qt.darker(Theme.bg1, 1.3) : "transparent"
+            color: sec.isCur(index) ? Theme.bg1 : hover.hovered ? Theme.hover : "transparent"
 
             // сопряжение закончилось — подключаем, раз его начали отсюда
             Connections {
@@ -108,7 +108,7 @@ Section {
                     Layout.fillWidth: true
                     elide: Text.ElideRight
                     text: item.d.name
-                    color: item.d.connected ? Theme.accent : item.d.paired ? Theme.fg : Qt.darker(Theme.fg, 1.3)
+                    color: item.d.connected ? Theme.accent : item.d.paired ? Theme.fg : Theme.fgDim
                     font.bold: item.d.connected || sec.isCur(item.index)
                 }
                 T { text: sec.status(item.d); color: Theme.gray }
