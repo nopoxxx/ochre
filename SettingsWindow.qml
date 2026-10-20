@@ -118,6 +118,7 @@ Scope {
                     else if (ShellUpdate.behind > 0) ShellUpdate.update();
                     else ShellUpdate.check(true);
                     break;
+                case "shellRollback": ShellUpdate.rollback(); break;
                 case "restartShell": ShellUpdate.restartShell(); break;
                 case "greeterUpdate": ShellUpdate.updateGreeter(); break;
                 default: console.warn("settings: неизвестное действие", name);

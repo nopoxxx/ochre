@@ -24,6 +24,8 @@ Singleton {
     readonly property bool greeterInstalled: greeterCheck.text().length > 0 || legacyGreeter.text().length > 0
     // копию greeter обновлять отдельно нужно только git-установке: у пакета greeter — те же файлы
     readonly property bool greeterSeparate: greeterInstalled && !Ochre.system
+    readonly property string stateDir: Quickshell.env("HOME") + "/.local/state/ochre"
+    property string prevHead: ""
 
     // force — проверить, даже если автопроверка выключена в настройках
     function check(force) {
@@ -48,6 +50,21 @@ Singleton {
             "sh", title ?? "", body ?? ""].concat(Ochre.sel));
     }
 
+    function booted() {
+        Quickshell.execDetached(["sh", "-c", 'mkdir -p "$1" && touch "$1/update-ok"', "sh", stateDir]);
+    }
+
+    function rollback() {
+        if (Ochre.system || !prevHead) {
+            Quickshell.execDetached(["notify-send", "-a", "ochre", I18n.tr("Нет прошлой версии"),
+                I18n.tr("Откат доступен после обновления через ochre ↑ или system/ → обновить")]);
+            return;
+        }
+        if (rollbacker.running || updating) return;
+        error = "";
+        rollbacker.running = true;
+    }
+
     function updateGreeter() {
         Term.float(["sudo", "bash", dir + "/extras/install-greeter.sh"], { hold: true });
     }
@@ -57,6 +74,16 @@ Singleton {
         id: greeterCheck
         path: "/etc/greetd/ochre-niri.kdl"
         printErrors: false
+    }
+
+    FileView {
+        id: prevFile
+        path: root.stateDir + "/update-prev"
+        printErrors: false
+        watchChanges: true
+        onFileChanged: reload()
+        onLoaded: root.prevHead = text().trim()
+        onLoadFailed: root.prevHead = ""
     }
 
     FileView {
@@ -105,7 +132,8 @@ Singleton {
 
     Process {
         id: updater
-        command: ["sh", "-c", 'cd "$1" && GIT_TERMINAL_PROMPT=0 git pull --ff-only --quiet 2>&1', "sh", root.dir]
+        command: ["sh", "-c", 'cd "$1" && prev=$(git rev-parse HEAD) && GIT_TERMINAL_PROMPT=0 git pull --ff-only --quiet 2>&1 && mkdir -p "$2" && echo "$prev" > "$2/update-prev"',
+            "sh", root.dir, root.stateDir]
         stdout: StdioCollector { id: pullOut }
         onExited: code => {
             root.updating = false;
@@ -115,8 +143,32 @@ Singleton {
             }
             root.commits = [];
             root.updated = true;
-            root.restartShell(I18n.tr("ochre обновлён"),
-                root.greeterSeparate ? I18n.tr("Greeter обновляется отдельно: Mod+S → system/ → обновить greeter") : "");
+            Quickshell.execDetached(["sh", "-c",
+                't=$1 b=$2 s=$3 d=$4 ft=$5 fb=$6; shift 6; rm -f "$s/update-ok"; sleep 0.5; ' + Ochre.restartScript + '; '
+                + 'i=0; while [ $i -lt 30 ] && [ ! -e "$s/update-ok" ]; do sleep 1; i=$((i+1)); done; sleep 3; '
+                + 'if [ -e "$s/update-ok" ] && qs list "$@" 2>&1 | grep -q Instance; then [ -n "$t" ] && notify-send -a ochre "$t" "$b"; exit 0; fi; '
+                + 'p=$(cat "$s/update-prev") && git -C "$d" reset --keep --quiet "$p" && rm -f "$s/update-prev" || exit 1; '
+                + Ochre.restartScript + '; sleep 3; notify-send -a ochre -u critical "$ft" "$fb"',
+                "sh", I18n.tr("ochre обновлён"),
+                root.greeterSeparate ? I18n.tr("Greeter обновляется отдельно: Mod+S → system/ → обновить greeter") : "",
+                root.stateDir, root.dir,
+                I18n.tr("Обновление ochre откачено"),
+                I18n.tr("Новая версия не запустилась, вернул прошлую. Лог: qs log; повторить — ochre ↑ на панели")].concat(Ochre.sel));
+        }
+    }
+
+    Process {
+        id: rollbacker
+        command: ["sh", "-c", 'git -C "$1" reset --keep --quiet "$2" 2>&1 && rm -f "$3/update-prev" && git -C "$1" log -1 --format=%h', "sh", root.dir, root.prevHead, root.stateDir]
+        stdout: StdioCollector { id: rollbackOut }
+        onExited: code => {
+            const out = rollbackOut.text.trim();
+            if (code !== 0) {
+                root.error = "git reset: " + (out.split("\n").pop() || I18n.tr("код %1", code));
+                Quickshell.execDetached(["notify-send", "-a", "ochre", I18n.tr("Откат не удался"), root.error]);
+                return;
+            }
+            root.restartShell(I18n.tr("ochre возвращён к %1", out), I18n.tr("Обновить снова — ochre ↑ на панели"));
         }
     }
 

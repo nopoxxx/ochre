@@ -277,6 +277,7 @@ function sections(outputs, layout, home) {
             { key: "shell.cast", label: "выбор демонстрации экрана", type: "bool", def: true, hint: "окно ochre вместо GTK-диалога, когда Discord, браузер или OBS просят показать экран; выключено — снова GNOME" },
             { key: "shell.polkit", label: "polkit-агент", type: "bool", def: true, hint: "запрос пароля pkexec, systemctl и т.п. окном ochre вместо polkit-gnome" },
             { key: "shell.errors", label: "показывать ошибки", type: "bool", def: true, hint: "окно ~/log/errors: ошибки QML shell и конфига niri, как лог компилятора" },
+            act("shellRollback", "вернуть прошлую версию", "git reset к коммиту до последнего обновления и перезапуск"),
             act("restartShell", "перезапустить shell", "qs kill и запуск заново"),
             act("greeterUpdate", "обновить greeter", "переустановить экран входа из текущего shell (sudo)")
         ] }
