@@ -608,14 +608,17 @@ declare -A TERM_CONF=(
     [ghostty]="ghostty/config:$HOME/.config/ghostty/config"
     [foot]="foot/foot.ini:$HOME/.config/foot/foot.ini"
 )
+for f in "$DEST"/extras/term/*; do
+    [ -f "$HOME/.config/ochre/term/${f##*/}" ] || install -Dm644 "$f" "$HOME/.config/ochre/term/${f##*/}"
+done
 src="$DEST/extras/${TERM_CONF[$TERMINAL]%%:*}"
 dst="${TERM_CONF[$TERMINAL]#*:}"
 if [ ! -f "$dst" ]; then
     install -Dm644 "$src" "$dst"
-    ok "конфиг в цветах Gruvbox + Terminess"
+    ok "конфиг ochre: Terminess, цвета из темы"
 elif cmp -s "$dst" "$src"; then
     ok "уже стоит конфиг ochre"
-elif ask "Заменить ваш конфиг $TERMINAL на Gruvbox + Terminess от ochre?" n; then
+elif ask "Заменить ваш конфиг $TERMINAL на конфиг ochre (Terminess, цвета из темы)?" n; then
     backup "$dst"
     install -Dm644 "$src" "$dst"
     ok "конфиг заменён"

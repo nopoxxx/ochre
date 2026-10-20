@@ -126,7 +126,7 @@ var NIRI_FILES = ["input", "displays", "layout", "window-rules", "cursor", "anim
 // в каком файле живёт настройка — для подсказки в окне настроек
 function niriFileOf(key) {
     if (/^niri\.(kb|tp|mouse)\.|^niri\.(ffm|warp)$/.test(key)) return "input.kdl";
-    if (/^niri\.(gaps|colWidth|center|ring|border|shadow)$/.test(key) || key === "shell.accent" || key === "shell.theme.name") return "layout.kdl";
+    if (/^niri\.(gaps|colWidth|center|ring|border|shadow)$/.test(key) || key === "shell.accent" || key === "shell.theme.name" || key === "shell.theme.mode") return "layout.kdl";
     if (/^niri\.rules\./.test(key)) return "window-rules.kdl";
     if (/^niri\.cursor\./.test(key)) return "cursor.kdl";
     if (/^niri\.anim/.test(key)) return "animations.kdl";
@@ -135,6 +135,11 @@ function niriFileOf(key) {
     if (key === "action.binds") return "keys.kdl";
     if (key === "shell.terminal" || key === "shell.files" || key === "shell.browser" || key in MUTE_BINDS) return "binds.kdl";
     return "";
+}
+
+function greeterNiri(get) {
+    const bg = P.palette(get).bg;
+    return "layout {\n    background-color " + q(/^#[0-9a-f]{6}$/i.test(bg) ? bg : "#1d2021") + "\n}\n";
 }
 
 // get(key) — значение с учётом умолчаний;

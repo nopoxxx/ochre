@@ -1,6 +1,7 @@
 .pragma library
 .import "common.js" as C
 .import "themes.js" as P
+.import "term.js" as TM
 
 // Темы приложений вслед за shell: GTK, Qt (qt6ct), btop, gsettings.
 // Часть services/settings.js: QML импортирует только его, он отдаёт все имена этого файла.
@@ -88,13 +89,13 @@ function qtFont(pt) {
 function themeFiles(get, home) {
     if (!get("shell.theme.sync")) {
         const off = "/* ochre: синхронизация тем выключена (Mod+S → look/ → темы Qt и GTK) */\n";
-        return { "gtk-3.0/ochre.css": off, "gtk-4.0/ochre.css": off };
+        return Object.assign({ "gtk-3.0/ochre.css": off, "gtk-4.0/ochre.css": off }, TM.termFiles(get));
     }
     const c = P.palette(get);
     const accent = c.accent;
     const colors = gtkColors(c, accent);
     const pt = fontPt(get);
-    return {
+    return Object.assign(TM.termFiles(get), {
         "gtk-3.0/ochre.css": gtkCss(colors, false),
         "gtk-4.0/ochre.css": gtkCss(colors, true),
         "btop/themes/ochre.theme": btopTheme(c, accent),
@@ -120,7 +121,7 @@ function themeFiles(get, home) {
             ...(get("shell.theme.font") ? ["general=" + qtFont(pt)] : []),
             ""
         ].join("\n")
-    };
+    });
 }
 
 // btop в стиле shell: рамки и заголовки — акцент, разделители — bg2, подписи — серые, градиенты Gruvbox.
@@ -150,10 +151,11 @@ function btopTheme(c, accent) {
 function themeGsettings(get) {
     if (!get("shell.theme.sync")) return [];
     const s = v => "'" + v + "'";
+    const dark = P.palette(get).dark;
     const font = s(FONT + " " + fontPt(get));
     return [
-        ["color-scheme", s("prefer-dark")],
-        ["gtk-theme", s("adw-gtk3-dark")],
+        ["color-scheme", s(dark ? "prefer-dark" : "prefer-light")],
+        ["gtk-theme", s(dark ? "adw-gtk3-dark" : "adw-gtk3")],
         ["icon-theme", s(ICONS)],
         ["accent-color", s(GNOME_ACCENTS[get("shell.accent")] ?? "yellow")],
         ["cursor-size", String(get("niri.cursor.size"))],

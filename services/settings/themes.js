@@ -14,6 +14,15 @@ var THEMES = {
             ansi: ["#282828", "#cc241d", "#98971a", "#d79921", "#458588", "#b16286", "#689d6a", "#a89984",
                 "#928374", "#fb4934", "#b8bb26", "#fabd2f", "#83a598", "#d3869b", "#8ec07c", "#ebdbb2"],
             icons: "Gruvbox-Plus-Dark"
+        },
+        light: {
+            bg: "#f9f5d7", bg0: "#f2e5bc", bg1: "#ebdbb2", bg2: "#d5c4a1", bg3: "#bdae93",
+            fg: "#3c3836", fg0: "#282828", gray: "#7c6f64",
+            red: "#9d0006", green: "#79740e", yellow: "#b57614", orange: "#af3a03",
+            blue: "#076678", purple: "#8f3f71", aqua: "#427b58", ochre: "#b57614",
+            ansi: ["#fbf1c7", "#cc241d", "#98971a", "#d79921", "#458588", "#b16286", "#689d6a", "#7c6f64",
+                "#928374", "#9d0006", "#79740e", "#b57614", "#076678", "#8f3f71", "#427b58", "#3c3836"],
+            icons: "Gruvbox-Plus-Dark"
         }
     },
     catppuccin: {
@@ -26,6 +35,15 @@ var THEMES = {
             ansi: ["#45475a", "#f38ba8", "#a6e3a1", "#f9e2af", "#89b4fa", "#f5c2e7", "#94e2d5", "#bac2de",
                 "#585b70", "#f38ba8", "#a6e3a1", "#f9e2af", "#89b4fa", "#f5c2e7", "#94e2d5", "#a6adc8"],
             icons: "Papirus-Dark"
+        },
+        light: {
+            bg: "#eff1f5", bg0: "#e6e9ef", bg1: "#ccd0da", bg2: "#bcc0cc", bg3: "#acb0be",
+            fg: "#4c4f69", fg0: "#4c4f69", gray: "#7c7f93",
+            red: "#d20f39", green: "#40a02b", yellow: "#df8e1d", orange: "#fe640b",
+            blue: "#1e66f5", purple: "#8839ef", aqua: "#179299", ochre: "#bb7718",
+            ansi: ["#5c5f77", "#d20f39", "#40a02b", "#df8e1d", "#1e66f5", "#ea76cb", "#179299", "#acb0be",
+                "#6c6f85", "#d20f39", "#40a02b", "#df8e1d", "#1e66f5", "#ea76cb", "#179299", "#bcc0cc"],
+            icons: "Papirus-Light"
         }
     },
     rosepine: {
@@ -38,6 +56,15 @@ var THEMES = {
             ansi: ["#26233a", "#eb6f92", "#31748f", "#f6c177", "#9ccfd8", "#c4a7e7", "#ebbcba", "#e0def4",
                 "#6e6a86", "#eb6f92", "#31748f", "#f6c177", "#9ccfd8", "#c4a7e7", "#ebbcba", "#e0def4"],
             icons: "Papirus-Dark"
+        },
+        light: {
+            bg: "#faf4ed", bg0: "#fffaf3", bg1: "#f2e9e1", bg2: "#dfdad9", bg3: "#cecacd",
+            fg: "#575279", fg0: "#575279", gray: "#797593",
+            red: "#b4637a", green: "#286983", yellow: "#ea9d34", orange: "#d7827e",
+            blue: "#56949f", purple: "#907aa9", aqua: "#3f7f91", ochre: "#b77a29",
+            ansi: ["#f2e9e1", "#b4637a", "#286983", "#ea9d34", "#56949f", "#907aa9", "#d7827e", "#575279",
+                "#9893a5", "#b4637a", "#286983", "#ea9d34", "#56949f", "#907aa9", "#d7827e", "#575279"],
+            icons: "Papirus-Light"
         }
     },
     tokyonight: {
@@ -50,6 +77,15 @@ var THEMES = {
             ansi: ["#15161e", "#f7768e", "#9ece6a", "#e0af68", "#7aa2f7", "#bb9af7", "#7dcfff", "#a9b1d6",
                 "#414868", "#f7768e", "#9ece6a", "#e0af68", "#7aa2f7", "#bb9af7", "#7dcfff", "#c0caf5"],
             icons: "Papirus-Dark"
+        },
+        light: {
+            bg: "#e1e2e7", bg0: "#d0d5e3", bg1: "#c4c8da", bg2: "#a8aecb", bg3: "#8990b3",
+            fg: "#3760bf", fg0: "#3760bf", gray: "#6172b0",
+            red: "#f52a65", green: "#587539", yellow: "#8c6c3e", orange: "#b15c00",
+            blue: "#2e7de9", purple: "#9854f1", aqua: "#007197", ochre: "#9f641f",
+            ansi: ["#e9e9ed", "#f52a65", "#587539", "#8c6c3e", "#2e7de9", "#9854f1", "#007197", "#6172b0",
+                "#a1a6c5", "#f52a65", "#587539", "#8c6c3e", "#2e7de9", "#9854f1", "#007197", "#3760bf"],
+            icons: "Papirus-Light"
         }
     },
     everforest: {
@@ -62,6 +98,15 @@ var THEMES = {
             ansi: ["#374145", "#e67e80", "#a7c080", "#dbbc7f", "#7fbbb3", "#d699b6", "#83c092", "#d3c6aa",
                 "#4f5b58", "#e67e80", "#a7c080", "#dbbc7f", "#7fbbb3", "#d699b6", "#83c092", "#d3c6aa"],
             icons: "Papirus-Dark"
+        },
+        light: {
+            bg: "#fffbef", bg0: "#f8f5e4", bg1: "#e8e5d5", bg2: "#bec5b2", bg3: "#a6b0a0",
+            fg: "#5c6a72", fg0: "#5c6a72", gray: "#829181",
+            red: "#f85552", green: "#8da101", yellow: "#dfa000", orange: "#f57d26",
+            blue: "#3a94c5", purple: "#df69ba", aqua: "#35a77c", ochre: "#b78300",
+            ansi: ["#e8e5d5", "#f85552", "#8da101", "#dfa000", "#3a94c5", "#df69ba", "#35a77c", "#5c6a72",
+                "#a6b0a0", "#f85552", "#8da101", "#dfa000", "#3a94c5", "#df69ba", "#35a77c", "#5c6a72"],
+            icons: "Papirus-Light"
         }
     },
     kanagawa: {
@@ -74,6 +119,15 @@ var THEMES = {
             ansi: ["#16161d", "#c34043", "#76946a", "#c0a36e", "#7e9cd8", "#957fb8", "#6a9589", "#c8c093",
                 "#727169", "#e82424", "#98bb6c", "#e6c384", "#7fb4ca", "#938aa9", "#7aa89f", "#dcd7ba"],
             icons: "Papirus-Dark"
+        },
+        light: {
+            bg: "#f2ecbc", bg0: "#e5ddb0", bg1: "#dcd5ac", bg2: "#d5cea3", bg3: "#8a8980",
+            fg: "#545464", fg0: "#43436c", gray: "#716e61",
+            red: "#c84053", green: "#6f894e", yellow: "#77713f", orange: "#cc6d00",
+            blue: "#4d699b", purple: "#624c83", aqua: "#597b75", ochre: "#ad7700",
+            ansi: ["#1f1f28", "#c84053", "#6f894e", "#77713f", "#4d699b", "#b35b79", "#597b75", "#545464",
+                "#8a8980", "#d7474b", "#6e915f", "#836f4a", "#6693bf", "#624c83", "#5e857a", "#43436c"],
+            icons: "Papirus-Light"
         }
     },
     solarized: {
@@ -86,6 +140,15 @@ var THEMES = {
             ansi: ["#073642", "#dc322f", "#859900", "#b58900", "#268bd2", "#d33682", "#2aa198", "#eee8d5",
                 "#002b36", "#cb4b16", "#586e75", "#657b83", "#839496", "#6c71c4", "#93a1a1", "#fdf6e3"],
             icons: "Papirus-Dark"
+        },
+        light: {
+            bg: "#fdf6e3", bg0: "#eee8d5", bg1: "#d3d3c5", bg2: "#93a1a1", bg3: "#839496",
+            fg: "#586e75", fg0: "#073642", gray: "#839496",
+            red: "#dc322f", green: "#859900", yellow: "#b58900", orange: "#cb4b16",
+            blue: "#268bd2", purple: "#6c71c4", aqua: "#2aa198", ochre: "#aa8100",
+            ansi: ["#eee8d5", "#dc322f", "#859900", "#b58900", "#268bd2", "#d33682", "#2aa198", "#073642",
+                "#fdf6e3", "#cb4b16", "#93a1a1", "#839496", "#657b83", "#6c71c4", "#586e75", "#002b36"],
+            icons: "Papirus-Light"
         }
     },
     nord: {
@@ -126,9 +189,11 @@ function palette(get, user) {
     const name = get("shell.theme.name");
     const pick = (o, k) => o && Object.prototype.hasOwnProperty.call(o, k) ? o[k] : undefined;
     const theme = pick(user, name) ?? pick(THEMES, name) ?? THEMES.gruvbox;
-    const base = THEMES.gruvbox.dark;
-    const own = theme.dark ?? theme.light ?? base;
-    const p = { dark: true };
+    const mode = get("shell.theme.mode") === "light" && theme.light ? "light" : "dark";
+    const own = theme[mode] ?? theme.dark ?? theme.light ?? THEMES.gruvbox.dark;
+    const isDark = own !== theme.light;
+    const base = THEMES.gruvbox[isDark ? "dark" : "light"];
+    const p = { dark: isDark };
     for (const r of ROLES) p[r] = own[r] ?? base[r];
     if (!own.hover) p.hover = mix(p.bg, p.bg1, 0.5);
     if (!own.fgDim) p.fgDim = mix(p.fg, p.gray, 0.3);
