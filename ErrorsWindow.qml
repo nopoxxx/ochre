@@ -8,7 +8,7 @@ import qs.services
 //   ┌[ ~/log/errors ]──────────────────────────────────┐
 //   │ qs   bar/Privacy.qml:42  TypeError: Cannot read … │
 //   │ niri ochre/layout.kdl:3  unexpected node `foo`    │
-//   │ [скопировать] [очистить] [закрыть]                │
+//   │ [скопировать] [сообщить] [очистить] [закрыть]     │
 // Фокус клавиатуры не забирает. Закрытое окно снова появляется только на новую ошибку.
 Scope {
     id: root
@@ -86,6 +86,7 @@ Scope {
                         Repeater {
                             model: [
                                 { label: I18n.tr("скопировать"), run: () => Errors.copy() },
+                                { label: Errors.reporting ? I18n.tr("собираю…") : I18n.tr("сообщить"), run: () => Errors.report() },
                                 { label: I18n.tr("очистить"), run: () => Errors.clear() },
                                 { label: I18n.tr("закрыть"), run: () => Errors.close() }
                             ]

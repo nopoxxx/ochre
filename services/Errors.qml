@@ -8,7 +8,7 @@ import QtQuick
 // неудачная перезагрузка конфига (`ERROR: caused by @…`; старый shell при этом продолжает работать).
 // Лог читается с начала, поэтому строка «Reloading configuration...» очищает список: ошибки старого кода больше не нужны.
 // niri: событие ConfigLoaded с failed — текст ошибки берётся из `niri validate`.
-// Настройка shell.errors (system/ → ochre). IPC: errors open | clear | get (не show — его занимает qs ipc show).
+// Настройка shell.errors (system/ → ochre). IPC: errors open | clear | get | report (не show — его занимает qs ipc show).
 Singleton {
     id: root
 
@@ -54,6 +54,85 @@ Singleton {
 
     function copy() {
         Quickshell.execDetached(["sh", "-c", 'printf "%s\\n" "$1" | wl-copy', "sh", asText()]);
+    }
+
+    // ── сообщить о проблеме: архив логов и issue на GitHub с заполненным текстом; архив прикрепляют вручную ──
+    readonly property string repo: "https://github.com/nopoxxx/ochre"
+    property bool reporting: false
+
+    function report() {
+        if (reporter.running) return;
+        const values = Object.assign({}, Settings.values);
+        if (values["shell.weather.city"]) values["shell.weather.city"] = "…";
+        reporting = true;
+        reporter.command = ["sh", "-c", root.reportScript, "sh", asText(), Quickshell.shellDir, JSON.stringify(values, null, 2) + "\n"];
+        reporter.running = true;
+    }
+
+    // URL у GitHub — не длиннее ~8 КБ: лишние строки ошибок отбрасываются с начала (новые — в конце)
+    function issueUrl(versions, errors, archive) {
+        const title = (errors[errors.length - 1] ?? "").replace(/\s+\(×\d+\)$/, "").slice(0, 100);
+        const body = errs => "### " + I18n.tr("Что случилось") + "\n\n\n\n### " + I18n.tr("Как повторить") + "\n\n1. \n\n"
+            + (errs.length ? "### " + I18n.tr("Ошибки") + "\n\n```\n" + errs.join("\n") + "\n```\n\n" : "")
+            + "### " + I18n.tr("Версии") + "\n\n```\n" + versions.join("\n") + "\n```\n\n"
+            + I18n.tr("Архив логов: перетащите сюда %1", "`" + archive + "`") + "\n";
+        const url = errs => repo + "/issues/new?title=" + encodeURIComponent(title) + "&body=" + encodeURIComponent(body(errs));
+        let errs = errors;
+        while (errs.length && url(errs).length > 7500) errs = errs.slice(1);
+        return url(errs);
+    }
+
+    // $1 — ошибки текстом, $2 — папка shell, $3 — settings.json; $PPID — сам qs.
+    // Личное убирается из всех файлов: $HOME → ~, имя пользователя → user, имя машины → host
+    readonly property string reportScript: `
+        r=ochre-report-$(date +%Y%m%d-%H%M%S)
+        d=$(mktemp -d) || exit 1
+        w="$d/$r"
+        mkdir "$w"
+        {
+            echo "ochre: $(git -C "$2" describe --always --dirty --tags 2>/dev/null || cat "$2/VERSION" 2>/dev/null || echo ?) ($2)"
+            echo "quickshell: $(qs --version 2>&1 | head -1)"
+            echo "niri: $(niri --version 2>&1 | head -1)"
+            echo "os: $(. /etc/os-release 2>/dev/null; echo "\${PRETTY_NAME:-?}"), $(uname -r)"
+            echo "session: \${XDG_CURRENT_DESKTOP:-?}, \${LANG:-?}"
+        } > "$w/versions.txt"
+        printf '%s\\n' "$1" > "$w/errors.txt"
+        printf '%s' "$3" > "$w/settings.json"
+        qs log --pid "$PPID" 2>&1 | sed 's/\\x1b\\[[0-9;]*m//g' | tail -n 5000 > "$w/qs.log"
+        journalctl --user -b --no-pager -o short-iso _COMM=niri 2>&1 | tail -n 3000 > "$w/niri.log"
+        niri validate > "$w/niri-validate.txt" 2>&1
+        cp -r "$HOME/.config/niri/ochre" "$w/niri-ochre" 2>/dev/null
+        esc() { printf '%s' "$1" | sed 's/[][\\.*^$/]/\\\\&/g'; }
+        set -- -e "s/$(esc "$HOME")/~/g"
+        u=$(id -un); [ \${#u} -ge 2 ] && set -- "$@" -e "s/\\\\b$(esc "$u")\\\\b/user/g"
+        n=$(uname -n); [ \${#n} -ge 2 ] && set -- "$@" -e "s/\\\\b$(esc "$n")\\\\b/host/g"
+        find "$w" -type f -exec sed -i "$@" {} +
+        out=$(xdg-user-dir DOWNLOAD 2>/dev/null)
+        [ -d "$out" ] || out=$HOME
+        tar -czf "$out/$r.tar.gz" -C "$d" "$r" || { rm -rf "$d"; exit 1; }
+        echo "A $out/$r.tar.gz"
+        sed 's/^/V /' "$w/versions.txt"
+        sed '/^$/d; s/^/E /' "$w/errors.txt"
+        rm -rf "$d"`
+
+    Process {
+        id: reporter
+        stdout: StdioCollector { id: reportOut }
+        onExited: code => {
+            root.reporting = false;
+            const lines = reportOut.text.split("\n");
+            const archive = (lines.find(l => l.startsWith("A ")) ?? "").slice(2);
+            if (code !== 0 || !archive) {
+                Quickshell.execDetached(["notify-send", "-a", "ochre", "-u", "critical", I18n.tr("Не удалось собрать архив логов"), I18n.tr("код %1", code)]);
+                return;
+            }
+            const home = Quickshell.env("HOME");
+            const shown = archive.startsWith(home + "/") ? "~" + archive.slice(home.length) : archive;
+            const pick = p => lines.filter(l => l.startsWith(p)).map(l => l.slice(2));
+            Quickshell.execDetached(["xdg-open", root.issueUrl(pick("V "), pick("E "), shown.split("/").pop())]);
+            Quickshell.execDetached(["sh", "-c", 'a=$(notify-send -a ochre -A open="$2" "$3" "$4"); [ "$a" = open ] && xdg-open "$(dirname "$1")"',
+                "sh", archive, I18n.tr("папка"), I18n.tr("Архив логов готов"), I18n.tr("%1 — перетащите его в окно issue", shown)]);
+        }
     }
 
     // своё окно вместо встроенного попапа Quickshell о неудачной перезагрузке — чтобы не было двух
@@ -123,5 +202,6 @@ Singleton {
         function open(): void { root.open = true; }
         function clear(): void { root.clear(); }
         function get(): string { return root.asText(); }
+        function report(): void { root.report(); }
     }
 }

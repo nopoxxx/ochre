@@ -704,7 +704,7 @@ Password: <span class="blink">█</span></div>
 <span class="p">❯ </span>qs ipc call welcome open        <span class="cm"># окно первого запуска: клавиши и подсказки</span>
 <span class="p">❯ </span>qs ipc call shell reload        <span class="cm"># перечитать конфиг shell без перезапуска</span>
 <span class="p">❯ </span>qs ipc call game toggle         <span class="cm"># игровой режим; game on, game off, game get</span>
-<span class="p">❯ </span>qs ipc call errors get          <span class="cm"># ошибки shell и niri текстом; errors open, errors clear</span>
+<span class="p">❯ </span>qs ipc call errors get          <span class="cm"># ошибки shell и niri текстом; errors open, errors clear, errors report</span>
 <span class="p">❯ </span>qs ipc call privacy get         <span class="cm"># кто слушает микрофон и показывает экран</span>
 <span class="p">❯ </span>qs ipc call settings set shell.accent blue   <span class="cm"># любая настройка из Mod+S; "" — по умолчанию, settings get &lt;ключ&gt; — прочитать</span></code></pre>
 </section>
@@ -764,7 +764,9 @@ Password: <span class="blink">█</span></div>
 
   <h3>в углу появилось окно ~/log/errors</h3>
   <p>Это ошибки: в QML shell (<code>файл:строка</code> от <code>~/.config/quickshell/</code>) или в конфиге niri — тогда niri
-  работает на прошлой версии конфига. <code>[скопировать]</code> кладёт текст в буфер — для issue. Исправленная ошибка QML
+  работает на прошлой версии конфига. <code>[скопировать]</code> кладёт текст в буфер, а <code>[сообщить]</code> собирает архив логов в <code>~/Downloads</code>
+  (логи shell и niri, версии, настройки; домашняя папка, имя пользователя и машины заменены) и открывает новый issue
+  с версиями и ошибками — останется описать проблему и перетащить архив. То же без ошибок: <code>system/ → сообщить о проблеме</code>. Исправленная ошибка QML
   исчезает после перезагрузки shell, ошибка niri — как только конфиг снова загрузится. Закрытое окно появится снова
   только на новую ошибку; совсем отключить — <code>system/ → ochre → показывать ошибки</code>.</p>
 
