@@ -21,6 +21,7 @@ ShellRoot {
     readonly property var _songRec: SongRec       // IPC songrec (Mod+Shift+M)
     readonly property var _errors: Errors         // ошибки shell и niri — с запуска, а не с первой ошибки
     readonly property var _hooks: Hooks           // ~/.config/ochre/hooks/<событие>
+    readonly property var _sounds: Sounds
     readonly property var _screenTime: ScreenTime // время за экраном считается с запуска, а не с открытия home
     readonly property var _wallPalette: WallPalette
 

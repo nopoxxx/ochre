@@ -106,6 +106,7 @@ Scope {
                 case "lockPreview": ipc("lock", "preview"); break;
                 case "home": ipc("home", "open"); break;
                 case "record": ipc("record", "toggle"); break;
+                case "soundTest": Sounds.test(); break;
                 case "notifyTest": Quickshell.execDetached(["notify-send", "-a", "ochre", I18n.tr("Проверка уведомления"), I18n.tr("так выглядит анимация %1", Settings.get("shell.notify.anim"))]); break;
                 case "wifi": Term.float(["nmtui"]); break;
                 case "audio": Quickshell.execDetached(["pavucontrol"]); break;
