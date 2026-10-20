@@ -1,22 +1,16 @@
 .pragma library
 .import "common.js" as C
+.import "themes.js" as P
 
 // Темы приложений вслед за shell: GTK, Qt (qt6ct), btop, gsettings.
 // Часть services/settings.js: QML импортирует только его, он отдаёт все имена этого файла.
 
-var ACCENTS = C.ACCENTS;
 var head = C.head;
 var text = C.text;
 
 // ── темы приложений: GTK и Qt вслед за shell ───────────────────────
 // Пишет services/AppTheme.qml: файлы — в ~/.config, параметры GTK — через gsettings
 // (их же отдаёт xdg-desktop-portal: Firefox, Chromium, libadwaita).
-
-const GRUVBOX = {
-    bg: "#1d2021", bg0: "#282828", bg1: "#3c3836", bg2: "#504945", bg3: "#665c54",
-    fg: "#ebdbb2", fg0: "#fbf1c7", gray: "#928374",
-    red: "#fb4934", green: "#b8bb26", yellow: "#fabd2f", blue: "#83a598", purple: "#d3869b"
-};
 
 const FONT = "Terminess Nerd Font Mono";
 
@@ -32,8 +26,7 @@ function fontPt(get) {
 }
 
 // именованные цвета libadwaita; их понимает и adw-gtk3 для GTK3-приложений
-function gtkColors(accent) {
-    const c = GRUVBOX;
+function gtkColors(c, accent) {
     const shade = a => "rgba(0, 0, 0, " + a + ")";
     const out = {
         accent_color: accent, accent_bg_color: accent, accent_fg_color: c.bg,
@@ -72,14 +65,14 @@ function gtkCss(colors, vars) {
 }
 
 // палитра qt6ct: роли QPalette по порядку, от WindowText до Accent
-function qtColors(accent, disabled) {
-    const c = GRUVBOX;
+function qtColors(c, accent, disabled) {
+    const alt = P.mix(c.bg0, c.bg1, 0.5);
     const text = disabled ? c.gray : c.fg;
     return [
-        text, c.bg1, c.bg2, c.bg1, c.bg, "#32302f",     // WindowText Button Light Midlight Dark Mid
+        text, c.bg1, c.bg2, c.bg1, c.bg, alt,     // WindowText Button Light Midlight Dark Mid
         text, c.fg0, text, c.bg0, c.bg, "#000000",      // Text BrightText ButtonText Base Window Shadow
         disabled ? c.bg2 : accent, c.bg,                // Highlight HighlightedText
-        c.blue, c.purple, "#32302f", c.bg,              // Link LinkVisited AlternateBase NoRole
+        c.blue, c.purple, alt, c.bg,              // Link LinkVisited AlternateBase NoRole
         c.bg0, c.fg, c.gray, disabled ? c.bg2 : accent  // ToolTipBase ToolTipText PlaceholderText Accent
     ].join(", ");
 }
@@ -97,19 +90,20 @@ function themeFiles(get, home) {
         const off = "/* ochre: синхронизация тем выключена (Mod+S → look/ → темы Qt и GTK) */\n";
         return { "gtk-3.0/ochre.css": off, "gtk-4.0/ochre.css": off };
     }
-    const accent = ACCENTS[get("shell.accent")] ?? ACCENTS.ochre;
-    const colors = gtkColors(accent);
+    const c = P.palette(get);
+    const accent = c.accent;
+    const colors = gtkColors(c, accent);
     const pt = fontPt(get);
     return {
         "gtk-3.0/ochre.css": gtkCss(colors, false),
         "gtk-4.0/ochre.css": gtkCss(colors, true),
-        "btop/themes/ochre.theme": btopTheme(accent),
+        "btop/themes/ochre.theme": btopTheme(c, accent),
         "qt6ct/colors/ochre.conf": [
             "; ochre: палитра shell для Qt — сгенерировано ochre, ручные правки перезапишутся",
             "[ColorScheme]",
-            "active_colors=" + qtColors(accent, false),
-            "disabled_colors=" + qtColors(accent, true),
-            "inactive_colors=" + qtColors(accent, false),
+            "active_colors=" + qtColors(c, accent, false),
+            "disabled_colors=" + qtColors(c, accent, true),
+            "inactive_colors=" + qtColors(c, accent, false),
             ""
         ].join("\n"),
         "qt6ct/qt6ct.conf": [
@@ -131,8 +125,8 @@ function themeFiles(get, home) {
 
 // btop в стиле shell: рамки и заголовки — акцент, разделители — bg2, подписи — серые, градиенты Gruvbox.
 // Фон пустой — btop рисует на фоне терминала (theme_background = False ставит AppTheme в btop.conf).
-function btopTheme(accent) {
-    const c = GRUVBOX, aqua = ACCENTS.aqua, orange = ACCENTS.orange;
+function btopTheme(c, accent) {
+    const aqua = c.aqua, orange = c.orange;
     const t = {
         main_bg: "", main_fg: c.fg, title: accent, hi_fg: accent,
         selected_bg: c.bg1, selected_fg: accent, inactive_fg: c.bg3, graph_text: c.gray, meter_bg: c.bg1,

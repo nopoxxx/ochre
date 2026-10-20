@@ -569,7 +569,7 @@
   "трей свёрнут": "tray collapsed",
   "туман": "fog",
   "тяни": "drag",
-  "тёмная схема, палитра Gruvbox, акцент и иконки Gruvbox Plus в GTK (adw-gtk3, libadwaita) и Qt (qt6ct); открытые окна — после перезапуска приложения": "dark scheme, Gruvbox palette, accent and Gruvbox Plus icons in GTK (adw-gtk3, libadwaita) and Qt (qt6ct); open windows — after the app restarts",
+  "тёмная схема, палитра темы, акцент и иконки Gruvbox Plus в GTK (adw-gtk3, libadwaita) и Qt (qt6ct); открытые окна — после перезапуска приложения": "dark scheme, theme palette, accent and Gruvbox Plus icons in GTK (adw-gtk3, libadwaita) and Qt (qt6ct); open windows — after the app restarts",
   "тёплые цвета экрана (gammastep); переключатель — и в меню home": "warm screen colors (gammastep); the toggle is in the home menu too",
   "тёплый экран": "warm screen",
   "у ветки нет upstream": "the branch has no upstream",
