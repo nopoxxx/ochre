@@ -10,6 +10,7 @@ import qs.services
 //   qs ipc call lock lock     — заблокировать
 //   qs ipc call lock locked   — заблокирован ли сейчас
 //   qs ipc call lock preview  — тот же экран обычным окном, без проверки пароля (Esc — закрыть)
+// Хуки lock / unlock — services/Hooks.qml.
 Scope {
     id: root
 
@@ -76,6 +77,8 @@ Scope {
 
     WlSessionLock {
         id: session
+
+        onLockedChanged: Hooks.run(locked ? "lock" : "unlock")
 
         WlSessionLockSurface {
             id: surface
