@@ -1,7 +1,7 @@
 // node --test tests/ — палитры тем (services/settings/themes.js).
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { load, getter } from "./load.mjs";
+import { load, getter, S } from "./load.mjs";
 
 const P = load("services/settings/themes.js");
 const hex = /^#[0-9a-f]{6}$/;
@@ -55,4 +55,11 @@ test("THEMES: у каждого варианта все роли и 16 цвет�
             assert.ok(v.icons, `${id}.${mode}.icons`);
         }
     }
+});
+
+test("схема: shell.theme.name — темы из THEMES, по умолчанию gruvbox", () => {
+    const row = S.sections([], undefined, undefined).flatMap(s => s.rows).find(r => r.key === "shell.theme.name");
+    assert.ok(row, "нет строки shell.theme.name");
+    assert.deepEqual(row.options, Object.keys(P.THEMES));
+    assert.equal(S.defaultOf("shell.theme.name", []), "gruvbox");
 });
