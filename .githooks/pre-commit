@@ -1,0 +1,3 @@
+#!/bin/sh
+# проверка перед коммитом; включить: git config core.hooksPath .githooks; пропустить: git commit --no-verify
+exec "$(git rev-parse --show-toplevel)/extras/check.sh" --staged
