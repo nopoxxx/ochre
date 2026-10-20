@@ -98,7 +98,6 @@ Singleton {
         return (slotOf(slots, level, targetKey(level)) || {})[time] || "";
     }
 
-    // path "" — сбросить слот: уровень наследует более широкий
     function assign(level, time, path) {
         if (!["all", "output", "ws"].includes(level) || !["day", "night"].includes(time)) return;
         const key = targetKey(level);
@@ -134,7 +133,6 @@ Singleton {
         scan();
     }
 
-    // папки из слотов (и их night/) и ночные варианты файлов — одним вызовом
     property bool _rescan: false
     function scan() {
         if (scanner.running) { _rescan = true; return; }
@@ -177,12 +175,14 @@ Singleton {
         return dir + "/wallhaven-" + w.id + w.path.slice(w.path.lastIndexOf("."));
     }
 
-    function download(w) {
+    function download(w, level, time) {
         const dest = localPathFor(w);
-        if (local.includes(dest)) { set(dest); return; }
+        if (local.includes(dest)) { assign(level, time, dest); return; }
         if (downloading) return;
         downloading = w.id;
         dl.dest = dest;
+        dl.level = level;
+        dl.time = time;
         dl.command = ["sh", "-c", 'curl -fsSL -o "$1.part" "$2" && mv "$1.part" "$1"', "sh", dest, w.path];
         dl.running = true;
     }
@@ -228,7 +228,6 @@ Singleton {
         onLoadFailed: error => { if (error === FileViewError.FileNotFound) legacy.path = root.stateFile; }
     }
 
-    // одни обои на все экраны (до wallpapers.json) — переезжают в all.day, сам файл остаётся
     FileView {
         id: legacy
         onLoaded: {
@@ -295,9 +294,16 @@ Singleton {
     Process {
         id: folderLister
         running: true
-        command: ["find", root.dir, "-mindepth", "1", "-maxdepth", "1", "-type", "d", "!", "-name", "night"]
+        command: ["sh", "-c", `
+            for d in "$1"/*/; do
+                [ -d "$d" ] || continue
+                d=\${d%/}
+                [ "\${d##*/}" = night ] && continue
+                f=$(find "$d" -maxdepth 1 -type f \\( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \\) | sort | head -n 1)
+                printf '%s\\t%s\\n' "$d" "$f"
+            done`, "sh", root.dir]
         stdout: StdioCollector {
-            onStreamFinished: root.folders = this.text.split("\n").filter(l => l).sort()
+            onStreamFinished: root.folders = this.text.split("\n").filter(l => l).map(l => l.split("\t"))
         }
     }
 
@@ -305,11 +311,13 @@ Singleton {
         id: dl
 
         property string dest
+        property string level
+        property string time
 
         onExited: code => {
             root.downloading = "";
             if (code === 0) {
-                root.set(dest);
+                root.assign(level, time, dest);
                 root.refresh();
             }
         }
