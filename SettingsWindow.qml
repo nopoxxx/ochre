@@ -392,7 +392,7 @@ Scope {
             // подписи вариантов: зоны раскладки — коротко
             function optionLabel(r, o) {
                 if (r.type === "module") return ({ off: I18n.tr("выкл"), on: I18n.tr("вкл") })[o] ?? I18n.tr(S.zoneLabel(r.key, o));
-                return String(o);
+                return r.labels?.[o] ?? String(o);
             }
             function optionsOf(r) { return r.type === "module" ? S.layoutZones(r.key) : (r.options ?? []); }
             // кнопками — если помещаются; иначе — выпадающий список

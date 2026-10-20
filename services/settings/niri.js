@@ -2,11 +2,11 @@
 .import "common.js" as C
 .import "apps.js" as A
 .import "binds.js" as B
+.import "themes.js" as P
 
 // Генерация ~/.config/niri/ochre/*.kdl: niriFiles(), в каком файле живёт настройка, анимации и шейдеры, мониторы.
 // Часть services/settings.js: QML импортирует только его, он отдаёт все имена этого файла.
 
-var ACCENTS = C.ACCENTS;
 var WIDTHS = C.WIDTHS;
 var q = C.q;
 var f = C.f;
@@ -126,7 +126,7 @@ var NIRI_FILES = ["input", "displays", "layout", "window-rules", "cursor", "anim
 // в каком файле живёт настройка — для подсказки в окне настроек
 function niriFileOf(key) {
     if (/^niri\.(kb|tp|mouse)\.|^niri\.(ffm|warp)$/.test(key)) return "input.kdl";
-    if (/^niri\.(gaps|colWidth|center|ring|border|shadow)$/.test(key) || key === "shell.accent") return "layout.kdl";
+    if (/^niri\.(gaps|colWidth|center|ring|border|shadow)$/.test(key) || key === "shell.accent" || key === "shell.theme.name") return "layout.kdl";
     if (/^niri\.rules\./.test(key)) return "window-rules.kdl";
     if (/^niri\.cursor\./.test(key)) return "cursor.kdl";
     if (/^niri\.anim/.test(key)) return "animations.kdl";
@@ -148,7 +148,8 @@ function niriFiles(get0, outs, sel) {
     const get = k => get0("shell.game") && k in GAME_OFF ? GAME_OFF[k] : get0(k);
     const qsRun = ["qs"].concat(sel ?? []).map(q).join(" ");
     const ipc = (t, f) => " { spawn " + ["qs", "ipc"].concat(sel ?? [], ["call", t, f]).map(q).join(" ") + "; }";
-    const accent = ACCENTS[get("shell.accent")] ?? ACCENTS.ochre;
+    const pal = P.palette(get);
+    const accent = pal.accent;
     const ring = get("niri.ring");
     const border = get("niri.border");
     const radius = get("niri.rules.radius");
@@ -222,12 +223,12 @@ function niriFiles(get0, outs, sel) {
         "    default-column-width { proportion " + WIDTHS[get("niri.colWidth")] + "; }",
         "    focus-ring {",
         ...(ring > 0
-            ? ["        width " + ring, "        active-color " + q(accent), '        inactive-color "#504945"']
+            ? ["        width " + ring, "        active-color " + q(accent), "        inactive-color " + q(pal.bg2)]
             : ["        off"]),
         "    }",
         "    border {",
         ...(border > 0
-            ? ["        width " + border, "        active-color " + q(accent), '        inactive-color "#504945"', '        urgent-color "#fb4934"']
+            ? ["        width " + border, "        active-color " + q(accent), "        inactive-color " + q(pal.bg2), "        urgent-color " + q(pal.red)]
             : ["        off"]),
         "    }",
         "    shadow {",

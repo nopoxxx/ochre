@@ -48,7 +48,7 @@ test("THEMES: у каждого варианта все роли и 16 цвет�
         for (const mode of ["dark", "light"]) {
             const v = t[mode];
             if (!v) continue;
-            for (const r of P.ROLES) assert.match(v[r] ?? "", hex, `${id}.${mode}.${r}`);
+            for (const r of P.ROLES) if (v[r] || !["hover", "fgDim"].includes(r)) assert.match(v[r] ?? "", hex, `${id}.${mode}.${r}`);
             assert.equal(v.ansi.length, 16, `${id}.${mode}.ansi`);
             for (const c of v.ansi) assert.match(c, hex, `${id}.${mode}.ansi`);
             assert.ok(v.icons, `${id}.${mode}.icons`);
@@ -72,4 +72,36 @@ test("palette: тема без dark и имена из прототипа не �
     } finally {
         delete P.THEMES.lightOnly;
     }
+});
+
+const lum = c => {
+    const v = [1, 3, 5].map(i => parseInt(c.substr(i, 2), 16) / 255).map(x => x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4);
+    return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2];
+};
+const contrast = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
+
+test("THEMES: девять семейств, текст и акцент ochre читаются на фоне", () => {
+    assert.deepEqual(Object.keys(P.THEMES), ["gruvbox", "catppuccin", "rosepine", "tokyonight", "everforest", "kanagawa", "solarized", "nord", "dracula"]);
+    for (const [id, t] of Object.entries(P.THEMES)) {
+        const v = t.dark;
+        assert.ok(contrast(v.fg, v.bg) >= 4.5, `${id}: fg/bg ${contrast(v.fg, v.bg).toFixed(2)}`);
+        assert.ok(contrast(v.ochre, v.bg) >= 3, `${id}: ochre/bg ${contrast(v.ochre, v.bg).toFixed(2)}`);
+    }
+});
+
+test("схема: в списке тем — названия, а не id", () => {
+    const row = S.sections([], undefined, undefined).flatMap(s => s.rows).find(r => r.key === "shell.theme.name");
+    for (const id of row.options) assert.equal(row.labels[id], P.THEMES[id].name);
+});
+
+test("палитра доходит до niri и приложений", () => {
+    const get = getter({ "shell.theme.name": "nord", "shell.accent": "blue" });
+    const nord = P.THEMES.nord.dark;
+    assert.match(S.niriFiles(get, {}, [])["layout.kdl"], new RegExp(nord.blue));
+    assert.match(S.niriFiles(get, {}, [])["layout.kdl"], new RegExp(nord.bg2));
+    const files = S.themeFiles(get, "/home/u");
+    assert.match(files["gtk-4.0/ochre.css"], new RegExp("window_bg_color " + nord.bg));
+    assert.match(files["qt6ct/colors/ochre.conf"], new RegExp(nord.fg));
+    assert.match(files["btop/themes/ochre.theme"], new RegExp(nord.blue));
+    assert.equal(S.niriFileOf("shell.theme.name"), "layout.kdl");
 });

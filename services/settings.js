@@ -19,8 +19,14 @@ var MODULES = L.MODULES, DEFAULT_LAYOUT = L.DEFAULT_LAYOUT, HOME_SECTIONS = L.HO
 var TRAY_ICONS = A.TRAY_ICONS, trayGlyph = A.trayGlyph, TERMINALS = A.TERMINALS, FILE_MANAGERS = A.FILE_MANAGERS, SHELLS = A.SHELLS, SHELL_PKGS = A.SHELL_PKGS, BROWSERS = A.BROWSERS, termClass = A.termClass, termCmd = A.termCmd, filesCmd = A.filesCmd;
 var MUTE_BINDS = B.MUTE_BINDS, COMBO_RE = B.COMBO_RE, MODS = B.MODS, comboKey = B.comboKey, BIND_GROUPS = B.BIND_GROUPS, titleGroup = B.titleGroup, bindGroup = B.bindGroup, groupBinds = B.groupBinds, parseBinds = B.parseBinds, actionKdl = B.actionKdl, keysKdl = B.keysKdl;
 var APP_ENV = N.APP_ENV, OPEN_SHADER = N.OPEN_SHADER, CLOSE_SHADER = N.CLOSE_SHADER, glslColor = N.glslColor, animBlocks = N.animBlocks, HOT_CORNERS = N.HOT_CORNERS, TRANSFORMS = N.TRANSFORMS, niriTransform = N.niriTransform, logicalSize = N.logicalSize, NIRI_FILES = N.NIRI_FILES, niriFileOf = N.niriFileOf, GAME_OFF = N.GAME_OFF, niriFiles = N.niriFiles;
-var GRUVBOX = T.GRUVBOX, FONT = T.FONT, ICONS = T.ICONS, GNOME_ACCENTS = T.GNOME_ACCENTS, fontPt = T.fontPt, gtkColors = T.gtkColors, gtkCss = T.gtkCss, qtColors = T.qtColors, qtFont = T.qtFont, themeFiles = T.themeFiles, btopTheme = T.btopTheme, themeGsettings = T.themeGsettings;
+var FONT = T.FONT, ICONS = T.ICONS, GNOME_ACCENTS = T.GNOME_ACCENTS, fontPt = T.fontPt, gtkColors = T.gtkColors, gtkCss = T.gtkCss, qtColors = T.qtColors, qtFont = T.qtFont, themeFiles = T.themeFiles, btopTheme = T.btopTheme, themeGsettings = T.themeGsettings;
 var THEMES = P.THEMES, ROLES = P.ROLES, mix = P.mix, palette = P.palette;
+
+function themeLabels() {
+    const out = {};
+    for (const id in THEMES) out[id] = THEMES[id].name;
+    return out;
+}
 
 // Строка раздела: { header } или { key, label, type, def, hint, … }.
 // type: bool | int | float (min, max, step) | enum (options) | text | action (action — имя действия,
@@ -38,7 +44,7 @@ function sections(outputs, layout, home) {
     return [
         { id: "look", title: "вид", rows: [
             { header: "цвет и шрифт" },
-            { key: "shell.theme.name", label: "тема", type: "enum", options: Object.keys(THEMES), def: "gruvbox", hint: "палитра shell и приложений" },
+            { key: "shell.theme.name", label: "тема", type: "enum", options: Object.keys(THEMES), labels: themeLabels(), def: "gruvbox", hint: "палитра shell и приложений" },
             { key: "shell.accent", label: "акцентный цвет", type: "enum", options: Object.keys(ACCENTS), def: "ochre", hint: "рамки окон shell, prompt, рамка фокуса niri и акцент в приложениях" },
             { key: "shell.fontSize", label: "размер шрифта", type: "int", min: 10, max: 28, step: 1, def: 16 },
             { key: "shell.lang", label: "язык", type: "enum", options: ["auto", "ru", "en"], def: "auto",
@@ -46,7 +52,7 @@ function sections(outputs, layout, home) {
 
             { header: "приложения" },
             { key: "shell.theme.sync", label: "темы Qt и GTK", type: "bool", def: true,
-              hint: "тёмная схема, палитра Gruvbox, акцент и иконки Gruvbox Plus в GTK (adw-gtk3, libadwaita) и Qt (qt6ct); открытые окна — после перезапуска приложения" },
+              hint: "тёмная схема, палитра темы, акцент и иконки Gruvbox Plus в GTK (adw-gtk3, libadwaita) и Qt (qt6ct); открытые окна — после перезапуска приложения" },
             { key: "shell.theme.font", label: "шрифт shell в приложениях", type: "bool", def: true,
               hint: "Terminess в интерфейсе GTK- и Qt-приложений; моноширинный шрифт ставится всегда" },
 
