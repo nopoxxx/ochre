@@ -20,7 +20,8 @@ PanelWindow {
     WlrLayershell.namespace: "ochre-wallpaper"
     color: Theme.bg0   // виден по краям в режиме fit
 
-    readonly property string src: Wallpaper.current ? "file://" + encodeURI(Wallpaper.current) : ""
+    readonly property string path: Wallpaper.imageFor(screen?.name ?? "", Wallpaper.activeWs(screen?.name ?? ""))
+    readonly property string src: path ? "file://" + encodeURI(path) : ""
     readonly property int mode: Wallpaper.fill === "fit" ? Image.PreserveAspectFit
         : Wallpaper.fill === "stretch" ? Image.Stretch
         : Image.PreserveAspectCrop

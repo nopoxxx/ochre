@@ -78,13 +78,16 @@ Scope {
         id: session
 
         WlSessionLockSurface {
+            id: surface
             color: Theme.bg
+
+            readonly property string wall: Wallpaper.imageFor(screen?.name ?? "", Wallpaper.activeWs(screen?.name ?? ""))
 
             // приглушённые обои под приглашением
             Image {
                 anchors.fill: parent
-                visible: Settings.get("shell.lock.wallpaper") && Wallpaper.current !== ""
-                source: Wallpaper.current ? "file://" + encodeURI(Wallpaper.current) : ""
+                visible: Settings.get("shell.lock.wallpaper") && surface.wall !== ""
+                source: surface.wall ? "file://" + encodeURI(surface.wall) : ""
                 fillMode: Image.PreserveAspectCrop
                 asynchronous: true
                 opacity: 0.15
