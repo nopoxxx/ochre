@@ -137,6 +137,11 @@ function niriFileOf(key) {
     return "";
 }
 
+function greeterNiri(get) {
+    const bg = P.palette(get).bg;
+    return "layout {\n    background-color " + q(/^#[0-9a-f]{6}$/i.test(bg) ? bg : "#1d2021") + "\n}\n";
+}
+
 // get(key) — значение с учётом умолчаний;
 // outs — { имя: { enabled, mode, scale, transform, x, y, vrr, primary } }, только то, что задано вручную.
 // Возвращает { "input.kdl": текст, … } — все файлы папки ochre/, кроме keys.kdl (его пишет Binds).

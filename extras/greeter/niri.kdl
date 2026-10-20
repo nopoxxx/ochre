@@ -21,6 +21,8 @@ layout {
     background-color "#1d2021"
 }
 
+include "/var/lib/ochre-greeter/.greeter/niri.kdl"
+
 // когда greeter передал управление сессии, quickshell выходит — закрываем niri,
 // и greetd запускает выбранную сессию
 spawn-at-startup "sh" "-c" "OCHRE_GREETER=1 qs -p /usr/share/ochre/greeter.qml; niri msg action quit --skip-confirmation"
