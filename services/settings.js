@@ -47,6 +47,8 @@ function sections(outputs, layout, home) {
         { id: "look", title: "вид", rows: [
             { header: "цвет и шрифт" },
             { key: "shell.theme.name", label: "тема", type: "enum", options: Object.keys(THEMES), labels: themeLabels(), def: "gruvbox", hint: "палитра shell и приложений" },
+            { key: "shell.theme.mode", label: "тёмная или светлая", type: "enum", options: ["dark", "light"], def: "dark",
+              hint: "светлой нет у Nord и Dracula — у них остаётся тёмная; переключить: ochre ipc call theme toggle" },
             { key: "shell.accent", label: "акцентный цвет", type: "enum", options: Object.keys(ACCENTS), def: "ochre", hint: "рамки окон shell, prompt, рамка фокуса niri и акцент в приложениях" },
             { key: "shell.fontSize", label: "размер шрифта", type: "int", min: 10, max: 28, step: 1, def: 16 },
             { key: "shell.lang", label: "язык", type: "enum", options: ["auto", "ru", "en"], def: "auto",
@@ -54,7 +56,7 @@ function sections(outputs, layout, home) {
 
             { header: "приложения" },
             { key: "shell.theme.sync", label: "темы Qt и GTK", type: "bool", def: true,
-              hint: "тёмная схема, палитра темы, акцент и иконки Gruvbox Plus в GTK (adw-gtk3, libadwaita) и Qt (qt6ct); открытые окна — после перезапуска приложения" },
+              hint: "схема (тёмная или светлая), палитра темы, акцент и иконки Gruvbox Plus в GTK (adw-gtk3, libadwaita) и Qt (qt6ct); открытые окна — после перезапуска приложения" },
             { key: "shell.theme.font", label: "шрифт shell в приложениях", type: "bool", def: true,
               hint: "Terminess в интерфейсе GTK- и Qt-приложений; моноширинный шрифт ставится всегда" },
 

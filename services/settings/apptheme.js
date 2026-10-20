@@ -151,10 +151,11 @@ function btopTheme(c, accent) {
 function themeGsettings(get) {
     if (!get("shell.theme.sync")) return [];
     const s = v => "'" + v + "'";
+    const dark = P.palette(get).dark;
     const font = s(FONT + " " + fontPt(get));
     return [
-        ["color-scheme", s("prefer-dark")],
-        ["gtk-theme", s("adw-gtk3-dark")],
+        ["color-scheme", s(dark ? "prefer-dark" : "prefer-light")],
+        ["gtk-theme", s(dark ? "adw-gtk3-dark" : "adw-gtk3")],
         ["icon-theme", s(ICONS)],
         ["accent-color", s(GNOME_ACCENTS[get("shell.accent")] ?? "yellow")],
         ["cursor-size", String(get("niri.cursor.size"))],

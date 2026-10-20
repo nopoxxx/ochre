@@ -83,9 +83,12 @@ const contrast = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - 
 test("THEMES: девять семейств, текст и акцент ochre читаются на фоне", () => {
     assert.deepEqual(Object.keys(P.THEMES), ["gruvbox", "catppuccin", "rosepine", "tokyonight", "everforest", "kanagawa", "solarized", "nord", "dracula"]);
     for (const [id, t] of Object.entries(P.THEMES)) {
-        const v = t.dark;
-        assert.ok(contrast(v.fg, v.bg) >= 4.5, `${id}: fg/bg ${contrast(v.fg, v.bg).toFixed(2)}`);
-        assert.ok(contrast(v.ochre, v.bg) >= 3, `${id}: ochre/bg ${contrast(v.ochre, v.bg).toFixed(2)}`);
+        for (const mode of ["dark", "light"]) {
+            const v = t[mode];
+            if (!v) continue;
+            assert.ok(contrast(v.fg, v.bg) >= 4.5, `${id}.${mode}: fg/bg ${contrast(v.fg, v.bg).toFixed(2)}`);
+            assert.ok(contrast(v.ochre, v.bg) >= 3, `${id}.${mode}: ochre/bg ${contrast(v.ochre, v.bg).toFixed(2)}`);
+        }
     }
 });
 
@@ -104,4 +107,39 @@ test("палитра доходит до niri и приложений", () => {
     assert.match(files["qt6ct/colors/ochre.conf"], new RegExp(nord.fg));
     assert.match(files["btop/themes/ochre.theme"], new RegExp(nord.blue));
     assert.equal(S.niriFileOf("shell.theme.name"), "layout.kdl");
+});
+
+test("светлый режим: светлый вариант темы, без него — тёмный", () => {
+    const light = P.palette(getter({ "shell.theme.mode": "light" }));
+    assert.equal(light.bg, "#f9f5d7");
+    assert.equal(light.dark, false);
+    const nord = P.palette(getter({ "shell.theme.name": "nord", "shell.theme.mode": "light" }));
+    assert.equal(nord.bg, P.THEMES.nord.dark.bg);
+    assert.equal(nord.dark, true);
+    assert.deepEqual(Object.keys(P.THEMES).filter(id => P.THEMES[id].light),
+        ["gruvbox", "catppuccin", "rosepine", "tokyonight", "everforest", "kanagawa", "solarized"]);
+    for (const id in P.THEMES) if (P.THEMES[id].light) assert.ok(lum(P.THEMES[id].light.bg) > 0.7, id);
+});
+
+test("светлый режим: недостающие роли — из светлого Gruvbox", () => {
+    P.THEMES.stubLight = { name: "Stub", light: { bg: "#ffffff" } };
+    try {
+        const p = P.palette(getter({ "shell.theme.name": "stubLight", "shell.theme.mode": "light" }));
+        assert.equal(p.red, P.THEMES.gruvbox.light.red);
+        assert.equal(p.dark, false);
+    } finally {
+        delete P.THEMES.stubLight;
+    }
+});
+
+test("светлый режим: настройка, gsettings и niri", () => {
+    const row = S.sections([], undefined, undefined).flatMap(s => s.rows).find(r => r.key === "shell.theme.mode");
+    assert.deepEqual(row.options, ["dark", "light"]);
+    assert.equal(row.def, "dark");
+    const gs = k => Object.fromEntries(S.themeGsettings(getter({ "shell.theme.mode": k })));
+    assert.equal(gs("light")["color-scheme"], "'prefer-light'");
+    assert.equal(gs("light")["gtk-theme"], "'adw-gtk3'");
+    assert.equal(gs("dark")["color-scheme"], "'prefer-dark'");
+    assert.equal(gs("dark")["gtk-theme"], "'adw-gtk3-dark'");
+    assert.equal(S.niriFileOf("shell.theme.mode"), "layout.kdl");
 });
