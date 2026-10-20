@@ -28,9 +28,10 @@ function mix(a, b, t) {
 
 function palette(get, user) {
     const name = get("shell.theme.name");
-    const theme = (user ?? {})[name] ?? THEMES[name] ?? THEMES.gruvbox;
+    const pick = (o, k) => o && Object.prototype.hasOwnProperty.call(o, k) ? o[k] : undefined;
+    const theme = pick(user, name) ?? pick(THEMES, name) ?? THEMES.gruvbox;
     const base = THEMES.gruvbox.dark;
-    const own = theme.dark;
+    const own = theme.dark ?? theme.light ?? base;
     const p = { dark: true };
     for (const r of ROLES) p[r] = own[r] ?? base[r];
     if (!own.hover) p.hover = mix(p.bg, p.bg1, 0.5);

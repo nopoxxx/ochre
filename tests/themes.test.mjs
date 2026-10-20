@@ -1,4 +1,3 @@
-// node --test tests/ — палитры тем (services/settings/themes.js).
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { load, getter, S } from "./load.mjs";
@@ -62,4 +61,15 @@ test("схема: shell.theme.name — темы из THEMES, по умолчан
     assert.ok(row, "нет строки shell.theme.name");
     assert.deepEqual(row.options, Object.keys(P.THEMES));
     assert.equal(S.defaultOf("shell.theme.name", []), "gruvbox");
+});
+
+test("palette: тема без dark и имена из прототипа не ломают палитру", () => {
+    P.THEMES.lightOnly = { name: "Light", light: { bg: "#ffffff" } };
+    try {
+        assert.equal(P.palette(getter({ "shell.theme.name": "lightOnly" })).bg, "#ffffff");
+        for (const name of ["constructor", "toString", "__proto__"])
+            assert.equal(P.palette(getter({ "shell.theme.name": name })).bg, "#1d2021", name);
+    } finally {
+        delete P.THEMES.lightOnly;
+    }
 });
