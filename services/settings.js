@@ -22,11 +22,12 @@ var MUTE_BINDS = B.MUTE_BINDS, COMBO_RE = B.COMBO_RE, MODS = B.MODS, comboKey = 
 var APP_ENV = N.APP_ENV, OPEN_SHADER = N.OPEN_SHADER, CLOSE_SHADER = N.CLOSE_SHADER, glslColor = N.glslColor, animBlocks = N.animBlocks, HOT_CORNERS = N.HOT_CORNERS, TRANSFORMS = N.TRANSFORMS, niriTransform = N.niriTransform, logicalSize = N.logicalSize, outputIds = N.outputIds, migrateOutputKeys = N.migrateOutputKeys, NIRI_FILES = N.NIRI_FILES, niriFileOf = N.niriFileOf, GAME_OFF = N.GAME_OFF, niriFiles = N.niriFiles, greeterNiri = N.greeterNiri, privateAppIds = N.privateAppIds;
 var FONT = T.FONT, ICONS = T.ICONS, GNOME_ACCENTS = T.GNOME_ACCENTS, fontPt = T.fontPt, gtkColors = T.gtkColors, gtkCss = T.gtkCss, qtColors = T.qtColors, qtFont = T.qtFont, themeFiles = T.themeFiles, btopTheme = T.btopTheme, themeGsettings = T.themeGsettings, iconTheme = T.iconTheme, iconOverlay = T.iconOverlay;
 var TERM_COLORS = TM.TERM_COLORS, TERM_INCLUDE = TM.TERM_INCLUDE, termFiles = TM.termFiles, termMigrate = TM.termMigrate, termOsc = TM.termOsc;
-var THEMES = P.THEMES, ROLES = P.ROLES, mix = P.mix, palette = P.palette, themeStrip = P.themeStrip;
+var THEMES = P.THEMES, ROLES = P.ROLES, mix = P.mix, palette = P.palette, themeStrip = P.themeStrip, hasLight = P.hasLight, wallTheme = P.wallTheme, WALL_SCHEMES = P.WALL_SCHEMES;
 
 function themeLabels() {
     const out = {};
     for (const id in THEMES) out[id] = THEMES[id].name;
+    out.wallpaper = "Wallpaper";
     return out;
 }
 
@@ -46,9 +47,12 @@ function sections(outputs, layout, home) {
     return [
         { id: "look", title: "вид", rows: [
             { header: "цвет и шрифт" },
-            { key: "shell.theme.name", label: "тема", type: "enum", options: Object.keys(THEMES), labels: themeLabels(), def: "gruvbox", hint: "палитра shell и приложений" },
+            { key: "shell.theme.name", label: "тема", type: "enum", options: Object.keys(THEMES).concat("wallpaper"), labels: themeLabels(), def: "gruvbox",
+              hint: "палитра shell и приложений; Wallpaper — из текущих обоев (нужен matugen), пока её нет — Gruvbox" },
+            { key: "shell.theme.scheme", label: "схема из обоев", type: "enum", options: WALL_SCHEMES, def: "tonal-spot",
+              hint: "для темы Wallpaper: tonal-spot — спокойная, content и fidelity — ближе к цветам картинки, expressive, fruit-salad и rainbow — ярче, neutral и monochrome — почти серые" },
             { key: "shell.theme.mode", label: "тёмная или светлая", type: "enum", options: ["dark", "light"], def: "dark",
-              hint: "светлой нет у Nord и Dracula — у них остаётся тёмная; переключить: ochre ipc call theme toggle" },
+              hint: "светлой нет у Nord и Dracula — у них остаётся тёмная; у Wallpaper есть обе; переключить: ochre ipc call theme toggle" },
             { key: "shell.accent", label: "акцентный цвет", type: "enum", options: Object.keys(ACCENTS), def: "ochre", hint: "рамки окон shell, prompt, рамка фокуса niri и акцент в приложениях" },
             { key: "shell.fontSize", label: "размер шрифта", type: "int", min: 10, max: 28, step: 1, def: 16 },
             { key: "shell.lang", label: "язык", type: "enum", options: ["auto", "ru", "en"], def: "auto",

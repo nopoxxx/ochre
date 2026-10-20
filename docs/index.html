@@ -223,7 +223,7 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
     <li><b>меню</b> <kbd>Mod+D</kbd> для действий: программы, обои, пакеты pacman/AUR, питание;</li>
     <li><b>настройки</b> <kbd>Mod+S</kbd> в стиле menuconfig с поиском — без правки конфигов руками;</li>
     <li><b>окна</b> мониторов, биндов и обоев (wallhaven.cc);</li>
-    <li><b>темы</b>: Gruvbox, Catppuccin, Rosé Pine, Tokyo Night, Everforest, Kanagawa, Solarized, Nord, Dracula — shell, niri, GTK, Qt, btop, терминал и greeter в одной палитре;</li>
+    <li><b>темы</b>: Gruvbox, Catppuccin, Rosé Pine, Tokyo Night, Everforest, Kanagawa, Solarized, Nord, Dracula и Wallpaper (палитра из обоев через matugen) — shell, niri, GTK, Qt, btop, терминал и greeter в одной палитре;</li>
     <li><b>блокировка и greeter</b> как getty, уведомления как лог, обновление shell одним кликом.</li>
   </ul>
 </section>
@@ -575,6 +575,11 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
   в списке рядом с названием — полоска её цветов. <code>тёмная или светлая</code> — режим; светлой нет у Nord и Dracula.
   Переключить режим: плитка «тема» в <code>home</code> → быстро или <code>qs ipc call theme toggle</code> (<code>dark</code>, <code>light</code>, <code>get</code>).
   Тема меняет сразу shell, рамки niri, терминал (и уже открытые окна), greeter и приложения.</p>
+  <p><code>Wallpaper</code> — палитра из текущих обоев сфокусированного экрана: её строит <code>matugen</code> (ставит установщик),
+  обои сменились — сменилась и палитра. Есть тёмный и светлый вариант. Характер палитры — <code>схема из обоев</code>:
+  <code>tonal-spot</code> (спокойная), <code>content</code> и <code>fidelity</code> (ближе к картинке), <code>expressive</code>,
+  <code>fruit-salad</code>, <code>rainbow</code> (ярче), <code>neutral</code>, <code>monochrome</code>. Акцент выбирается как обычно:
+  <code>ochre</code> — главный цвет обоев, остальные — цвета Gruvbox, сдвинутые к нему.</p>
   <h2>Темы приложений</h2>
   <p><code>look/</code> → <code>темы Qt и GTK</code>: GTK- и Qt-приложения в той же палитре, с тем же акцентом и шрифтом,
   что и shell, — через adw-gtk3 / libadwaita и qt6ct. Firefox и Chromium берут тёмную или светлую схему через портал.
