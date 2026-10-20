@@ -6,6 +6,7 @@
 .import "settings/niri.js" as N
 .import "settings/apptheme.js" as T
 .import "settings/themes.js" as P
+.import "settings/term.js" as TM
 
 // Схема окна настроек; генерация ~/.config/niri/ochre/*.kdl — в settings/niri.js.
 //   niri.*      — уходят в конфиг niri
@@ -20,6 +21,7 @@ var TRAY_ICONS = A.TRAY_ICONS, trayGlyph = A.trayGlyph, TERMINALS = A.TERMINALS,
 var MUTE_BINDS = B.MUTE_BINDS, COMBO_RE = B.COMBO_RE, MODS = B.MODS, comboKey = B.comboKey, BIND_GROUPS = B.BIND_GROUPS, titleGroup = B.titleGroup, bindGroup = B.bindGroup, groupBinds = B.groupBinds, parseBinds = B.parseBinds, actionKdl = B.actionKdl, keysKdl = B.keysKdl;
 var APP_ENV = N.APP_ENV, OPEN_SHADER = N.OPEN_SHADER, CLOSE_SHADER = N.CLOSE_SHADER, glslColor = N.glslColor, animBlocks = N.animBlocks, HOT_CORNERS = N.HOT_CORNERS, TRANSFORMS = N.TRANSFORMS, niriTransform = N.niriTransform, logicalSize = N.logicalSize, NIRI_FILES = N.NIRI_FILES, niriFileOf = N.niriFileOf, GAME_OFF = N.GAME_OFF, niriFiles = N.niriFiles;
 var FONT = T.FONT, ICONS = T.ICONS, GNOME_ACCENTS = T.GNOME_ACCENTS, fontPt = T.fontPt, gtkColors = T.gtkColors, gtkCss = T.gtkCss, qtColors = T.qtColors, qtFont = T.qtFont, themeFiles = T.themeFiles, btopTheme = T.btopTheme, themeGsettings = T.themeGsettings;
+var TERM_COLORS = TM.TERM_COLORS, TERM_INCLUDE = TM.TERM_INCLUDE, termFiles = TM.termFiles, termMigrate = TM.termMigrate, termOsc = TM.termOsc;
 var THEMES = P.THEMES, ROLES = P.ROLES, mix = P.mix, palette = P.palette;
 
 function themeLabels() {
