@@ -93,6 +93,12 @@ Singleton {
         dismiss(e);
     }
 
+    function removeAll(list) {
+        const keys = new Set(list.map(e => e.key));
+        history = history.filter(h => !keys.has(h.key));
+        for (const e of list) dismiss(e);
+    }
+
     function clear() {
         for (const h of history)
             if (h.notif) h.notif.dismiss();
