@@ -4,6 +4,7 @@ import Quickshell.Wayland
 import QtQuick
 import QtQuick.Layouts
 import qs.services
+import qs.settings
 import "services/settings.js" as S
 
 // Настройки: разделы слева, справа — карточки групп, у каждой строки свой элемент (как в DankMaterialShell, но в стиле ochre).
@@ -52,7 +53,7 @@ Scope {
 
             readonly property var sections: S.sections(Settings.outputs, Settings.get("shell.bar.layout"), Settings.get("shell.home.layout"))
             property int section: 0
-            readonly property string query: search.text.trim()
+            readonly property string query: sidebar.search.text.trim()
             readonly property var rows: query ? S.searchRows(sections, query, s => I18n.tr(s)) : sections[section].rows
             property int cur: 1
             property bool editing: false
@@ -80,7 +81,7 @@ Scope {
             }
 
             function selectSection(i) {
-                search.text = "";
+                sidebar.search.text = "";
                 section = (i + sections.length) % sections.length;
                 Settings.page = sections[section].id;
                 cur = 0;
@@ -269,12 +270,12 @@ Scope {
             }
 
             function startSearch() {
-                search.forceActiveFocus();
-                search.selectAll();
+                sidebar.search.forceActiveFocus();
+                sidebar.search.selectAll();
             }
 
             function endSearch(keep) {
-                if (!keep) search.text = "";
+                if (!keep) sidebar.search.text = "";
                 keys.forceActiveFocus();
             }
 
@@ -413,6 +414,17 @@ Scope {
 
             readonly property real lineH: cell.height * 1.3
             readonly property real cw: cell.advanceWidth
+            readonly property real cellH: cell.height
+
+            // ссылки для компонентов settings/: у них свои свойства win/box/ghost, и `win: win` в них указал бы
+            // на само свойство, а не на id окна
+            QtObject {
+                id: refs
+                readonly property var w: win
+                readonly property Item b: box
+                readonly property Item g: ghost
+                readonly property Item f: flick
+            }
 
             MouseArea {
                 anchors.fill: parent
@@ -526,109 +538,12 @@ Scope {
                         spacing: Theme.pad
 
                         // ── разделы ──
-                        Rectangle {
+                        Sidebar {
+                            id: sidebar
                             Layout.fillHeight: true
                             Layout.preferredWidth: win.cw * 24
-                            color: "transparent"
-                            border.color: Theme.bg2
-                            border.width: 1
-
-                            ColumnLayout {
-                                anchors { fill: parent; margins: 4 }
-                                spacing: 2
-
-                                // поиск — над разделами, как в DMS
-                                Rectangle {
-                                    Layout.fillWidth: true
-                                    implicitHeight: win.lineH * 1.2
-                                    color: search.activeFocus ? Theme.bg1 : "transparent"
-                                    border.color: search.activeFocus ? Theme.accent : Theme.bg2
-                                    border.width: 1
-
-                                    RowLayout {
-                                        anchors { fill: parent; leftMargin: win.cw * 0.6; rightMargin: win.cw * 0.6 }
-                                        spacing: win.cw * 0.6
-                                        T { font.family: Theme.iconFont; text: String.fromCodePoint(0xF0349); color: search.activeFocus ? Theme.accent : Theme.gray }
-                                        Item {
-                                            Layout.fillWidth: true
-                                            implicitHeight: search.implicitHeight
-                                            TextInput {
-                                                id: search
-                                                anchors { left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter }
-                                                font.family: Theme.font
-                                                font.pixelSize: Theme.fontSize
-                                                color: Theme.fg
-                                                selectionColor: Theme.bg2
-                                                renderType: Text.NativeRendering
-                                                clip: true
-                                                Keys.onPressed: event => {
-                                                    const k = event.key;
-                                                    if (k === Qt.Key_Escape) win.endSearch(false);
-                                                    else if (k === Qt.Key_Return || k === Qt.Key_Enter) win.endSearch(true);
-                                                    else if (k === Qt.Key_Down) win.move(1);
-                                                    else if (k === Qt.Key_Up) win.move(-1);
-                                                    else return;
-                                                    event.accepted = true;
-                                                }
-                                            }
-                                            T { visible: search.text === ""; anchors.verticalCenter: parent.verticalCenter; text: I18n.tr("поиск  /"); color: Theme.bg2 }
-                                            MouseArea { anchors.fill: parent; cursorShape: Qt.IBeamCursor; onClicked: win.startSearch() }
-                                        }
-                                        T {
-                                            visible: search.text !== ""
-                                            font.family: Theme.iconFont
-                                            text: String.fromCodePoint(0xF0156)
-                                            color: clr.containsMouse ? Theme.red : Theme.gray
-                                            MouseArea { id: clr; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: win.endSearch(false) }
-                                        }
-                                    }
-                                }
-
-                                Item { implicitHeight: 4 }
-
-                                Repeater {
-                                    model: win.sections
-
-                                    Rectangle {
-                                        id: sec
-                                        required property var modelData
-                                        required property int index
-                                        readonly property bool current: index === win.section && !win.query
-
-                                        Layout.fillWidth: true
-                                        implicitHeight: win.lineH * 1.35
-                                        color: current ? Theme.bg1 : secHover.containsMouse ? Qt.darker(Theme.bg1, 1.35) : "transparent"
-
-                                        Rectangle { visible: sec.current; width: 3; height: parent.height; color: Theme.accent }
-                                        RowLayout {
-                                            anchors { fill: parent; leftMargin: win.cw * 1.2; rightMargin: win.cw }
-                                            spacing: win.cw
-                                            T {
-                                                font.family: Theme.iconFont
-                                                text: win.icon(sec.modelData.id)
-                                                color: sec.current ? Theme.accent : Theme.gray
-                                            }
-                                            T {
-                                                Layout.fillWidth: true
-                                                elide: Text.ElideRight
-                                                text: I18n.tr(sec.modelData.title)
-                                                color: sec.current ? Theme.accent : secHover.containsMouse ? Theme.fg : Qt.darker(Theme.fg, 1.15)
-                                                font.bold: sec.current
-                                            }
-                                            T { text: String(sec.index + 1); color: Theme.bg2 }
-                                        }
-                                        MouseArea {
-                                            id: secHover
-                                            anchors.fill: parent
-                                            hoverEnabled: true
-                                            cursorShape: Qt.PointingHandCursor
-                                            onClicked: { win.selectSection(sec.index); win.endSearch(false); flick.contentY = 0; }
-                                        }
-                                    }
-                                }
-
-                                Item { Layout.fillHeight: true }
-                            }
+                            win: refs.w
+                            flick: refs.f
                         }
 
                         // ── параметры: карточки групп ──
@@ -714,7 +629,7 @@ Scope {
 
                                             Repeater {
                                                 model: card.modelData.items
-                                                delegate: settingRow
+                                                delegate: SettingRow { win: refs.w; box: refs.b; ghost: refs.g }
                                             }
                                         }
                                     }
@@ -782,564 +697,7 @@ Scope {
                 }
 
                 // ── выпадающий список вариантов ──
-                Rectangle {
-                    id: dropBox
-                    readonly property var r: win.rows[win.drop] ?? null
-                    readonly property var opts: r ? win.optionsOf(r) : []
-                    // ширина — по самому длинному варианту (сетка моноширинная), а не от dropCol:
-                    // его дети тянутся по его же ширине — список раздувался в polish-петле
-                    readonly property int maxLen: opts.reduce((n, o) => Math.max(n, Array.from(win.optionLabel(r, o)).length), 0)
-                    // где кнопка сейчас: список едет вместе с ней при прокрутке (contentY — чтобы привязка пересчитывалась)
-                    readonly property rect anchor: {
-                        flick.contentY;
-                        flick.height;
-                        const it = win.dropItem;
-                        if (!it) return Qt.rect(0, 0, 0, 0);
-                        const p = it.mapToItem(box, 0, 0);
-                        return Qt.rect(p.x, p.y, it.width, it.height);
-                    }
-                    // кнопка ушла за край прокрутки — список прячем, а не вешаем в воздухе
-                    readonly property bool inView: {
-                        const f = flick.mapToItem(box, 0, 0);
-                        return anchor.y + anchor.height > f.y && anchor.y < f.y + flick.height;
-                    }
-                    // снизу не помещается — открываем вверх от кнопки
-                    readonly property bool below: anchor.y + anchor.height + 2 + height <= box.height - Theme.pad
-                    visible: win.drop >= 0 && r !== null && !!win.dropItem && inView
-                    z: 10
-                    x: Math.max(Theme.pad, Math.min(box.width - width - Theme.pad, anchor.x))
-                    y: below ? anchor.y + anchor.height + 2 : Math.max(Theme.pad, anchor.y - height - 2)
-                    width: Math.max(win.cw * 22, win.cw * (maxLen + 4) + 8)
-                    height: dropCol.implicitHeight + 8
-                    color: Theme.bg
-                    border.color: Theme.accent
-                    border.width: 1
-
-                    // клики по рамке и колёсико не проваливаются в строки под списком
-                    MouseArea {
-                        anchors.fill: parent
-                        onWheel: wheel => wheel.accepted = true
-                    }
-
-                    Column {
-                        id: dropCol
-                        x: 4
-                        y: 4
-                        width: parent.width - 8
-                        Repeater {
-                            model: dropBox.opts
-                            Rectangle {
-                                required property var modelData
-                                readonly property bool sel: dropBox.r && modelData === win.shown(dropBox.r)
-                                width: dropCol.width
-                                height: win.lineH
-                                color: optHover.containsMouse ? Theme.bg1 : "transparent"
-                                T {
-                                    anchors { verticalCenter: parent.verticalCenter; left: parent.left; leftMargin: win.cw }
-                                    text: (parent.sel ? "● " : "  ") + win.optionLabel(dropBox.r, parent.modelData)
-                                    color: parent.sel ? Theme.accent : Theme.fg
-                                }
-                                MouseArea {
-                                    id: optHover
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    cursorShape: Qt.PointingHandCursor
-                                    // drop = -1 сразу уничтожает строки списка вместе с этим обработчиком:
-                                    // всё нужное — в локальные переменные до закрытия
-                                    onClicked: {
-                                        const w = win, i = w.drop, v = parent.modelData;
-                                        w.drop = -1;
-                                        w.pick(i, v);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            // ── строка настройки: подпись и описание слева, элемент справа ──
-            Component {
-                id: settingRow
-
-                Rectangle {
-                    id: line
-                    required property var modelData
-                    readonly property var r: modelData.row
-                    readonly property int idx: modelData.index
-                    readonly property bool current: idx === win.cur
-
-                    Layout.fillWidth: true
-                    implicitHeight: Math.max(texts.implicitHeight, control.implicitHeight) + win.cw * 1.4
-                    color: current ? Theme.bg1 : rowHover.containsMouse ? Qt.darker(Theme.bg1, 1.35) : "transparent"
-
-                    onCurrentChanged: if (current) Qt.callLater(() => { if (win) win.scrollTo(line); })   // окно могли закрыть
-
-                    readonly property bool canDrag: line.r.type === "module" && win.layoutKey !== ""
-                    opacity: win.dragRow && win.dragRow.id === line.r.id && win.dragRow.key === line.r.key ? 0.35 : 1
-
-                    MouseArea {
-                        id: rowHover
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: line.canDrag ? (drag.active ? Qt.ClosedHandCursor : Qt.OpenHandCursor) : Qt.ArrowCursor
-                        // строку модуля можно тащить: за мышью едет «призрак», строки и карточки ловят его DropArea
-                        drag.target: line.canDrag ? ghost : null
-                        drag.threshold: 6
-                        preventStealing: line.canDrag
-                        onPressed: mouse => {
-                            if (!line.canDrag) return;
-                            const p = line.mapToItem(box, 0, 0);
-                            ghost.x = p.x;
-                            ghost.y = p.y;
-                            ghost.width = line.width;
-                            ghost.text = line.r.label ?? line.r.id;
-                            ghost.Drag.hotSpot = Qt.point(mouse.x, mouse.y);
-                        }
-                        onClicked: win.focusRow(line.idx)
-                        onDoubleClicked: if (line.r.type === "action") win.runAction(line.r.action)
-                    }
-                    Connections {
-                        target: rowHover.drag
-                        function onActiveChanged() {
-                            if (rowHover.drag.active) { win.focusRow(line.idx); win.dragRow = line.r; }
-                            else win.finishDrag();
-                        }
-                    }
-                    DropArea {
-                        anchors.fill: parent
-                        enabled: line.r.type === "module"
-                        onEntered: drag => win.dropOver(line.idx, drag.y < height / 2)
-                        onPositionChanged: drag => win.dropOver(line.idx, drag.y < height / 2)
-                    }
-                    // сюда встанет перетаскиваемый модуль
-                    Rectangle {
-                        visible: win.isDropBefore(line.r)
-                        x: Theme.pad
-                        width: parent.width - Theme.pad * 2
-                        height: 2
-                        color: Theme.accent
-                        z: 5
-                    }
-
-                    Rectangle { visible: line.current; width: 3; height: parent.height; color: Theme.accent }
-
-                    RowLayout {
-                        anchors { fill: parent; leftMargin: win.cw * 1.5; rightMargin: win.cw * 1.2 }
-                        spacing: win.cw * 2
-
-                        // ⠿ — за это (и за всю строку) модуль можно перетащить
-                        T {
-                            visible: line.canDrag
-                            font.family: Theme.iconFont
-                            text: String.fromCodePoint(0xF01DD)
-                            color: rowHover.containsMouse || line.current ? Theme.gray : Theme.bg2
-                        }
-                        ColumnLayout {
-                            id: texts
-                            Layout.fillWidth: true
-                            Layout.alignment: Qt.AlignVCenter
-                            spacing: 1
-                            T {
-                                Layout.fillWidth: true
-                                elide: Text.ElideRight
-                                textFormat: Text.StyledText
-                                text: I18n.tr(line.r.label ?? "") + (win.changed(line.r) ? ` <font color="${Theme.accent}">*</font>` : "")
-                                color: line.r.type === "action" ? Theme.blue : line.current ? Theme.fg : Qt.darker(Theme.fg, 1.08)
-                                font.bold: line.current
-                            }
-                            T {
-                                // у модулей подсказка общая — описание модуля до «·»
-                                readonly property string h: I18n.tr(line.r.type === "module" ? String(line.r.hint ?? "").split("  ·  ")[0] : (line.r.hint ?? ""))
-                                visible: h !== ""
-                                Layout.fillWidth: true
-                                wrapMode: Text.Wrap
-                                maximumLineCount: 2
-                                elide: Text.ElideRight
-                                text: h
-                                color: Theme.gray
-                                font.pixelSize: Math.max(10, Theme.fontSize - 2)
-                            }
-                        }
-
-                        Loader {
-                            id: control
-                            Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
-                            readonly property var r: line.r
-                            readonly property int idx: line.idx
-                            readonly property bool current: line.current
-                            sourceComponent: {
-                                const t = line.r.type;
-                                if (t === "bool") return toggleC;
-                                if (t === "int" || t === "float") return sliderC;
-                                if (t === "text") return textC;
-                                if (t === "combo") return comboC;
-                                if (t === "action") return actionC;
-                                if (win.swatchKeys.includes(line.r.key)) return swatchC;
-                                return win.fitsSegments(line.r) ? segmentsC : dropC;
-                            }
-                        }
-
-                        // черновик с клавиатуры — применить мышкой
-                        T {
-                            visible: win.drafted(line.r)
-                            text: "[↵]"
-                            color: Theme.accent
-                            font.bold: true
-                            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: { win.cur = line.idx; win.apply(); } }
-                        }
-                        // ↺ — по умолчанию (у раскладки — r на строке)
-                        T {
-                            readonly property bool can: !["action", "module"].includes(line.r.type) && win.changed(line.r)
-                            opacity: can ? 1 : 0
-                            font.family: Theme.iconFont
-                            text: "↺"
-                            color: resetHover.containsMouse ? Theme.accent : Theme.gray
-                            MouseArea {
-                                id: resetHover
-                                anchors.fill: parent
-                                enabled: parent.can
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: win.resetNow(line.idx)
-                            }
-                        }
-                    }
-                }
-            }
-
-            // ── элементы ──
-            // тумблер: █ слева — выкл., справа акцентом — вкл.
-            Component {
-                id: toggleC
-                Rectangle {
-                    readonly property bool on: win.shown(parent.r) === true
-                    readonly property int idx: parent.idx
-                    implicitWidth: win.cw * 5
-                    implicitHeight: Math.round(cell.height * 0.95)
-                    color: on ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.22) : "transparent"
-                    border.color: on ? Theme.accent : Theme.bg2
-                    border.width: 1
-                    Rectangle {
-                        y: 3
-                        x: parent.on ? parent.width - width - 3 : 3
-                        width: parent.width / 2 - 3
-                        height: parent.height - 6
-                        color: parent.on ? Theme.accent : Theme.gray
-                        Behavior on x { NumberAnimation { duration: 90 } }
-                    }
-                    MouseArea {
-                        anchors.fill: parent
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: win.pick(parent.idx, !win.value(win.rows[parent.idx]))
-                    }
-                }
-            }
-
-            // кнопки вариантов: [fill] [fit] [stretch]; у строк раскладки — зоны и порядок ↑↓
-            Component {
-                id: segmentsC
-                Row {
-                    id: seg
-                    readonly property var r: parent.r
-                    readonly property int idx: parent.idx
-                    spacing: win.cw * 0.5
-                    Repeater {
-                        model: win.optionsOf(seg.r)
-                        Rectangle {
-                            required property var modelData
-                            readonly property bool sel: modelData === win.shown(seg.r)
-                            width: segT.implicitWidth + win.cw * 1.6
-                            height: segT.implicitHeight + 4
-                            color: sel ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.22) : segHover.containsMouse ? Theme.bg1 : "transparent"
-                            border.color: sel ? Theme.accent : Theme.bg2
-                            border.width: 1
-                            T {
-                                id: segT
-                                anchors.centerIn: parent
-                                text: win.optionLabel(seg.r, parent.modelData)
-                                color: parent.sel ? Theme.accent : segHover.containsMouse ? Theme.fg : Theme.gray
-                                font.bold: parent.sel
-                            }
-                            MouseArea {
-                                id: segHover
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: win.pick(seg.idx, parent.modelData)
-                            }
-                        }
-                    }
-                    // порядок модуля в зоне
-                    Repeater {
-                        model: seg.r.type === "module" ? [[-1, 0xF005D], [1, 0xF0045]] : []
-                        T {
-                            required property var modelData
-                            // у выключенных порядка нет — место остаётся, чтобы кнопки зон стояли ровно
-                            opacity: seg.r.zone !== "off" ? 1 : 0
-                            font.family: Theme.iconFont
-                            text: " " + String.fromCodePoint(modelData[1])
-                            color: ordHover.containsMouse ? Theme.accent : Theme.gray
-                            MouseArea {
-                                id: ordHover
-                                anchors.fill: parent
-                                enabled: seg.r.zone !== "off"
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: { win.focusRow(seg.idx); win.reorderModule(win.rows[seg.idx], parent.modelData[0]); }
-                            }
-                        }
-                    }
-                }
-            }
-
-            // много вариантов: ‹ значение ▾ › и список
-            Component {
-                id: dropC
-                Rectangle {
-                    id: dc
-                    readonly property var r: parent.r
-                    readonly property int idx: parent.idx
-                    implicitWidth: Math.max(win.cw * 16, dcT.implicitWidth + win.cw * 4)
-                    implicitHeight: dcT.implicitHeight + 4
-                    color: dcHover.containsMouse ? Theme.bg1 : "transparent"
-                    border.color: win.drop === idx ? Theme.accent : Theme.bg2
-                    border.width: 1
-                    T {
-                        id: dcT
-                        anchors { verticalCenter: parent.verticalCenter; left: parent.left; leftMargin: win.cw }
-                        text: win.optionLabel(dc.r, win.shown(dc.r))
-                        color: win.drafted(dc.r) ? Theme.accent : Theme.fg
-                    }
-                    T {
-                        anchors { verticalCenter: parent.verticalCenter; right: parent.right; rightMargin: win.cw * 0.6 }
-                        font.family: Theme.iconFont
-                        text: String.fromCodePoint(0xF0140)
-                        color: Theme.gray
-                    }
-                    MouseArea {
-                        id: dcHover
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: win.drop === dc.idx ? win.drop = -1 : win.openDrop(dc.idx, dc)
-                    }
-                }
-            }
-
-            // цвета: квадраты, выбранный — в рамке, название рядом
-            Component {
-                id: swatchC
-                Row {
-                    id: sw
-                    readonly property var r: parent.r
-                    readonly property int idx: parent.idx
-                    spacing: win.cw * 0.5
-                    Repeater {
-                        model: sw.r.options
-                        Rectangle {
-                            required property var modelData
-                            readonly property bool sel: modelData === win.shown(sw.r)
-                            width: Math.round(cell.height * 1.1)
-                            height: width
-                            color: "transparent"
-                            border.color: sel ? Theme.fg : swHover.containsMouse ? Theme.bg2 : "transparent"
-                            border.width: 2
-                            Rectangle { anchors { fill: parent; margins: 3 } color: Theme.named(parent.modelData); border.color: Theme.bg2; border.width: parent.modelData === "black" ? 1 : 0 }
-                            MouseArea {
-                                id: swHover
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: win.pick(sw.idx, parent.modelData)
-                            }
-                        }
-                    }
-                    T { anchors.verticalCenter: parent.verticalCenter; text: " " + win.shown(sw.r); color: Theme.gray }
-                }
-            }
-
-            // число: [−] ▕████░░░░▏ [+] значение; полосу можно тянуть
-            Component {
-                id: sliderC
-                Row {
-                    id: sl
-                    readonly property var r: parent.r
-                    readonly property int idx: parent.idx
-                    readonly property real v: win.shown(r)
-                    readonly property int cells: 18
-                    readonly property int filled: Math.round(Math.max(0, Math.min(1, (v - r.min) / (r.max - r.min))) * cells)
-                    readonly property int decimals: r.type === "float" ? (String(r.step).split(".")[1]?.length ?? 0) : 0
-                    spacing: 0
-                    function at(x) {
-                        const f = Math.max(0, Math.min(1, x / (cells * win.cw)));
-                        const n = r.min + Math.round(f * (r.max - r.min) / r.step) * r.step;
-                        return r.type === "int" ? Math.round(n) : Number(n.toFixed(2));
-                    }
-                    T {
-                        font.family: Theme.iconFont
-                        text: String.fromCodePoint(0xF0374) + " "
-                        color: minus.containsMouse ? Theme.accent : Theme.gray
-                        MouseArea { id: minus; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: win.nudge(sl.idx, -1) }
-                    }
-                    T {
-                        text: "█".repeat(sl.filled) + "░".repeat(sl.cells - sl.filled)
-                        color: win.drafted(sl.r) ? Theme.accent : Qt.darker(Theme.accent, sl.parent.current ? 1 : 1.25)
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            preventStealing: true
-                            onPressed: mouse => win.pick(sl.idx, sl.at(mouse.x))
-                            onPositionChanged: mouse => { if (pressed) { const v = sl.at(mouse.x); if (v !== win.value(win.rows[sl.idx])) win.pick(sl.idx, v); } }
-                        }
-                    }
-                    T {
-                        font.family: Theme.iconFont
-                        text: " " + String.fromCodePoint(0xF0415)
-                        color: plus.containsMouse ? Theme.accent : Theme.gray
-                        MouseArea { id: plus; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: win.nudge(sl.idx, 1) }
-                    }
-                    T {
-                        text: " " + Number(sl.v).toFixed(sl.decimals).padStart(5)
-                        color: win.drafted(sl.r) ? Theme.accent : Theme.fg
-                        font.bold: true
-                    }
-                }
-            }
-
-            // текст: поле прямо в строке, клик — редактировать
-            Component {
-                id: textC
-                Rectangle {
-                    id: tf
-                    readonly property var r: parent.r
-                    readonly property int idx: parent.idx
-                    readonly property bool edit: win.editing && parent.current
-                    implicitWidth: win.cw * 32
-                    implicitHeight: tfT.implicitHeight + 6
-                    color: edit ? Theme.bg : "transparent"
-                    border.color: edit ? Theme.accent : tfHover.containsMouse ? Theme.gray : Theme.bg2
-                    border.width: 1
-                    T {
-                        id: tfT
-                        visible: !tf.edit
-                        anchors { verticalCenter: parent.verticalCenter; left: parent.left; right: parent.right; leftMargin: win.cw * 0.6; rightMargin: win.cw * 0.6 }
-                        elide: Text.ElideRight
-                        text: String(win.value(tf.r)) || I18n.tr("пусто")
-                        color: String(win.value(tf.r)) ? Theme.aqua : Theme.bg2
-                    }
-                    TextInput {
-                        visible: tf.edit
-                        anchors { verticalCenter: parent.verticalCenter; left: parent.left; right: parent.right; leftMargin: win.cw * 0.6; rightMargin: win.cw * 0.6 }
-                        font.family: Theme.font
-                        font.pixelSize: Theme.fontSize
-                        color: Theme.fg
-                        selectionColor: Theme.bg2
-                        renderType: Text.NativeRendering
-                        clip: true
-                        onVisibleChanged: if (visible) { text = String(win.value(tf.r)); selectAll(); forceActiveFocus(); }
-                        Keys.onPressed: event => {
-                            if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) win.finishEdit(true, text);
-                            else if (event.key === Qt.Key_Escape) win.finishEdit(false, "");
-                            else return;
-                            event.accepted = true;
-                        }
-                        onActiveFocusChanged: if (!activeFocus && visible) win.finishEdit(true, text)
-                    }
-                    MouseArea {
-                        id: tfHover
-                        anchors.fill: parent
-                        visible: !tf.edit
-                        hoverEnabled: true
-                        cursorShape: Qt.IBeamCursor
-                        onClicked: { win.focusRow(tf.idx); win.editing = true; }
-                    }
-                }
-            }
-
-            // сочетание: [Mod+Shift+M] — клик и нажать; ⌫ в строке или ✕ — убрать
-            Component {
-                id: comboC
-                Row {
-                    id: cb
-                    readonly property var r: parent.r
-                    readonly property int idx: parent.idx
-                    readonly property bool cap: win.capturing && parent.current
-                    readonly property bool edit: win.editing && parent.current
-                    spacing: win.cw
-                    Rectangle {
-                        width: Math.max(win.cw * 18, cbT.implicitWidth + win.cw * 2)
-                        height: cbT.implicitHeight + 6
-                        color: cb.cap || cb.edit ? Theme.bg : cbHover.containsMouse ? Theme.bg1 : "transparent"
-                        border.color: cb.cap || cb.edit ? Theme.accent : Theme.bg2
-                        border.width: 1
-                        T {
-                            id: cbT
-                            visible: !cb.edit
-                            anchors.centerIn: parent
-                            text: cb.cap ? I18n.tr("нажмите сочетание…") : win.value(cb.r) || I18n.tr("не задано")
-                            color: cb.cap ? Theme.accent : win.value(cb.r) ? Theme.blue : Theme.bg2
-                        }
-                        TextInput {
-                            visible: cb.edit
-                            anchors { verticalCenter: parent.verticalCenter; left: parent.left; right: parent.right; leftMargin: win.cw * 0.6; rightMargin: win.cw * 0.6 }
-                            font.family: Theme.font
-                            font.pixelSize: Theme.fontSize
-                            color: Theme.fg
-                            renderType: Text.NativeRendering
-                            onVisibleChanged: if (visible) { text = String(win.value(cb.r)); selectAll(); forceActiveFocus(); }
-                            Keys.onPressed: event => {
-                                if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) win.finishEdit(true, text);
-                                else if (event.key === Qt.Key_Escape) win.finishEdit(false, "");
-                                else return;
-                                event.accepted = true;
-                            }
-                        }
-                        MouseArea {
-                            id: cbHover
-                            anchors.fill: parent
-                            visible: !cb.edit
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: { win.focusRow(cb.idx); win.capturing = true; }
-                        }
-                    }
-                    T {
-                        visible: !!win.value(cb.r) && !cb.cap
-                        anchors.verticalCenter: parent.verticalCenter
-                        font.family: Theme.iconFont
-                        text: String.fromCodePoint(0xF0156)
-                        color: cbx.containsMouse ? Theme.red : Theme.gray
-                        MouseArea { id: cbx; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: { win.focusRow(cb.idx); win.reset(win.rows[cb.idx]); } }
-                    }
-                }
-            }
-
-            // действие — кнопка
-            Component {
-                id: actionC
-                Rectangle {
-                    id: ac
-                    readonly property var r: parent.r
-                    implicitWidth: acT.implicitWidth + win.cw * 3
-                    implicitHeight: acT.implicitHeight + 6
-                    color: acHover.pressed ? Theme.accent : acHover.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.22) : "transparent"
-                    border.color: acHover.containsMouse || parent.current ? Theme.accent : Theme.bg2
-                    border.width: 1
-                    T {
-                        id: acT
-                        anchors.centerIn: parent
-                        text: win.opens.includes(ac.r.action) ? I18n.tr("открыть") : I18n.tr("выполнить")
-                        color: acHover.pressed ? Theme.bg : Theme.accent
-                    }
-                    MouseArea {
-                        id: acHover
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: win.runAction(ac.r.action)
-                    }
-                }
+                DropList { win: refs.w; flick: refs.f; box: refs.b }
             }
         }
     }
