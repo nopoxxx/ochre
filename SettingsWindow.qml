@@ -93,12 +93,13 @@ Scope {
             function runAction(name) {
                 Settings.open = false;
                 // из этих окон Esc возвращает сюда же
-                Settings.returnHere = ["picker", "wallhaven", "binds", "displays", "lockPreview"].includes(name);
+                Settings.returnHere = ["picker", "wallhaven", "binds", "cheatsheet", "displays", "lockPreview"].includes(name);
                 const ipc = (...args) => Ochre.ipc(...args);
                 switch (name) {
                 case "picker": Wallpaper.pickerSource = "local"; Wallpaper.pickerOpen = true; break;
                 case "wallhaven": Wallpaper.pickerSource = "wallhaven"; Wallpaper.pickerOpen = true; break;
                 case "binds": ipc("binds", "toggle"); break;
+                case "cheatsheet": ipc("cheatsheet", "toggle"); break;
                 case "hotkeys": Niri.action("show-hotkey-overlay"); break;
                 case "displays": ipc("displays", "toggle"); break;
                 case "lock": ipc("lock", "lock"); break;
@@ -108,12 +109,14 @@ Scope {
                 case "calendarEdit": Calendar.edit(); break;
                 case "calendarLogin": Calendar.login(); break;
                 case "calendarRefresh": Calendar.refresh(); break;
+                case "soundTest": Sounds.test(); break;
                 case "notifyTest": Quickshell.execDetached(["notify-send", "-a", "ochre", I18n.tr("Проверка уведомления"), I18n.tr("так выглядит анимация %1", Settings.get("shell.notify.anim"))]); break;
                 case "wifi": Term.float(["nmtui"]); break;
                 case "audio": Quickshell.execDetached(["pavucontrol"]); break;
                 case "editNiri": Term.edit(Quickshell.env("HOME") + "/.config/niri/config.kdl"); break;
                 case "editShell": Term.edit(Quickshell.shellDir); break;
                 case "editTerminal": Term.edit(Term.configPath); break;
+                case "fastfetch": Term.fastfetch(); break;
                 case "shellUpdate":
                     if (Ochre.system)
                         Quickshell.execDetached(["notify-send", "-a", "ochre", I18n.tr("ochre поставлен пакетом"),
@@ -407,7 +410,7 @@ Scope {
             }
             readonly property var swatchKeys: ["shell.accent", "shell.shot.color"]
             readonly property var opens: ["picker", "wallhaven", "binds", "displays", "home", "wifi", "audio", "editNiri",
-                "editShell", "editTerminal", "lockPreview", "hotkeys"]
+                "editShell", "editTerminal", "lockPreview", "hotkeys", "cheatsheet", "fastfetch"]
 
             TextMetrics {
                 id: cell

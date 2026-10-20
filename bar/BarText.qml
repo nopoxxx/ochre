@@ -9,7 +9,7 @@ T {
 
     height: fm.height
     // запасной шрифт опускает базовую линию — возвращаем её на место, вровень с соседями
-    y: Math.round(fm.ascent - baselineOffset)
+    transform: Translate { y: Math.round(fm.ascent - t.baselineOffset) }
 
     FontMetrics { id: fm; font: t.font }
 }

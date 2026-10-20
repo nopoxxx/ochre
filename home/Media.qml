@@ -22,7 +22,8 @@ Section {
     readonly property var buttons: [
         { icon: G.g("prev"), ok: player?.canGoPrevious ?? false, run: () => player.previous() },
         { icon: G.g(player?.isPlaying ? "pause" : "play"), ok: player?.canTogglePlaying ?? false, run: () => player.togglePlaying() },
-        { icon: G.g("next"), ok: player?.canGoNext ?? false, run: () => player.next() }
+        { icon: G.g("next"), ok: player?.canGoNext ?? false, run: () => player.next() },
+        { icon: G.g("ear"), ok: true, on: SongRec.busy, run: () => SongRec.recognize(false) }
     ].concat(players.length > 1 ? [{ text: "‹ " + (players.indexOf(player) + 1) + "/" + players.length + " ›", ok: true, run: () => sec.cycle(1) }] : [])
 
     function cycle(d) {
@@ -148,6 +149,7 @@ Section {
                         icon: modelData.icon ?? ""
                         text: modelData.text ?? ""
                         active: modelData.ok
+                        on: modelData.on ?? false
                         current: sec.isCur(index)
                         onClicked: { sec.pick(index); sec.activate(index); }
                     }

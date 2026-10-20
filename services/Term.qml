@@ -27,4 +27,10 @@ Singleton {
     function open(argv) { run(cmd(argv)); }
     function float(argv, opts) { run(cmd(argv, Object.assign({ cls: "ochre-term" }, opts ?? {}))); }
     function edit(path) { float(["vim", path]); }
+    function fastfetch() {
+        const config = S.fastfetchConfig(k => Settings.get(k), Quickshell.shellDir);
+        float(["bash", "-c",
+            'f=${XDG_RUNTIME_DIR:-/tmp}/ochre-fastfetch.jsonc; printf "%s" "$1" > "$f"; printf "\\e[?25l"; fastfetch -c "$f"; printf "\\n  \\e[90m%s\\e[0m" "$2"; read -rs',
+            "bash", config, I18n.tr("↵ — закрыть")]);
+    }
 }

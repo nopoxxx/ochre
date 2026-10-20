@@ -13,6 +13,7 @@ Seg {
 
     label: "cpu"
     value: spark + Sys.cpu + "%"
+    compact: Sys.cpu + "%"
     valueColor: Sys.cpu > 80 ? Theme.red : Sys.cpu > 50 ? Theme.yellow : Theme.fg
     onLeftClicked: procs.toggle()
 

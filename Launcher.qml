@@ -15,7 +15,8 @@ import "services/emoji.js" as Emoji
 // Запрос в корне ищет по меню сразу: программы и вложенные действия (system/reboot).
 // Остальное — только префиксами в корне (настраиваются, look/ → меню): «=выражение» — калькулятор,
 // «> cmd» — в терминале, «/имя» — файлы, «? запрос» — веб-поиск, «:имя» — эмодзи в буфер,
-// «@имя» — окна niri, «+пакет» / «-пакет» — установить / удалить, «%25m чай» — таймер.
+// «@имя» — окна niri, «+пакет» / «-пакет» — установить / удалить, «%25m чай» — таймер,
+// «!вопрос» — Claude Code в терминале или Google AI Mode в браузере.
 //   qs ipc call launcher apps   — сразу список программ
 Scope {
     id: root
@@ -53,13 +54,12 @@ Scope {
 
     function spawn(argv) { Quickshell.execDetached(argv); }
 
-    // fastfetch с конфигом ochre и акцентом shell; окно закрывается по Enter
-    function about() {
-        const c = Theme.accent;
-        const ansi = "38;2;" + [c.r, c.g, c.b].map(x => Math.round(x * 255)).join(";");
-        Term.float(["bash", "-c",
-            'printf "\\e[?25l"; fastfetch -c "$1" --logo-type file --logo "$3" --logo-color-1 "$2" --logo-color-2 "$2"; printf "\\n  \\e[90m%s\\e[0m" "$4"; read -rs',
-            "bash", Quickshell.shellDir + "/extras/fastfetch/config.jsonc", ansi, Quickshell.shellDir + "/extras/fastfetch/ochre-large.txt", I18n.tr("↵ — закрыть")]);
+    // AI-агент (shell.launcher.ai.cmd, по умолчанию claude) в обычном окне терминала, из ~
+    function ai(args) {
+        const cmd = String(Settings.get("shell.launcher.ai.cmd") ?? "").trim() || "claude";
+        Term.open(["bash", "-c",
+            'cd ~; command -v "${1%% *}" >/dev/null || { printf "%s\\n" "$2"; read -rs; exit 1; }; exec $1 "${@:3}"',
+            "bash", cmd, I18n.tr("не найдено: %1 — поставь Claude Code или смени команду в look/ → меню", cmd)].concat(args));
     }
 
     function openPicker(source) {
@@ -137,7 +137,8 @@ Scope {
         { kind: "install", p: Settings.get("shell.launcher.prefix.install") },
         { kind: "remove", p: Settings.get("shell.launcher.prefix.remove") },
         { kind: "timer", p: Settings.get("shell.launcher.prefix.timer") },
-        { kind: "calc", p: Settings.get("shell.launcher.prefix.calc") }
+        { kind: "calc", p: Settings.get("shell.launcher.prefix.calc") },
+        { kind: "ai", p: Settings.get("shell.launcher.prefix.ai") }
     ].map(x => ({ kind: x.kind, p: String(x.p ?? "").trim() })).filter(x => x.p)
      .sort((a, b) => b.p.length - a.p.length)   // «>>» раньше «>», если заданы оба
 
@@ -258,7 +259,7 @@ Scope {
                 { label: "reboot", desc: I18n.tr("перезагрузка"), alias: ["restart"], confirm: true, run: () => spawn(["systemctl", "reboot"]) },
                 { label: "poweroff", desc: I18n.tr("выключение"), alias: ["shutdown", I18n.tr("выключить")], confirm: true, run: () => spawn(["systemctl", "poweroff"]) }
             ] },
-            { label: "about", icon: icons.about, desc: I18n.tr("о системе: fastfetch"), run: () => about() },
+            { label: "about", icon: icons.about, desc: I18n.tr("о системе: fastfetch"), run: () => Term.fastfetch() },
             { label: "help", icon: icons.about, desc: I18n.tr("главные клавиши и подсказки (ochre --help)"), alias: [I18n.tr("помощь"), I18n.tr("справка"), I18n.tr("клавиши")], run: () => Ochre.ipc("welcome", "open") }
         ]
     })
@@ -342,6 +343,14 @@ Scope {
         if (name === "web")
             return query ? [{ label: query, desc: I18n.tr("↵ — искать: %1", Settings.get("shell.launcher.web")), pin: true, run: () => spawn(["xdg-open", webUrl(query)]) }]
                 : [{ label: prefixOf("web"), desc: I18n.tr("что искать в интернете"), pin: true }];
+        if (name === "ai" && Settings.get("shell.launcher.ai") === "google")
+            return query ? [{ label: prefixOf("ai") + " " + query, desc: I18n.tr("↵ — спросить Google AI"), pin: true,
+                              run: () => spawn(["xdg-open", "https://www.google.com/search?udm=50&q=" + encodeURIComponent(query)]) }]
+                : [{ label: prefixOf("ai"), desc: I18n.tr("вопрос для Google AI Mode"), pin: true }];
+        if (name === "ai")
+            return query ? [{ label: prefixOf("ai") + " " + query, desc: I18n.tr("↵ — спросить в Claude Code"), pin: true, run: () => ai([query]) }]
+                : [{ label: "new", desc: I18n.tr("новая сессия Claude Code"), pin: true, run: () => ai([]) },
+                   { label: "continue", desc: I18n.tr("продолжить последнюю сессию"), pin: true, run: () => ai(["--continue"]) }];
         if (name === "files")
             return query ? fileHits : [];
         if (name === "emoji")

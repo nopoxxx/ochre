@@ -9,6 +9,7 @@ Item {
     property var bar
     property bool available: true
     readonly property string style: Settings.get("shell.bar.prompt")
+    readonly property bool vertical: bar?.vertical ?? false
 
     function c(color, s) { return `<font color="${color}">${s}</font>`; }
 
@@ -25,8 +26,9 @@ Item {
         id: t
         textFormat: Text.StyledText
         text: {
-            const u = root.c(Theme.green, "<b>" + Sys.user + "</b>");
-            const h = root.c(Theme.aqua, "<b>" + Sys.host + "</b>");
+            const n = !root.vertical ? undefined : root.style === "user" || root.style === "host" ? 6 : 1;
+            const u = root.c(Theme.green, "<b>" + Sys.user.slice(0, n) + "</b>");
+            const h = root.c(Theme.aqua, "<b>" + Sys.host.slice(0, n) + "</b>");
             const at = root.c(Theme.gray, "@");
             switch (root.style) {
             case "[user@host]": return root.c(Theme.gray, "[") + u + at + h + root.c(Theme.gray, "]");

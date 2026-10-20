@@ -56,6 +56,8 @@ Singleton {
             e.notif = null;
         });
 
+        if (!n.transient && !n.hints?.["suppress-sound"] && !(e.app === "ochre" && Sounds.recent(1500)))
+            Sounds.play(n.urgency === NotificationUrgency.Critical ? "critical" : "notify");
         if (dnd && n.urgency !== NotificationUrgency.Critical) return;
         const onTop = Settings.get("shell.notify.position").startsWith("top");
         popupModel.insert(onTop ? 0 : popupModel.count, { key: e.key });

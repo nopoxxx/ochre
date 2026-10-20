@@ -18,14 +18,19 @@ Item {
         return list.length > 2 ? list.slice(0, 2).join(",") + " +" + (list.length - 2) : list.join(",");
     }
 
-    Row {
+    Grid {
         id: row
-        spacing: cell.advanceWidth
+        readonly property bool vertical: root.bar?.vertical ?? false
+        rows: vertical ? -1 : 1
+        columns: vertical ? 1 : -1
+        horizontalItemAlignment: Grid.AlignHCenter
+        spacing: vertical ? 0 : cell.advanceWidth
         Seg {
             visible: Privacy.micApps.length > 0
             bar: root.bar
             label: "mic"
             value: root.names(Privacy.micApps)
+            compact: String(Privacy.micApps.length)
             valueColor: Theme.orange
             bold: true
         }
@@ -34,6 +39,7 @@ Item {
             bar: root.bar
             label: "cast"
             value: root.names(Privacy.screenApps)
+            compact: String(Privacy.screenApps.length)
             valueColor: Theme.red
             bold: true
         }
