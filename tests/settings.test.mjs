@@ -40,6 +40,8 @@ const VARIANTS = {
     "игровой режим": { "shell.game": true },
     "все горячие углы": { "niri.hc.topLeft": true, "niri.hc.topRight": true, "niri.hc.bottomLeft": true, "niri.hc.bottomRight": true },
     "без анимаций": { "niri.anim": false },
+    "без приватных окон": { "niri.rules.private": "" },
+    "приватные и от скриншотов": { "niri.rules.privateShots": true, "niri.border": 4 },
     ...Object.fromEntries(S.NIRI_ANIMS.map(a => ["анимации " + a, { "niri.anim.style": a }])),
     ...Object.fromEntries(Object.keys(S.ACCENTS).map(a => ["акцент " + a, { "shell.accent": a }])),
 };
@@ -207,4 +209,23 @@ test("migrateOutputKeys: уже есть ключ по модели — он в�
 test("niriFiles: монитор по модели — output с make model serial", () => {
     const files = S.niriFiles(getter(), { "Dell Inc. DELL U2720Q ABC123": { scale: 1.5 } }, []);
     assert.match(files["displays.kdl"], /output "Dell Inc\. DELL U2720Q ABC123" \{\n    scale 1\.5/);
+});
+
+test("privateAppIds: регулярка по app-id, мусор отброшен, пусто — null", () => {
+    assert.equal(S.privateAppIds(""), null);
+    assert.equal(S.privateAppIds("  , "), null);
+    const re = S.privateAppIds("keepassxc, org.telegram.desktop \"x\"y");
+    assert.equal(re, "(?i)(^|[.])(keepassxc|org[.]telegram[.]desktop|xy)$");
+    const js = new RegExp(re.replace("(?i)", ""), "i");
+    for (const id of ["org.keepassxc.KeePassXC", "KeePassXC", "org.telegram.desktop"]) assert.match(id, js);
+    for (const id of ["notkeepassxc", "org.telegram.desktop.extra"]) assert.doesNotMatch(id, js);
+});
+
+test("niriFiles: приватные окна — block-out-from и зелёная обводка", () => {
+    const pal = S.palette(getter());
+    const rules = o => S.niriFiles(getter(o), {}, [])["window-rules.kdl"];
+    assert.match(rules({}), /block-out-from "screencast"/);
+    assert.ok(rules({}).includes("active-color " + JSON.stringify(pal.green)));
+    assert.match(rules({ "niri.rules.privateShots": true }), /block-out-from "screen-capture"/);
+    assert.doesNotMatch(rules({ "niri.rules.private": "" }), /block-out-from/);
 });

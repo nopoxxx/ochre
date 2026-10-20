@@ -169,6 +169,12 @@ function niriFileOf(key) {
     return "";
 }
 
+// «keepassxc org.telegram.desktop» → (?i)(^|[.])(keepassxc|org[.]telegram[.]desktop)$; пусто — null
+function privateAppIds(list) {
+    const ids = String(list ?? "").split(/[\s,]+/).map(s => s.replace(/[^\w.-]/g, "")).filter(s => s);
+    return ids.length ? "(?i)(^|[.])(" + ids.map(s => s.replace(/[.]/g, "[.]")).join("|") + ")$" : null;
+}
+
 function greeterNiri(get) {
     const bg = P.palette(get).bg;
     return "layout {\n    background-color " + q(/^#[0-9a-f]{6}$/i.test(bg) ? bg : "#1d2021") + "\n}\n";
@@ -191,6 +197,7 @@ function niriFiles(get0, outs, sel) {
     const border = get("niri.border");
     const radius = get("niri.rules.radius");
     const inactive = get("niri.rules.inactiveOpacity");
+    const priv = privateAppIds(get("niri.rules.private"));
     const files = {};
 
     files["main.kdl"] = text([
@@ -292,6 +299,19 @@ function niriFiles(get0, outs, sel) {
             "window-rule {",
             "    match is-active=false",
             "    opacity " + (inactive / 100).toFixed(2),
+            "}",
+            ""] : []),
+        ...(priv ? [
+            "// приватные окна: в стримах — чёрный прямоугольник, на экране — зелёная обводка",
+            "window-rule {",
+            "    match app-id=" + q(priv),
+            "    block-out-from " + q(get("niri.rules.privateShots") ? "screen-capture" : "screencast"),
+            "    border {",
+            "        on",
+            "        width " + Math.max(border, 2),
+            "        active-color " + q(pal.green),
+            "        inactive-color " + q(pal.green),
+            "    }",
             "}",
             ""] : []),
         "// терминалы, открытые из меню ochre (install / remove / update …), — плавающие по центру",
