@@ -292,7 +292,7 @@ Scope {
                                 T {
                                     anchors.centerIn: parent
                                     visible: img.status !== Image.Ready
-                                    text: img.status === Image.Error ? "ошибка" : "…"
+                                    text: img.status === Image.Error ? I18n.tr("ошибка") : "…"
                                     color: Theme.gray
                                 }
                             }
@@ -343,10 +343,10 @@ Scope {
                             anchors.centerIn: parent
                             visible: grid.count === 0
                             color: Theme.gray
-                            text: win.loading ? "загрузка…"
+                            text: win.loading ? I18n.tr("загрузка…")
                                 : win.error ? win.error
-                                : win.source === "local" ? "пусто: " + Wallpaper.dir + " — найдите обои на wallhaven (Tab)"
-                                : "ничего не найдено"
+                                : win.source === "local" ? I18n.tr("пусто: %1 — найдите обои на wallhaven (Tab)", Wallpaper.dir)
+                                : I18n.tr("ничего не найдено")
                         }
                     }
 
@@ -363,7 +363,7 @@ Scope {
 
                         T {
                             text: (grid.count ? (grid.currentIndex + 1) + "/" + grid.count : "0/0")
-                                + (win.loading && grid.count ? "  загрузка…" : "")
+                                + (win.loading && grid.count ? I18n.tr("  загрузка…") : "")
                             color: Theme.gray
                         }
                         // режим заполнения: fill [fit] stretch — Ctrl+F или клик
@@ -386,7 +386,7 @@ Scope {
                         }
                         T {
                             textFormat: Text.StyledText
-                            text: [["↵", "применить"], ["⇥", "источник"], ["^f", "заполнение"], ["←↑↓→", "выбор"], ["esc", "выход"]]
+                            text: [["↵", I18n.tr("применить")], ["⇥", I18n.tr("источник")], ["^f", I18n.tr("заполнение")], ["←↑↓→", I18n.tr("выбор")], ["esc", I18n.tr("выход")]]
                                 .map(([k, v]) => `<font color="${Theme.accent}">${k}</font> ${v}`).join("   ")
                             color: Theme.gray
                         }

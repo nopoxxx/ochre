@@ -126,7 +126,7 @@ Scope {
 
             LoginPrompt {
                 anchors.fill: parent
-                message: "предпросмотр — пароль не проверяется, Esc — закрыть"
+                message: I18n.tr("предпросмотр — пароль не проверяется, Esc — закрыть")
                 messageIsError: false
                 attempt: root.previewAttempt
                 onSubmit: root.previewAttempt++

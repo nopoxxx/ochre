@@ -322,7 +322,7 @@ Scope {
                             spacing: Theme.pad
                             T {
                                 font.family: Theme.iconFont
-                                text: String.fromCodePoint(0xF0141) + " назад"
+                                text: String.fromCodePoint(0xF0141) + " " + I18n.tr("назад")
                                 color: backHover.containsMouse ? Theme.accent : Theme.gray
                                 MouseArea { id: backHover; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: win.closePage() }
                             }
@@ -330,7 +330,7 @@ Scope {
                             // секция страницы недоступна (нет адаптера) — сказать об этом, а не показывать пустоту
                             T {
                                 visible: win.page !== "" && !(repPage.itemAt(0)?.shown ?? false)
-                                text: win.page === "wifi" ? "нет Wi-Fi-адаптера" : "нет bluetooth-адаптера"
+                                text: win.page === "wifi" ? I18n.tr("нет Wi-Fi-адаптера") : I18n.tr("нет bluetooth-адаптера")
                                 color: Theme.gray
                             }
                         }
@@ -343,8 +343,8 @@ Scope {
                     textFormat: Text.StyledText
                     color: Theme.gray
                     elide: Text.ElideRight
-                    text: (win.page ? [["↑↓", "выбор"], ["↵", "действие"], ["esc", "назад"]]
-                        : [["↑↓", "выбор"], ["←→", "изменить"], ["↵", "действие"], ["⇥", "секция"], ["esc", "закрыть"]])
+                    text: (win.page ? [["↑↓", I18n.tr("выбор")], ["↵", I18n.tr("действие")], ["esc", I18n.tr("назад")]]
+                        : [["↑↓", I18n.tr("выбор")], ["←→", I18n.tr("изменить")], ["↵", I18n.tr("действие")], ["⇥", I18n.tr("секция")], ["esc", I18n.tr("закрыть")]])
                         .map(([k, v]) => `<font color="${Theme.accent}">${k}</font> ${v}`).join("  ")
                 }
             }
@@ -390,7 +390,7 @@ Scope {
                             id: cardTitle
                             anchors.centerIn: parent
                             textFormat: Text.StyledText
-                            text: `<font face="${Theme.iconFont}">${String.fromCodePoint(sl.folded ? 0xF0142 : 0xF0140)}</font> ${sl.item?.title ?? sl.info?.label ?? ""}`
+                            text: `<font face="${Theme.iconFont}">${String.fromCodePoint(sl.folded ? 0xF0142 : 0xF0140)}</font> ${sl.item?.title ?? I18n.tr(sl.info?.label ?? "")}`
                             color: sl.item?.focused ? Theme.accent : titleHover.containsMouse ? Theme.fg : Theme.gray
                             font.bold: true
                         }

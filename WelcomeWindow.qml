@@ -17,25 +17,25 @@ Scope {
     readonly property string docs: "https://nopoxxx.github.io/ochre/"
 
     readonly property var keys: [
-        ["Mod+D", "меню: программы, обои, таймер, пакеты, питание"],
-        ["Mod+Space", "программы"],
-        ["Mod+Return", "терминал"],
-        ["Mod+A", "меню home: звук, медиа, todo (или клик по user@host)"],
-        ["Mod+S", "настройки"],
-        ["Mod+Shift+S", "скриншот с разметкой"],
-        ["Mod+Shift+T", "текст с экрана в буфер"],
-        ["Mod+Shift+C", "пипетка"],
-        ["Mod+Shift+V", "история буфера обмена"],
-        ["Mod+Alt+R", "запись экрана"],
-        ["Mod+Shift+G", "игровой режим"],
-        ["Super+Alt+L", "блокировка"],
-        ["Mod+Shift+/", "все клавиши niri"]
+        ["Mod+D", I18n.tr("меню: программы, обои, таймер, пакеты, питание")],
+        ["Mod+Space", I18n.tr("программы")],
+        ["Mod+Return", I18n.tr("терминал")],
+        ["Mod+A", I18n.tr("меню home: звук, медиа, todo (или клик по user@host)")],
+        ["Mod+S", I18n.tr("настройки")],
+        ["Mod+Shift+S", I18n.tr("скриншот с разметкой")],
+        ["Mod+Shift+T", I18n.tr("текст с экрана в буфер")],
+        ["Mod+Shift+C", I18n.tr("пипетка")],
+        ["Mod+Shift+V", I18n.tr("история буфера обмена")],
+        ["Mod+Alt+R", I18n.tr("запись экрана")],
+        ["Mod+Shift+G", I18n.tr("игровой режим")],
+        ["Super+Alt+L", I18n.tr("блокировка")],
+        ["Mod+Shift+/", I18n.tr("все клавиши niri")]
     ]
     readonly property var tips: [
-        ["колёсико по панели", "листать рабочие столы"],
-        ["timer 25m чай", "в меню — таймер на панели"],
-        ["=2^10", "в меню — калькулятор"],
-        ["~/log/errors", "окно в углу — ошибки shell и niri"]
+        [I18n.tr("колёсико по панели"), I18n.tr("листать рабочие столы")],
+        [I18n.tr("timer 25m чай"), I18n.tr("в меню — таймер на панели")],
+        ["=2^10", I18n.tr("в меню — калькулятор")],
+        ["~/log/errors", I18n.tr("окно в углу — ошибки shell и niri")]
     ]
 
     function close() {
@@ -79,7 +79,7 @@ Scope {
 
             // строки страницы: StyledText; печатаются по одной
             readonly property var lines: [
-                c(Theme.accent, "<b>ochre</b>") + " — тёплая терминальная оболочка для niri",
+                c(Theme.accent, "<b>ochre</b>") + I18n.tr(" — тёплая терминальная оболочка для niri"),
                 "",
                 c(Theme.gray, "USAGE"),
                 ...root.keys.map(([k, d]) => "&nbsp;&nbsp;" + c(Theme.blue, pad(k, 14)) + d),
@@ -88,7 +88,7 @@ Scope {
                 ...root.tips.map(([k, d]) => "&nbsp;&nbsp;" + c(Theme.aqua, pad(k, 20)) + d),
                 "",
                 c(Theme.gray, "SEE ALSO"),
-                "&nbsp;&nbsp;" + c(Theme.accent, root.docs) + c(Theme.gray, " — документация (d)")
+                "&nbsp;&nbsp;" + c(Theme.accent, root.docs) + c(Theme.gray, I18n.tr(" — документация (d)"))
             ]
             property int printed: 0
             Timer {
@@ -151,12 +151,12 @@ Scope {
                         Layout.topMargin: Theme.pad / 2
                         spacing: cell.advanceWidth * 2
                         T {
-                            text: "[понятно ↵]"
+                            text: I18n.tr("[понятно ↵]")
                             color: ok.containsMouse ? Theme.accent : Theme.fg
                             MouseArea { id: ok; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.close() }
                         }
                         T {
-                            text: "[документация d]"
+                            text: I18n.tr("[документация d]")
                             color: dm.containsMouse ? Theme.accent : Theme.fg
                             MouseArea { id: dm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: Quickshell.execDetached(["xdg-open", root.docs]) }
                         }

@@ -76,7 +76,7 @@ Scope {
 
                     T {
                         visible: Errors.list.length > 12
-                        text: "… ещё " + (Errors.list.length - 12) + " выше"
+                        text: I18n.tr("… ещё %1 выше", Errors.list.length - 12)
                         color: Theme.gray
                     }
 
@@ -85,9 +85,9 @@ Scope {
                         spacing: cell.advanceWidth
                         Repeater {
                             model: [
-                                { label: "скопировать", run: () => Errors.copy() },
-                                { label: "очистить", run: () => Errors.clear() },
-                                { label: "закрыть", run: () => Errors.close() }
+                                { label: I18n.tr("скопировать"), run: () => Errors.copy() },
+                                { label: I18n.tr("очистить"), run: () => Errors.clear() },
+                                { label: I18n.tr("закрыть"), run: () => Errors.close() }
                             ]
                             T {
                                 required property var modelData

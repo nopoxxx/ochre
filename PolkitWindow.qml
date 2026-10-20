@@ -59,8 +59,8 @@ Scope {
         onTriggered: {
             if (!root.enabled || root.agentObj?.isRegistered) return;
             if (++root.attempts < 4) takeOver.running = true;
-            else Quickshell.execDetached(["notify-send", "-a", "ochre", "-u", "critical", "polkit-агент ochre не зарегистрировался",
-                "Запросы пароля обработает другой агент, если он есть. system/ → ochre → polkit-агент"]);
+            else Quickshell.execDetached(["notify-send", "-a", "ochre", "-u", "critical", I18n.tr("polkit-агент ochre не зарегистрировался"),
+                I18n.tr("Запросы пароля обработает другой агент, если он есть. system/ → ochre → polkit-агент")]);
         }
     }
 
@@ -149,7 +149,7 @@ Scope {
                         visible: win.ids.length > 1
                         textFormat: Text.StyledText
                         text: "<font color='" + Theme.gray + "'>user</font> ‹ " + win.who + " ›  <font color='"
-                            + Theme.gray + "'>tab — сменить</font>"
+                            + Theme.gray + "'>" + I18n.tr("tab — сменить") + "</font>"
                     }
                     Row {
                         Layout.topMargin: Theme.pad / 2
@@ -174,7 +174,7 @@ Scope {
                         Layout.topMargin: Theme.pad / 2
                         textFormat: Text.StyledText
                         color: Theme.gray
-                        text: "<font color='" + Theme.accent + "'>↵</font> ок   <font color='" + Theme.accent + "'>esc</font> отмена"
+                        text: "<font color='" + Theme.accent + "'>↵</font> " + I18n.tr("ок") + "   <font color='" + Theme.accent + "'>esc</font> " + I18n.tr("отмена")
                     }
                 }
 

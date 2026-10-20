@@ -29,14 +29,14 @@ Scope {
     readonly property var presets: [
         // qs ipc этому экземпляру: у пакета — с -p <каталог> (Ochre.qml)
         ...[
-            ["launcher", "toggle", "меню"], ["launcher", "apps", "программы"], ["settings", "toggle", "настройки"],
-            ["wallpaper", "picker", "обои"], ["clipboard", "toggle", "история буфера обмена"], ["home", "toggle", "меню home"],
-            ["record", "toggle", "запись экрана — начать / остановить"], ["lock", "lock", "блокировка"],
-            ["notify", "dnd", "не беспокоить"], ["displays", "toggle", "мониторы"],
-            ["shot", "region", "скриншот с разметкой"], ["shot", "window", "скриншот окна"]
+            ["launcher", "toggle", I18n.tr("меню")], ["launcher", "apps", I18n.tr("программы")], ["settings", "toggle", I18n.tr("настройки")],
+            ["wallpaper", "picker", I18n.tr("обои")], ["clipboard", "toggle", I18n.tr("история буфера обмена")], ["home", "toggle", I18n.tr("меню home")],
+            ["record", "toggle", I18n.tr("запись экрана — начать / остановить")], ["lock", "lock", I18n.tr("блокировка")],
+            ["notify", "dnd", I18n.tr("не беспокоить")], ["displays", "toggle", I18n.tr("мониторы")],
+            ["shot", "region", I18n.tr("скриншот с разметкой")], ["shot", "window", I18n.tr("скриншот окна")]
         ].map(([t, f, d]) => ({ name: "spawn " + Ochre.ipcArgv([t, f]).map(a => JSON.stringify(a)).join(" "), desc: "ochre: " + d })),
-        { name: "spawn kitty", desc: "запустить программу: spawn <команда> [аргументы]" },
-        { name: "off", desc: "отключить сочетание" }
+        { name: "spawn kitty", desc: I18n.tr("запустить программу: spawn <команда> [аргументы]") },
+        { name: "off", desc: I18n.tr("отключить сочетание") }
     ]
 
     LazyLoader {
@@ -238,8 +238,8 @@ Scope {
                         visible: !Binds.included
                         wrapMode: Text.Wrap
                         textFormat: Text.StyledText
-                        text: `<font color="${Theme.yellow}">! в config.kdl нет include "ochre/keys.kdl" — свои бинды не применятся.</font> `
-                            + `<font color="${Theme.accent}">[подключить]</font>`
+                        text: `<font color="${Theme.yellow}">${I18n.tr("! в config.kdl нет include \"ochre/keys.kdl\" — свои бинды не применятся.")}</font> `
+                            + `<font color="${Theme.accent}">[${I18n.tr("подключить")}]</font>`
 
                         MouseArea {
                             anchors.fill: parent
@@ -278,7 +278,7 @@ Scope {
                                 anchors.verticalCenter: parent.verticalCenter
                                 width: parent.width
                                 clip: true
-                                text: "── " + (line.modelData.header ?? "") + " (" + (line.modelData.count ?? 0) + ") " + "─".repeat(120)
+                                text: "── " + I18n.tr(line.modelData.header ?? "") + " (" + (line.modelData.count ?? 0) + ") " + "─".repeat(120)
                                 color: Theme.gray
                             }
 
@@ -300,11 +300,11 @@ Scope {
                                     Layout.fillWidth: true
                                     Layout.minimumWidth: 0
                                     elide: Text.ElideRight
-                                    text: line.b?.off ? "отключено" : (line.b?.title || line.b?.action || "")
+                                    text: line.b?.off ? I18n.tr("отключено") : (line.b?.title || line.b?.action || "")
                                     color: line.b?.off ? Theme.gray : line.current ? Theme.fg : Qt.darker(Theme.fg, 1.15)
                                 }
                                 T {
-                                    text: "  " + (({ config: "config", ochre: "ochre", own: "своё", changed: "изменено" })[line.b?.source] ?? "")
+                                    text: "  " + (({ config: "config", ochre: "ochre", own: I18n.tr("своё"), changed: I18n.tr("изменено") })[line.b?.source] ?? "")
                                     color: line.b?.source === "changed" || line.b?.source === "own" ? Theme.accent : Theme.gray
                                 }
                             }
@@ -326,7 +326,7 @@ Scope {
                         spacing: 2
 
                         T {
-                            text: win.origCombo ? "изменить " + win.origCombo : "новый бинд"
+                            text: win.origCombo ? I18n.tr("изменить ") + win.origCombo : I18n.tr("новый бинд")
                             color: Theme.accent
                             font.bold: true
                         }
@@ -335,8 +335,8 @@ Scope {
                             id: comboField
 
                             Layout.fillWidth: true
-                            label: "сочетание"
-                            hint: "нажмите или введите: Mod+Shift+T"
+                            label: I18n.tr("сочетание")
+                            hint: I18n.tr("нажмите или введите: Mod+Shift+T")
                             active: win.field === 0
                             textColor: Theme.blue
                             labelWidth: cell.advanceWidth * 12
@@ -359,7 +359,7 @@ Scope {
                             id: actionField
 
                             Layout.fillWidth: true
-                            label: "действие"
+                            label: I18n.tr("действие")
                             hint: "close-window · focus-workspace 3 · spawn kitty -e btop · off"
                             active: win.field === 1
                             labelWidth: cell.advanceWidth * 12
@@ -383,8 +383,8 @@ Scope {
                             id: titleField
 
                             Layout.fillWidth: true
-                            label: "подпись"
-                            hint: "для подсказки клавиш niri (Mod+Shift+/), можно пусто"
+                            label: I18n.tr("подпись")
+                            hint: I18n.tr("для подсказки клавиш niri (Mod+Shift+/), можно пусто")
                             active: win.field === 2
                             labelWidth: cell.advanceWidth * 12
                             lineHeight: win.lineH
@@ -394,7 +394,7 @@ Scope {
 
                         T {
                             visible: win.conflict !== null
-                            text: "заменит: " + (win.conflict?.combo ?? "") + " → " + (win.conflict?.title || win.conflict?.action || "")
+                            text: I18n.tr("заменит: %1", (win.conflict?.combo ?? "") + " → " + (win.conflict?.title || win.conflict?.action || ""))
                             color: Theme.yellow
                         }
 
@@ -432,8 +432,8 @@ Scope {
                         textFormat: Text.StyledText
                         color: Theme.gray
                         text: (win.editing
-                            ? [["↵", "сохранить"], ["⇥", "поле"], ["↑↓", "подсказки"], ["esc", "отмена"]]
-                            : [["↵", "изменить"], ["^a", "добавить"], ["^d", "отключить"], ["^r", "вернуть"], ["esc", "выход"]])
+                            ? [["↵", I18n.tr("сохранить")], ["⇥", I18n.tr("поле")], ["↑↓", I18n.tr("подсказки")], ["esc", I18n.tr("отмена")]]
+                            : [["↵", I18n.tr("изменить")], ["^a", I18n.tr("добавить")], ["^d", I18n.tr("отключить")], ["^r", I18n.tr("вернуть")], ["esc", I18n.tr("выход")]])
                             .map(([k, v]) => `<font color="${Theme.accent}">${k}</font> ${v}`).join("   ")
                     }
                 }

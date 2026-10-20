@@ -59,18 +59,18 @@ Scope {
             function snapshot() {
                 const r = root.held ?? {};
                 // приложение портал обычно не называет (не flatpak) — тогда то, по которому только что кликнули
-                app = r.app || Niri.focusedWindow?.app_id || "приложение";
+                app = r.app || Niri.focusedWindow?.app_id || I18n.tr("приложение");
                 types = r.types || 1;
                 const outs = (types & 1) ? Quickshell.screens.map(s => ({
                     kind: "monitor", key: "m:" + s.name, name: s.name, label: s.name,
                     info: Math.round(s.width * s.devicePixelRatio) + "×" + Math.round(s.height * s.devicePixelRatio)
-                        + (s.name === Niri.focusedWorkspace?.output ? "  фокус" : "")
+                        + (s.name === Niri.focusedWorkspace?.output ? I18n.tr("  фокус") : "")
                 })) : [];
                 const wins = (types & 2) ? Object.values(Niri.windows)
                     .sort((a, b) => (b.is_focused - a.is_focused) || a.id - b.id)
                     .map(w => ({ kind: "window", key: "w:" + w.id, id: w.id, label: w.app_id || "?", info: w.title || "" })) : [];
-                rows = (outs.length ? [{ header: "мониторы" }].concat(outs) : [])
-                    .concat(wins.length ? [{ header: "окна" }].concat(wins) : []);
+                rows = (outs.length ? [{ header: I18n.tr("мониторы") }].concat(outs) : [])
+                    .concat(wins.length ? [{ header: I18n.tr("окна") }].concat(wins) : []);
                 cur = rows.findIndex(x => !x.header);
             }
 
@@ -121,8 +121,8 @@ Scope {
                         Layout.fillWidth: true
                         elide: Text.ElideRight
                         textFormat: Text.StyledText
-                        text: `<font color="${Theme.accent}"><b>${win.app.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</b></font> хочет показать `
-                            + (win.types === 2 ? "окно" : win.types === 1 ? "экран" : "экран или окно")
+                        text: I18n.tr(win.types === 2 ? "%1 хочет показать окно" : win.types === 1 ? "%1 хочет показать экран" : "%1 хочет показать экран или окно",
+                            `<font color="${Theme.accent}"><b>${win.app.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</b></font>`)
                     }
 
                     Repeater {
@@ -162,7 +162,8 @@ Scope {
                         Layout.topMargin: Theme.pad / 2
                         textFormat: Text.StyledText
                         color: Theme.gray
-                        text: `<font color="${Theme.accent}">↵</font> показать   <font color="${Theme.accent}">↑↓</font> выбор   <font color="${Theme.accent}">esc</font> отказать`
+                        text: [["↵", I18n.tr("показать")], ["↑↓", I18n.tr("выбор")], ["esc", I18n.tr("отказать")]]
+                            .map(([k, v]) => `<font color="${Theme.accent}">${k}</font> ${v}`).join("   ")
                     }
                 }
 

@@ -24,16 +24,16 @@ Scope {
         function open(section: string): void { Settings.show(section); }
         function set(key: string, value: string): string {
             // только ключи из схемы — опечатка не должна оседать в settings.json мусором
-            if (S.defaultOf(key, Settings.outputs) === undefined) return "неизвестный ключ: " + key;
-            if (value === "") { Settings.reset(key); return "по умолчанию: " + JSON.stringify(Settings.get(key)); }
+            if (S.defaultOf(key, Settings.outputs) === undefined) return I18n.tr("неизвестный ключ: %1", key);
+            if (value === "") { Settings.reset(key); return I18n.tr("по умолчанию: %1", JSON.stringify(Settings.get(key))); }
             let v = value;
             try { v = JSON.parse(value); } catch (e) {}
             const row = S.find(key, Settings.outputs);
-            if (row?.options && !row.options.includes(v)) return "допустимо: " + row.options.join(", ");
+            if (row?.options && !row.options.includes(v)) return I18n.tr("допустимо: %1", row.options.join(", "));
             Settings.set(key, v);
             return JSON.stringify(Settings.get(key));
         }
-        function get(key: string): string { return JSON.stringify(Settings.get(key)) ?? "неизвестный ключ: " + key; }
+        function get(key: string): string { return JSON.stringify(Settings.get(key)) ?? I18n.tr("неизвестный ключ: %1", key); }
     }
 
     LazyLoader {
@@ -53,7 +53,7 @@ Scope {
             readonly property var sections: S.sections(Settings.outputs, Settings.get("shell.bar.layout"), Settings.get("shell.home.layout"))
             property int section: 0
             readonly property string query: search.text.trim()
-            readonly property var rows: query ? S.searchRows(sections, query) : sections[section].rows
+            readonly property var rows: query ? S.searchRows(sections, query, s => I18n.tr(s)) : sections[section].rows
             property int cur: 1
             property bool editing: false
             property bool capturing: false   // строка combo ждёт нажатия сочетания
@@ -104,7 +104,7 @@ Scope {
                 case "lockPreview": ipc("lock", "preview"); break;
                 case "home": ipc("home", "open"); break;
                 case "record": ipc("record", "toggle"); break;
-                case "notifyTest": Quickshell.execDetached(["notify-send", "-a", "ochre", "Проверка уведомления", "так выглядит анимация " + Settings.get("shell.notify.anim")]); break;
+                case "notifyTest": Quickshell.execDetached(["notify-send", "-a", "ochre", I18n.tr("Проверка уведомления"), I18n.tr("так выглядит анимация %1", Settings.get("shell.notify.anim"))]); break;
                 case "wifi": Term.float(["nmtui"]); break;
                 case "audio": Quickshell.execDetached(["pavucontrol"]); break;
                 case "editNiri": Term.edit(Quickshell.env("HOME") + "/.config/niri/config.kdl"); break;
@@ -112,8 +112,8 @@ Scope {
                 case "editTerminal": Term.edit(Term.configPath); break;
                 case "shellUpdate":
                     if (Ochre.system)
-                        Quickshell.execDetached(["notify-send", "-a", "ochre", "ochre поставлен пакетом",
-                            "Обновляется вместе с системой; после обновления придёт уведомление с перезапуском shell."]);
+                        Quickshell.execDetached(["notify-send", "-a", "ochre", I18n.tr("ochre поставлен пакетом"),
+                            I18n.tr("Обновляется вместе с системой; после обновления придёт уведомление с перезапуском shell.")]);
                     else if (ShellUpdate.behind > 0) ShellUpdate.update();
                     else ShellUpdate.check(true);
                     break;
@@ -283,7 +283,7 @@ Scope {
                 if (r.type === "module") return "‹ " + S.zoneLabel(r.key, v) + " ›";
                 if (r.type === "bool") return v ? "[x]" : "[ ]";
                 if (r.type === "text") return JSON.stringify(v);
-                if (r.type === "combo") return capturing && r === row ? "нажмите сочетание…" : v ? "[" + v + "]" : "—";
+                if (r.type === "combo") return capturing && r === row ? I18n.tr("нажмите сочетание…") : v ? "[" + v + "]" : "—";
                 if (r.type === "action") return "↵";
                 if (r.type === "float") {
                     const decimals = String(r.step).split(".")[1]?.length ?? 0;
@@ -307,16 +307,16 @@ Scope {
 
             function hint(r) {
                 if (!r) return "";
-                if (r.type === "module") return r.hint;
+                if (r.type === "module") return I18n.tr(r.hint);
                 const file = S.niriFileOf(r.key);
                 // файл первым: подсказка длинная и обрезается справа
-                const parts = [file ? "niri/ochre/" + file : "", r.hint ?? ""];
+                const parts = [file ? "niri/ochre/" + file : "", I18n.tr(r.hint ?? "")];
                 if (r.type === "combo" && value(r)) {
-                    if (!S.COMBO_RE.test(value(r))) parts.unshift("не похоже на сочетание (Mod+Shift+M) — бинд не создан");
+                    if (!S.COMBO_RE.test(value(r))) parts.unshift(I18n.tr("не похоже на сочетание (Mod+Shift+M) — бинд не создан"));
                     const other = Binds.conflict(value(r), r.action);
-                    if (other) parts.unshift("занято: " + other.action + " — конфликт");
+                    if (other) parts.unshift(I18n.tr("занято: %1 — конфликт", other.action));
                 }
-                if (r.type !== "action") parts.push(r.key + "  ·  по умолчанию " + JSON.stringify(r.def));
+                if (r.type !== "action") parts.push(r.key + "  ·  " + I18n.tr("по умолчанию %1", JSON.stringify(r.def)));
                 return parts.filter(x => x).join("  ·  ");
             }
 
@@ -390,7 +390,7 @@ Scope {
 
             // подписи вариантов: зоны раскладки — коротко
             function optionLabel(r, o) {
-                if (r.type === "module") return ({ off: "выкл", on: "вкл" })[o] ?? S.zoneLabel(r.key, o);
+                if (r.type === "module") return ({ off: I18n.tr("выкл"), on: I18n.tr("вкл") })[o] ?? I18n.tr(S.zoneLabel(r.key, o));
                 return String(o);
             }
             function optionsOf(r) { return r.type === "module" ? S.layoutZones(r.key) : (r.options ?? []); }
@@ -571,7 +571,7 @@ Scope {
                                                     event.accepted = true;
                                                 }
                                             }
-                                            T { visible: search.text === ""; anchors.verticalCenter: parent.verticalCenter; text: "поиск  /"; color: Theme.bg2 }
+                                            T { visible: search.text === ""; anchors.verticalCenter: parent.verticalCenter; text: I18n.tr("поиск  /"); color: Theme.bg2 }
                                             MouseArea { anchors.fill: parent; cursorShape: Qt.IBeamCursor; onClicked: win.startSearch() }
                                         }
                                         T {
@@ -611,7 +611,7 @@ Scope {
                                             T {
                                                 Layout.fillWidth: true
                                                 elide: Text.ElideRight
-                                                text: sec.modelData.title
+                                                text: I18n.tr(sec.modelData.title)
                                                 color: sec.current ? Theme.accent : secHover.containsMouse ? Theme.fg : Qt.darker(Theme.fg, 1.15)
                                                 font.bold: sec.current
                                             }
@@ -643,7 +643,7 @@ Scope {
                             T {
                                 anchors.centerIn: parent
                                 visible: win.query !== "" && win.rows.length === 0
-                                text: "ничего не найдено"
+                                text: I18n.tr("ничего не найдено")
                                 color: Theme.gray
                             }
 
@@ -699,7 +699,7 @@ Scope {
                                             T {
                                                 id: cardTitle
                                                 anchors.centerIn: parent
-                                                text: card.modelData.header
+                                                text: win.query ? card.modelData.header : I18n.tr(card.modelData.header)
                                                 color: card.active ? Theme.accent : Theme.gray
                                                 font.bold: true
                                             }
@@ -739,12 +739,12 @@ Scope {
                             textFormat: Text.StyledText
                             color: Theme.gray
                             text: (win.draft
-                                ? [["↵", "применить"], ["esc", "отмена"], ["←→", "значение"]]
+                                ? [["↵", I18n.tr("применить")], ["esc", I18n.tr("отмена")], ["←→", I18n.tr("значение")]]
                                 : win.capturing
-                                ? [["…", "нажмите сочетание"], ["⇥", "текстом"], ["⌫", "убрать"], ["esc", "отмена"]]
+                                ? [["…", I18n.tr("нажмите сочетание")], ["⇥", I18n.tr("текстом")], ["⌫", I18n.tr("убрать")], ["esc", I18n.tr("отмена")]]
                                 : win.editing
-                                ? [["↵", "сохранить"], ["esc", "отмена"]]
-                                : [["↑↓", "выбор"], ["←→", "изменить"], ["↵", "открыть"], ["r", "сброс"], ["/", "поиск"], ["esc", win.query ? "сбросить поиск" : "выход"]])
+                                ? [["↵", I18n.tr("сохранить")], ["esc", I18n.tr("отмена")]]
+                                : [["↑↓", I18n.tr("выбор")], ["←→", I18n.tr("изменить")], ["↵", I18n.tr("открыть")], ["r", I18n.tr("сброс")], ["/", I18n.tr("поиск")], ["esc", win.query ? I18n.tr("сбросить поиск") : I18n.tr("выход")]])
                                 .map(([k, v]) => `<font color="${Theme.accent}">${k}</font> ${v}`).join("   ")
                         }
                     }
@@ -944,13 +944,13 @@ Scope {
                                 Layout.fillWidth: true
                                 elide: Text.ElideRight
                                 textFormat: Text.StyledText
-                                text: (line.r.label ?? "") + (win.changed(line.r) ? ` <font color="${Theme.accent}">*</font>` : "")
+                                text: I18n.tr(line.r.label ?? "") + (win.changed(line.r) ? ` <font color="${Theme.accent}">*</font>` : "")
                                 color: line.r.type === "action" ? Theme.blue : line.current ? Theme.fg : Qt.darker(Theme.fg, 1.08)
                                 font.bold: line.current
                             }
                             T {
                                 // у модулей подсказка общая — описание модуля до «·»
-                                readonly property string h: line.r.type === "module" ? String(line.r.hint ?? "").split("  ·  ")[0] : (line.r.hint ?? "")
+                                readonly property string h: I18n.tr(line.r.type === "module" ? String(line.r.hint ?? "").split("  ·  ")[0] : (line.r.hint ?? ""))
                                 visible: h !== ""
                                 Layout.fillWidth: true
                                 wrapMode: Text.Wrap
@@ -1225,7 +1225,7 @@ Scope {
                         visible: !tf.edit
                         anchors { verticalCenter: parent.verticalCenter; left: parent.left; right: parent.right; leftMargin: win.cw * 0.6; rightMargin: win.cw * 0.6 }
                         elide: Text.ElideRight
-                        text: String(win.value(tf.r)) || "пусто"
+                        text: String(win.value(tf.r)) || I18n.tr("пусто")
                         color: String(win.value(tf.r)) ? Theme.aqua : Theme.bg2
                     }
                     TextInput {
@@ -1277,7 +1277,7 @@ Scope {
                             id: cbT
                             visible: !cb.edit
                             anchors.centerIn: parent
-                            text: cb.cap ? "нажмите сочетание…" : win.value(cb.r) || "не задано"
+                            text: cb.cap ? I18n.tr("нажмите сочетание…") : win.value(cb.r) || I18n.tr("не задано")
                             color: cb.cap ? Theme.accent : win.value(cb.r) ? Theme.blue : Theme.bg2
                         }
                         TextInput {
@@ -1329,7 +1329,7 @@ Scope {
                     T {
                         id: acT
                         anchors.centerIn: parent
-                        text: win.opens.includes(ac.r.action) ? "открыть" : "выполнить"
+                        text: win.opens.includes(ac.r.action) ? I18n.tr("открыть") : I18n.tr("выполнить")
                         color: acHover.pressed ? Theme.bg : Theme.accent
                     }
                     MouseArea {

@@ -36,7 +36,7 @@ Scope {
         Settings.replacePrefix("niri.out.", snapshot);
         snapshot = null;
         countdown.stop();
-        Quickshell.execDetached(["notify-send", "-a", "ochre", "Мониторы", "Изменения не подтверждены — вернул как было"]);
+        Quickshell.execDetached(["notify-send", "-a", "ochre", I18n.tr("Мониторы"), I18n.tr("Изменения не подтверждены — вернул как было")]);
     }
 
     Timer {
@@ -110,7 +110,7 @@ Scope {
     function setVal(o, prop, v) {
         // последний работающий монитор не выключаем — иначе вернуть всё будет нечем
         if (prop === "enabled" && !v && Settings.outputs.filter(x => x !== o && val(x, "enabled")).length === 0) {
-            message = "нельзя выключить единственный монитор";
+            message = I18n.tr("нельзя выключить единственный монитор");
             return;
         }
         message = "";
@@ -190,12 +190,12 @@ Scope {
                 const others = outputs.filter(x => x !== o).map(x => x.name);
                 const places = ["auto"].concat(...others.map(n => ["right:" + n, "left:" + n, "above:" + n, "below:" + n]));
                 const r = [
-                    { prop: "enabled", label: "включён", type: "bool" },
-                    { prop: "primary", label: "основной", type: "bool", hint: "сюда фокус при запуске niri" },
-                    { prop: "mode", label: "режим", type: "enum", options: o.modes, hint: o.preferred ? "рекомендуемый: " + o.preferred : "" },
-                    { prop: "scale", label: "масштаб", type: "float", min: 0.5, max: 4, step: 0.25 },
-                    { prop: "transform", label: "поворот", type: "enum", options: S.TRANSFORMS },
-                    { prop: "place", label: "расположение", type: "enum", options: places, hint: others.length ? "относительно другого монитора; auto — как решит niri" : "один монитор — располагать не относительно чего" }
+                    { prop: "enabled", label: I18n.tr("включён"), type: "bool" },
+                    { prop: "primary", label: I18n.tr("основной"), type: "bool", hint: I18n.tr("сюда фокус при запуске niri") },
+                    { prop: "mode", label: I18n.tr("режим"), type: "enum", options: o.modes, hint: o.preferred ? I18n.tr("рекомендуемый: %1", o.preferred) : "" },
+                    { prop: "scale", label: I18n.tr("масштаб"), type: "float", min: 0.5, max: 4, step: 0.25 },
+                    { prop: "transform", label: I18n.tr("поворот"), type: "enum", options: S.TRANSFORMS },
+                    { prop: "place", label: I18n.tr("расположение"), type: "enum", options: places, hint: others.length ? I18n.tr("относительно другого монитора; auto — как решит niri") : I18n.tr("один монитор — располагать не относительно чего") }
                 ];
                 if (o.vrrSupported) r.push({ prop: "vrr", label: "VRR (FreeSync)", type: "bool" });
                 return r;
@@ -204,7 +204,7 @@ Scope {
             function placeLabel(p) {
                 if (p === "auto") return "auto";
                 const [rel, n] = p.split(":");
-                return ({ right: "справа от ", left: "слева от ", above: "над ", below: "под " })[rel] + n;
+                return I18n.tr(({ right: "справа от %1", left: "слева от %1", above: "над %1", below: "под %1" })[rel], n);
             }
 
             function fmt(r) {
@@ -344,7 +344,7 @@ Scope {
                                     anchors.centerIn: parent
                                     T {
                                         anchors.horizontalCenter: parent.horizontalCenter
-                                        text: mon.modelData.o.name + (root.val(mon.modelData.o, "primary") ? " (основной)" : "")
+                                        text: mon.modelData.o.name + (root.val(mon.modelData.o, "primary") ? I18n.tr(" (основной)") : "")
                                         color: mon.selected ? Theme.accent : Theme.fg
                                         font.bold: mon.selected
                                     }
@@ -368,10 +368,10 @@ Scope {
                     // ── выбранный монитор ──
                     T {
                         textFormat: Text.StyledText
-                        text: !win.out ? "мониторы не найдены" :
+                        text: !win.out ? I18n.tr("мониторы не найдены") :
                             `<font color="${Theme.accent}"><b>▌ ${win.out.name}</b></font>`
                             + `<font color="${Theme.gray}">  ${[win.out.make, win.out.model].filter(x => x).join(" ")}`
-                            + (win.out.physical[0] ? `  ·  ${win.out.physical[0]}×${win.out.physical[1]} мм` : "")
+                            + (win.out.physical[0] ? "  ·  " + I18n.tr("%1×%2 мм", win.out.physical[0], win.out.physical[1]) : "")
                             + (win.outputs.length > 1 ? `  ·  ${win.sel + 1}/${win.outputs.length}` : "") + "</font>"
                     }
 
@@ -427,9 +427,9 @@ Scope {
                         elide: Text.ElideRight
                         textFormat: Text.StyledText
                         text: root.pending
-                            ? `<font color="${Theme.yellow}"><b>применено — оставить?</b></font>  `
-                                + `<font color="${Theme.accent}">y</font> да   <font color="${Theme.accent}">n</font> вернуть   `
-                                + `<font color="${Theme.gray}">(откат через ${root.remaining} с)</font>`
+                            ? `<font color="${Theme.yellow}"><b>${I18n.tr("применено — оставить?")}</b></font>  `
+                                + `<font color="${Theme.accent}">y</font> ${I18n.tr("да")}   <font color="${Theme.accent}">n</font> ${I18n.tr("вернуть")}   `
+                                + `<font color="${Theme.gray}">${I18n.tr("(откат через %1 с)", root.remaining)}</font>`
                             : root.message
                                 ? `<font color="${Theme.red}">${root.message}</font>`
                                 : `<font color="${Theme.gray}">${win.rows[win.cur]?.hint ?? ""}</font>`
@@ -439,7 +439,7 @@ Scope {
                         Layout.alignment: Qt.AlignRight
                         textFormat: Text.StyledText
                         color: Theme.gray
-                        text: [["↑↓", "выбор"], ["←→", "изменить"], ["⇥", "монитор"], ["r", "сброс монитора"], ["esc", "выход"]]
+                        text: [["↑↓", I18n.tr("выбор")], ["←→", I18n.tr("изменить")], ["⇥", I18n.tr("монитор")], ["r", I18n.tr("сброс монитора")], ["esc", I18n.tr("выход")]]
                             .map(([k, v]) => `<font color="${Theme.accent}">${k}</font> ${v}`).join("   ")
                     }
                 }

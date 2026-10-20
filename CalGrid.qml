@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import qs.services
 
 // Месяц как вывод `cal`: ‹ › или колёсико — соседние месяцы, сегодня выделено акцентом.
 // Общий для попапа часов (bar/CalPopup.qml) и секции календаря в меню home.
@@ -12,7 +13,7 @@ ColumnLayout {
 
     property int offset: 0
     property var now: new Date()
-    readonly property var loc: Qt.locale()
+    readonly property var loc: I18n.locale
     readonly property var month: new Date(now.getFullYear(), now.getMonth() + offset, 1)
     readonly property int firstDay: loc.firstDayOfWeek % 7   // 0 — воскресенье, как в Date.getDay()
     readonly property var cells: {

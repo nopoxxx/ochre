@@ -25,7 +25,7 @@ Scope {
     readonly property string imageIcon: String.fromCodePoint(0xF02E9)   // md-image
 
     function label(e) {
-        return e.image ? "изображение " + e.image.kind + " " + e.image.dims + " · " + e.image.size : e.text;
+        return e.image ? I18n.tr("изображение %1", e.image.kind + " " + e.image.dims + " · " + e.image.size) : e.text;
     }
 
     LazyLoader {
@@ -312,10 +312,10 @@ Scope {
                                 visible: !win.results.length
                                 color: Theme.gray
                                 text: !Clipboard.checked ? ""
-                                    : !Clipboard.available ? "cliphist не установлен:\nsudo pacman -S cliphist"
-                                    : Clipboard.loading && !Clipboard.entries.length ? "загрузка…"
-                                    : Clipboard.entries.length ? "ничего не найдено"
-                                    : "история пуста — скопируйте что-нибудь"
+                                    : !Clipboard.available ? I18n.tr("cliphist не установлен:\nsudo pacman -S cliphist")
+                                    : Clipboard.loading && !Clipboard.entries.length ? I18n.tr("загрузка…")
+                                    : Clipboard.entries.length ? I18n.tr("ничего не найдено")
+                                    : I18n.tr("история пуста — скопируйте что-нибудь")
                             }
                         }
 
@@ -366,8 +366,8 @@ Scope {
                         textFormat: Text.StyledText
                         color: win.confirmWipe ? Theme.red : Theme.gray
                         text: win.confirmWipe
-                            ? `очистить всю историю буфера? <font color="${Theme.accent}">y</font> — да, любая клавиша — нет`
-                            : [["↵", "в буфер"], ["del", "удалить"], ["⇧del", "очистить всё"], ["esc", "закрыть"]]
+                            ? I18n.tr("очистить всю историю буфера? %1 — да, любая клавиша — нет", `<font color="${Theme.accent}">y</font>`)
+                            : [["↵", I18n.tr("в буфер")], ["del", I18n.tr("удалить")], ["⇧del", I18n.tr("очистить всё")], ["esc", I18n.tr("закрыть")]]
                                 .map(([k, v]) => `<font color="${Theme.accent}">${k}</font> ${v}`).join("   ")
                     }
                 }

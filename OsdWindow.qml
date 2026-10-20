@@ -105,7 +105,7 @@ Scope {
                         text: (box.isVol ? G.g(box.off ? "volOff" : "vol") : G.g("bright")) + " "
                         color: box.off ? Theme.gray : Theme.accent
                     }
-                    T { text: (box.isVol ? "vol" : "яркость") + " "; color: Theme.gray }
+                    T { text: (box.isVol ? "vol" : I18n.tr("яркость")) + " "; color: Theme.gray }
                     T {
                         text: "▕" + "█".repeat(box.filled) + "░".repeat(box.cells - box.filled) + "▏"
                         color: box.off ? Theme.gray : Theme.accent

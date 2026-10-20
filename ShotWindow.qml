@@ -120,8 +120,8 @@ Scope {
                 const hex = (text.match(/#[0-9a-fA-F]{6}/) ?? [""])[0];
                 if (!hex) return;   // Esc
                 const rgb = (text.match(/rgb\([^)]*\)/) ?? [""])[0];
-                Quickshell.execDetached(["sh", "-c", 'printf %s "$1" | wl-copy; notify-send -a ochre "Цвет скопирован" "$1  $2"',
-                    "sh", hex, rgb]);
+                Quickshell.execDetached(["sh", "-c", 'printf %s "$1" | wl-copy; notify-send -a ochre "$3" "$1  $2"',
+                    "sh", hex, rgb, I18n.tr("Цвет скопирован")]);
             }
         }
     }
@@ -155,7 +155,7 @@ Scope {
         id: winShot
         onExited: code => {
             if (code !== 0) {
-                Quickshell.execDetached(["notify-send", "-a", "ochre", "Скриншот", "niri не отдал снимок окна"]);
+                Quickshell.execDetached(["notify-send", "-a", "ochre", I18n.tr("Скриншот"), I18n.tr("niri не отдал снимок окна")]);
                 return;
             }
             root.openImage(root.tmp + "/window.png");
@@ -296,7 +296,7 @@ Scope {
         cropRef.grabToImage(res => {
             const src = tmp + "/shot.png";
             if (!res.saveToFile(src)) {
-                message = "не удалось записать " + src;
+                message = I18n.tr("не удалось записать %1", src);
                 return;
             }
             const home = Quickshell.env("HOME");
@@ -309,10 +309,11 @@ Scope {
                 case $act in save|both) mkdir -p "$3" && cp "$src" "$dest" || dest="" ;; esac
                 [ "$5" = true ] || exit 0
                 case $act in
-                    copy) notify-send -a ochre -i "$src" "Скриншот скопирован" "$6" ;;
-                    *) [ -n "$dest" ] && notify-send -a ochre -i "$dest" "Скриншот сохранён$([ $act = both ] && echo ' и скопирован')" "$dest ($6)" \\
-                           || notify-send -a ochre -u critical "Скриншот не сохранён" "$3" ;;
-                esac`, "sh", src, action, dir, name, String(Settings.get("shell.shot.notify")), label]);
+                    copy) notify-send -a ochre -i "$src" "$7" "$6" ;;
+                    *) [ -n "$dest" ] && notify-send -a ochre -i "$dest" "$([ $act = both ] && echo "$9" || echo "$8")" "$dest ($6)" \\
+                           || notify-send -a ochre -u critical "\${10}" "$3" ;;
+                esac`, "sh", src, action, dir, name, String(Settings.get("shell.shot.notify")), label,
+                I18n.tr("Скриншот скопирован"), I18n.tr("Скриншот сохранён"), I18n.tr("Скриншот сохранён и скопирован"), I18n.tr("Скриншот не сохранён")]);
             close();
         }, size);
     }
@@ -321,17 +322,18 @@ Scope {
     function ocr(src) {
         Quickshell.execDetached(["sh", "-c", `
             if ! command -v tesseract >/dev/null; then
-                notify-send -a ochre -u critical "Нужен tesseract" "sudo pacman -S tesseract tesseract-data-eng tesseract-data-rus"; exit 1
+                notify-send -a ochre -u critical "$3" "sudo pacman -S tesseract tesseract-data-eng tesseract-data-rus"; exit 1
             fi
             langs=$(tesseract --list-langs 2>/dev/null | grep -xE 'eng|rus' | paste -sd+)
             # $(…) сама срезает пустые строки в конце
             text=$(tesseract "$1" - -l "\${langs:-eng}" 2>/dev/null)
             if [ -z "$(printf %s "$text" | tr -d '[:space:]')" ]; then
-                notify-send -a ochre "Текст не найден" "на снимке нечего распознать"; exit 0
+                notify-send -a ochre "$4" "$5"; exit 0
             fi
             printf %s "$text" | wl-copy
-            [ "$2" = true ] && notify-send -a ochre "Текст скопирован" "$(printf %s "$text" | head -n 6)"
-            exit 0`, "sh", src, String(Settings.get("shell.shot.notify"))]);
+            [ "$2" = true ] && notify-send -a ochre "$6" "$(printf %s "$text" | head -n 6)"
+            exit 0`, "sh", src, String(Settings.get("shell.shot.notify")), I18n.tr("Нужен tesseract"), I18n.tr("Текст не найден"),
+            I18n.tr("на снимке нечего распознать"), I18n.tr("Текст скопирован")]);
     }
 
     // латинская буква клавиши независимо от раскладки: при ru event.key для R — «К».
@@ -722,8 +724,8 @@ Scope {
                     y: Math.round(win.height * 0.08)
                     T {
                         textFormat: Text.StyledText
-                        text: root.then === "ocr" ? root.keys([["тяни", "область с текстом"], ["клик", "весь экран"], ["esc", "выход"]])
-                            : root.keys([["тяни", "область"], ["клик", "весь экран"], ["w", "окно"], ["i", "пипетка"], ["esc", "выход"]])
+                        text: root.then === "ocr" ? root.keys([[I18n.tr("тяни"), I18n.tr("область с текстом")], [I18n.tr("клик"), I18n.tr("весь экран")], ["esc", I18n.tr("выход")]])
+                            : root.keys([[I18n.tr("тяни"), I18n.tr("область")], [I18n.tr("клик"), I18n.tr("весь экран")], ["w", I18n.tr("окно")], ["i", I18n.tr("пипетка")], ["esc", I18n.tr("выход")]])
                     }
                 }
 
@@ -755,7 +757,7 @@ Scope {
                     }
                     Row {
                         spacing: 0
-                        T { text: "цвет "; color: Theme.gray }
+                        T { text: I18n.tr("цвет "); color: Theme.gray }
                         Repeater {
                             model: root.colors.length
                             T {
@@ -767,8 +769,8 @@ Scope {
                         }
                         T {
                             textFormat: Text.StyledText
-                            text: `&nbsp;&nbsp;&nbsp;<font color="${Theme.gray}">толщина</font> ‹ ${root.strokeW} ›&nbsp;&nbsp;&nbsp;<font color="${Theme.gray}">заливка</font> ${root.fill ? "[x]" : "[&nbsp;]"}`
-                                + `&nbsp;&nbsp;&nbsp;<font color="${Theme.gray}">фигур</font> ${root.anns.length}`
+                            text: `&nbsp;&nbsp;&nbsp;<font color="${Theme.gray}">${I18n.tr("толщина")}</font> ‹ ${root.strokeW} ›&nbsp;&nbsp;&nbsp;<font color="${Theme.gray}">${I18n.tr("заливка")}</font> ${root.fill ? "[x]" : "[&nbsp;]"}`
+                                + `&nbsp;&nbsp;&nbsp;<font color="${Theme.gray}">${I18n.tr("фигур")}</font> ${root.anns.length}`
                             MouseArea {
                                 anchors.fill: parent
                                 acceptedButtons: Qt.NoButton
@@ -791,7 +793,7 @@ Scope {
                             textFormat: Text.StyledText
                             color: Theme.gray
                             text: root.message ? `<font color="${Theme.red}">${root.message}</font>`
-                                : root.keys([["1-9", "цвет"], ["[ ]", "толщина"], ["f", "заливка"], ["i", "пипетка"], ["^Z", "отмена"], ["esc", "выход"]])
+                                : root.keys([["1-9", I18n.tr("цвет")], ["[ ]", I18n.tr("толщина")], ["f", I18n.tr("заливка")], ["i", I18n.tr("пипетка")], ["^Z", I18n.tr("отмена")], ["esc", I18n.tr("выход")]])
                         }
                     }
                 }

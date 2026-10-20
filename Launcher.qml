@@ -55,8 +55,8 @@ Scope {
         const c = Theme.accent;
         const ansi = "38;2;" + [c.r, c.g, c.b].map(x => Math.round(x * 255)).join(";");
         Term.float(["bash", "-c",
-            'printf "\\e[?25l"; fastfetch -c "$1" --logo-type file --logo "$3" --logo-color-1 "$2" --logo-color-2 "$2"; printf "\\n  \\e[90m↵ — закрыть\\e[0m"; read -rs',
-            "bash", Quickshell.shellDir + "/extras/fastfetch/config.jsonc", ansi, Quickshell.shellDir + "/extras/fastfetch/ochre-large.txt"]);
+            'printf "\\e[?25l"; fastfetch -c "$1" --logo-type file --logo "$3" --logo-color-1 "$2" --logo-color-2 "$2"; printf "\\n  \\e[90m%s\\e[0m" "$4"; read -rs',
+            "bash", Quickshell.shellDir + "/extras/fastfetch/config.jsonc", ansi, Quickshell.shellDir + "/extras/fastfetch/ochre-large.txt", I18n.tr("↵ — закрыть")]);
     }
 
     function openPicker(source) {
@@ -95,33 +95,33 @@ Scope {
     readonly property var menu: ({
         label: "~",
         children: [
-            { label: "apps", icon: icons.apps, desc: "запуск программ (Mod+Space)", provider: "apps" },
-            { label: "wallpaper", icon: icons.wallpaper, desc: "обои; Tab — wallhaven (Mod+Shift+W)", alias: ["обои"], run: () => openPicker("local") },
+            { label: "apps", icon: icons.apps, desc: I18n.tr("запуск программ (Mod+Space)"), provider: "apps" },
+            { label: "wallpaper", icon: icons.wallpaper, desc: I18n.tr("обои; Tab — wallhaven (Mod+Shift+W)"), alias: [I18n.tr("обои")], run: () => openPicker("local") },
             // пауза — чтобы закрывающееся меню не попало в замороженный кадр
-            { label: "screenshot", icon: icons.shot, desc: "снимок с разметкой (Mod+Shift+S); w — окно", alias: ["скриншот", "снимок"], run: () => spawn(["sh", "-c", 'sleep 0.3; exec "$@"', "sh", ...Ochre.ipcArgv(["shot", "region"])]) },
-            { label: "setup", icon: icons.setup, desc: "все настройки, мониторы, сеть, звук (Mod+S)", alias: ["settings", "настройки"], run: () => Settings.show("") },
+            { label: "screenshot", icon: icons.shot, desc: I18n.tr("снимок с разметкой (Mod+Shift+S); w — окно"), alias: [I18n.tr("скриншот"), I18n.tr("снимок")], run: () => spawn(["sh", "-c", 'sleep 0.3; exec "$@"', "sh", ...Ochre.ipcArgv(["shot", "region"])]) },
+            { label: "setup", icon: icons.setup, desc: I18n.tr("все настройки, мониторы, сеть, звук (Mod+S)"), alias: ["settings", I18n.tr("настройки")], run: () => Settings.show("") },
             // описания без Countdown.left: привязка пересоздавала бы menu каждую секунду, а узлы сравниваются по ссылке
-            { label: "timer", icon: icons.timer, desc: "таймер; любой срок — запросом в корне: timer 25m чай",
-              alias: ["таймер"], children: [
-                ...["5m", "10m", "15m", "25m", "45m", "1h"].map(t => ({ label: t, desc: "запустить на " + Countdown.fmt(Countdown.parse(t)),
+            { label: "timer", icon: icons.timer, desc: I18n.tr("таймер; любой срок — запросом в корне: timer 25m чай"),
+              alias: [I18n.tr("таймер")], children: [
+                ...["5m", "10m", "15m", "25m", "45m", "1h"].map(t => ({ label: t, desc: I18n.tr("запустить на %1", Countdown.fmt(Countdown.parse(t))),
                     run: () => Countdown.start(Countdown.parse(t), "") })),
-                { label: "stop", desc: "остановить таймер", alias: ["стоп"], run: () => Countdown.stop() }
+                { label: "stop", desc: I18n.tr("остановить таймер"), alias: [I18n.tr("стоп")], run: () => Countdown.stop() }
             ] },
-            { label: "packages", icon: icons.packages, desc: "установить, удалить, обновить", children: [
-                { label: "install", desc: "из репозиториев pacman", provider: "repo" },
-                { label: "aur", desc: "поиск в AUR через paru", provider: "aur" },
-                { label: "remove", desc: "удалить установленные", provider: "installed" },
-                { label: "update", desc: "обновить систему: paru -Syu" + (Updates.count > 0 ? " — доступно " + Updates.count : ""), alias: ["upgrade", "обновить"], run: () => Updates.run() }
+            { label: "packages", icon: icons.packages, desc: I18n.tr("установить, удалить, обновить"), children: [
+                { label: "install", desc: I18n.tr("из репозиториев pacman"), provider: "repo" },
+                { label: "aur", desc: I18n.tr("поиск в AUR через paru"), provider: "aur" },
+                { label: "remove", desc: I18n.tr("удалить установленные"), provider: "installed" },
+                { label: "update", desc: Updates.count > 0 ? I18n.tr("обновить систему: paru -Syu — доступно %1", Updates.count) : I18n.tr("обновить систему: paru -Syu"), alias: ["upgrade", I18n.tr("обновить")], run: () => Updates.run() }
             ] },
-            { label: "system", icon: icons.system, desc: "питание и сессия", children: [
-                { label: "lock", desc: "заблокировать экран (Super+Alt+L)", alias: ["блокировка"], run: () => Ochre.ipc("lock", "lock") },
-                { label: "suspend", desc: "заблокировать и уснуть", alias: ["sleep", "сон"], run: () => spawn(["sh", "-c", '"$@"; sleep 0.5; systemctl suspend', "sh", ...Ochre.ipcArgv(["lock", "lock"])]) },
-                { label: "logout", desc: "выйти из niri", alias: ["выход"], confirm: true, run: () => spawn(["niri", "msg", "action", "quit", "--skip-confirmation"]) },
-                { label: "reboot", desc: "перезагрузка", alias: ["restart"], confirm: true, run: () => spawn(["systemctl", "reboot"]) },
-                { label: "poweroff", desc: "выключение", alias: ["shutdown", "выключить"], confirm: true, run: () => spawn(["systemctl", "poweroff"]) }
+            { label: "system", icon: icons.system, desc: I18n.tr("питание и сессия"), children: [
+                { label: "lock", desc: I18n.tr("заблокировать экран (Super+Alt+L)"), alias: [I18n.tr("блокировка")], run: () => Ochre.ipc("lock", "lock") },
+                { label: "suspend", desc: I18n.tr("заблокировать и уснуть"), alias: ["sleep", I18n.tr("сон")], run: () => spawn(["sh", "-c", '"$@"; sleep 0.5; systemctl suspend', "sh", ...Ochre.ipcArgv(["lock", "lock"])]) },
+                { label: "logout", desc: I18n.tr("выйти из niri"), alias: [I18n.tr("выход")], confirm: true, run: () => spawn(["niri", "msg", "action", "quit", "--skip-confirmation"]) },
+                { label: "reboot", desc: I18n.tr("перезагрузка"), alias: ["restart"], confirm: true, run: () => spawn(["systemctl", "reboot"]) },
+                { label: "poweroff", desc: I18n.tr("выключение"), alias: ["shutdown", I18n.tr("выключить")], confirm: true, run: () => spawn(["systemctl", "poweroff"]) }
             ] },
-            { label: "about", icon: icons.about, desc: "о системе: fastfetch", run: () => about() },
-            { label: "help", icon: icons.about, desc: "главные клавиши и подсказки (ochre --help)", alias: ["помощь", "справка", "клавиши"], run: () => Ochre.ipc("welcome", "open") }
+            { label: "about", icon: icons.about, desc: I18n.tr("о системе: fastfetch"), run: () => about() },
+            { label: "help", icon: icons.about, desc: I18n.tr("главные клавиши и подсказки (ochre --help)"), alias: [I18n.tr("помощь"), I18n.tr("справка"), I18n.tr("клавиши")], run: () => Ochre.ipc("welcome", "open") }
         ]
     })
 
@@ -157,7 +157,7 @@ Scope {
                     run: () => launchApp(e)
                 }));
         if (name === "aur")
-            return query ? [{ label: "paru " + query, desc: "найти и установить из AUR", run: () => term("paru " + shq(query)) }] : [];
+            return query ? [{ label: "paru " + query, desc: I18n.tr("найти и установить из AUR"), run: () => term("paru " + shq(query)) }] : [];
         return cache[name] ?? null; // null — ещё загружается
     }
 
@@ -229,8 +229,8 @@ Scope {
                 if (!calcMode) return null;
                 const r = Calc.evaluate(query.slice(1));
                 if (r.value !== undefined)
-                    return { label: "= " + r.value, desc: "↵ — скопировать", run: () => root.spawn(["wl-copy", "--", r.value]) };
-                return { label: "=", desc: r.error || "+ - * / % ^ ( )  sqrt ln log sin cos …  pi e" };
+                    return { label: "= " + r.value, desc: I18n.tr("↵ — скопировать"), run: () => root.spawn(["wl-copy", "--", r.value]) };
+                return { label: "=", desc: I18n.tr(r.error, r.arg ?? "") || "+ - * / % ^ ( )  sqrt ln log sin cos …  pi e" };
             }
 
             // «timer 25m чай» в корне меню — запустить таймер (services/Countdown.qml)
@@ -239,7 +239,7 @@ Scope {
                 const p = m ? Countdown.parseSpec(m[1]) : null;
                 if (!p) return null;
                 return { label: "timer " + Countdown.fmt(p.sec) + (p.label ? " " + p.label : ""),
-                         desc: "↵ — запустить таймер" + (Countdown.active ? " (текущий заменится)" : ""),
+                         desc: Countdown.active ? I18n.tr("↵ — запустить таймер (текущий заменится)") : I18n.tr("↵ — запустить таймер"),
                          run: () => Countdown.start(p.sec, p.label) };
             }
 
@@ -462,7 +462,7 @@ Scope {
                         }
 
                         T {
-                            text: win.calcMode ? "calc" : win.items === null ? "загрузка…" : win.results.length + "/" + win.items.length
+                            text: win.calcMode ? "calc" : win.items === null ? I18n.tr("загрузка…") : win.results.length + "/" + win.items.length
                             color: Theme.gray
                         }
                     }
@@ -527,7 +527,7 @@ Scope {
                                 T {
                                     Layout.fillWidth: true
                                     Layout.minimumWidth: 0
-                                    text: row.armed ? "  точно? ↵" : row.item.desc ? "  " + row.item.desc : ""
+                                    text: row.armed ? I18n.tr("  точно? ↵") : row.item.desc ? "  " + row.item.desc : ""
                                     color: row.armed ? Theme.red : Theme.gray
                                     elide: Text.ElideRight
                                 }

@@ -63,8 +63,8 @@ Item {
 
     // слоганы ochre для входа и блокировки (BRAND.md) — каждый раз другой, как motd
     readonly property var motds: [
-        "с возвращением.", "чайник уже поставлен.", "идёт закат…", "сессия восстановлена. тепло: 100%",
-        "последний вход: как раз к закату", "сохраняй тепло.", "солнце садится. курсор остаётся."
+        I18n.tr("с возвращением."), I18n.tr("чайник уже поставлен."), I18n.tr("идёт закат…"), I18n.tr("сессия восстановлена. тепло: 100%"),
+        I18n.tr("последний вход: как раз к закату"), I18n.tr("сохраняй тепло."), I18n.tr("солнце садится. курсор остаётся.")
     ]
     readonly property string motd: motds[Math.floor(Math.random() * motds.length)]
 
@@ -140,8 +140,8 @@ Item {
         T {
             Layout.alignment: Qt.AlignHCenter
             visible: Settings.get("shell.lock.clock")
-            // Qt.locale(), а не Qt.formatDate: тот игнорирует системную локаль и пишет по-английски
-            text: Qt.locale().toString(clock.date, "dddd, d MMMM yyyy")
+            // I18n.locale, а не Qt.formatDate: тот игнорирует локаль и всегда пишет по-английски
+            text: I18n.locale.toString(clock.date, "dddd, d MMMM yyyy")
             color: Theme.gray
         }
 
@@ -192,20 +192,20 @@ Item {
                 textFormat: Text.StyledText
                 text: root.c(Theme.gray, "session: ")
                     + root.c(Theme.blue, root.sessions[root.sessionIndex]?.name ?? "")
-                    + (root.sessions.length > 1 ? root.c(Theme.gray, "  (tab — сменить)") : "")
+                    + (root.sessions.length > 1 ? root.c(Theme.gray, I18n.tr("  (tab — сменить)")) : "")
             }
 
             Item { implicitHeight: Theme.pad }
 
             T {
                 visible: root.busy || root.message !== ""
-                text: root.busy ? "проверка…" : root.message
+                text: root.busy ? I18n.tr("проверка…") : root.message
                 color: root.busy ? Theme.gray : root.messageIsError ? Theme.red : Theme.yellow
             }
 
             T {
                 visible: root.failures > 1 && !root.busy
-                text: root.failures + " неудачные попытки"
+                text: I18n.tr("неудачных попыток: %1", root.failures)
                 color: Theme.gray
             }
         }
@@ -216,8 +216,8 @@ Item {
         textFormat: Text.StyledText
         color: Theme.gray
         text: (root.askUser
-            ? [["↵", "далее"], ["esc", "назад"], ["tab", "сессия"], ["F11", "перезагрузка"], ["F12", "выключение"]]
-            : [["↵", "войти"], ["esc", "очистить"]])
+            ? [["↵", I18n.tr("далее")], ["esc", I18n.tr("назад")], ["tab", I18n.tr("сессия")], ["F11", I18n.tr("перезагрузка")], ["F12", I18n.tr("выключение")]]
+            : [["↵", I18n.tr("войти")], ["esc", I18n.tr("очистить")]])
             .map(([k, v]) => `<font color="${Theme.accent}">${k}</font> ${v}`).join("   ")
     }
 
