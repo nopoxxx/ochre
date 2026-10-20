@@ -303,6 +303,7 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
     <tr><td><kbd>Mod+Shift+T</kbd></td><td><a href="#shot">текст с экрана</a> в буфер (tesseract)</td></tr>
     <tr><td><kbd>Mod+Shift+C</kbd></td><td>пипетка: цвет под курсором в буфер</td></tr>
     <tr><td><kbd>Mod+Shift+G</kbd></td><td>игровой режим</td></tr>
+    <tr><td><kbd>Mod+Shift+M</kbd></td><td>распознать песню, что сейчас играет (songrec)</td></tr>
     <tr><td><kbd>Mod+Shift+V</kbd></td><td><a href="#clipboard">история буфера обмена</a></td></tr>
     <tr><td><kbd>Mod+A</kbd></td><td><a href="#home">меню home</a> (или клик по <code>user@host</code>)</td></tr>
     <tr><td><kbd>Mod+Alt+R</kbd></td><td><a href="#home">запись экрана</a>: начать / остановить</td></tr>
@@ -341,6 +342,7 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
     <tr><td><code>jobs</code></td><td><code>[N]</code> окон на активном столе</td></tr>
     <tr><td><code>command</code></td><td><code>❯ app # title</code> активного окна с эффектом набора; <span class="c-red">❯</span> красный, если окно просит внимания</td></tr>
     <tr><td><code>media</code></td><td>плеер (MPRIS) и полоски звука <span class="c-acc">▂▅▇▃</span>, пока играет (нужен cava; <code>bar/ → модули</code>): клик — пауза, правый — следующий, средний — предыдущий</td></tr>
+    <tr><td><code>songrec</code></td><td><code>♪?</code> — распознать песню через songrec (Shazam): клик — системный звук, правый — микрофон, во время записи — отмена. По умолчанию выключен</td></tr>
     <tr><td><code>rec</code></td><td><span class="c-red">● REC 01:23</span> — идёт запись экрана; клик — остановить. Без записи не виден</td></tr>
     <tr><td><code>timer</code></td><td><span class="c-gray">timer</span> <span class="c-acc b">24:59</span> чай — таймер (меню: <code>%25m чай</code>): клик — пауза, правый — стоп, колёсико — ±1 мин. Без таймера не виден</td></tr>
     <tr><td><code>privacy</code></td><td><span class="c-gray">mic</span> <span class="c-orange b">discord</span> <span class="c-gray">cast</span> <span class="c-red b">obs</span> — кто слушает микрофон и кто показывает экран. Выключенный микрофон не в счёт; когда никого нет, модуль не виден</td></tr>
@@ -412,7 +414,7 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
     <tr><td><code>whoami</code></td><td><code>user@host</code>, время работы, система и ядро</td></tr>
     <tr><td><code>быстро</code></td><td>переключатели: Wi-Fi, bluetooth, ночной режим, «не беспокоить», микрофон, запись экрана</td></tr>
     <tr><td><code>звук и экран</code></td><td>громкость, микрофон и яркость (на ноутбуке): <kbd>←→</kbd> ±5%, <kbd>↵</kbd> — mute</td></tr>
-    <tr><td><code>сейчас играет</code></td><td>обложка, трек, прогресс (клик — перемотка), кнопки и полоски звука (cava — только звук этого плеера, не звонки и не системные звуки; <code>home/ → звук для полосок</code>); текущая строка песни из <a href="https://lrclib.net">LRCLIB</a>; несколько плееров — <code>‹ 1/2 ›</code></td></tr>
+    <tr><td><code>сейчас играет</code></td><td>обложка, трек, прогресс (клик — перемотка), кнопки и полоски звука (cava — только звук этого плеера, не звонки и не системные звуки; <code>home/ → звук для полосок</code>); текущая строка песни из <a href="https://lrclib.net">LRCLIB</a>; кнопка-ухо — распознать песню (songrec, как <kbd>Mod+Shift+M</kbd>); несколько плееров — <code>‹ 1/2 ›</code></td></tr>
     <tr><td><code>погода</code></td><td><a href="https://open-meteo.com">Open-Meteo</a>: сейчас и прогноз на несколько дней; <kbd>↵</kbd> — обновить</td></tr>
     <tr><td><code>календарь</code></td><td>месяц как <code>cal</code>: <kbd>←→</kbd> — листать, <kbd>↵</kbd> — сегодня</td></tr>
     <tr><td><code>todo</code></td><td>список дел из <code>~/.config/ochre/todo.txt</code> (формат todo.txt, можно править руками): <kbd>↵</kbd> — сделано,
@@ -711,6 +713,7 @@ Password: <span class="blink">█</span></div>
 <span class="p">❯ </span>qs ipc call timer start "25m чай" <span class="cm"># таймер; timer pause, timer stop, timer get</span>
 <span class="p">❯ </span>qs ipc call welcome open        <span class="cm"># окно первого запуска: клавиши и подсказки</span>
 <span class="p">❯ </span>qs ipc call shell reload        <span class="cm"># перечитать конфиг shell без перезапуска</span>
+<span class="p">❯ </span>qs ipc call songrec recognize   <span class="cm"># распознать песню (10 с системного звука); songrec mic — с микрофона, songrec cancel, songrec get</span>
 <span class="p">❯ </span>qs ipc call game toggle         <span class="cm"># игровой режим; game on, game off, game get</span>
 <span class="p">❯ </span>qs ipc call errors get          <span class="cm"># ошибки shell и niri текстом; errors open, errors clear, errors report</span>
 <span class="p">❯ </span>qs ipc call privacy get         <span class="cm"># кто слушает микрофон и показывает экран</span>

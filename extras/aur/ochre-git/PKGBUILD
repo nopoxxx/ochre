@@ -25,6 +25,7 @@ optdepends=(
     'wf-recorder: запись экрана'
     'slurp: запись выделенной области'
     'cava: полоски звука в media и home'
+    'songrec: распознать песню (Mod+Shift+M)'
     'tesseract: текст со скриншота в буфер (с tesseract-data-eng, tesseract-data-rus)'
     'pavucontrol: микшер в настройках'
     'paru: обновления AUR на панели и меню packages/'
