@@ -2,28 +2,30 @@ pragma Singleton
 import Quickshell
 import QtQuick
 import qs.services
+import "services/settings.js" as S
 
-// Gruvbox dark (hard) — единая палитра ochre
 Singleton {
-    readonly property color bg: "#1d2021"
-    readonly property color bg1: "#3c3836"
-    readonly property color bg2: "#504945"
-    readonly property color fg: "#ebdbb2"
-    readonly property color gray: "#928374"
-    readonly property color red: "#fb4934"
-    readonly property color green: "#b8bb26"
-    readonly property color yellow: "#fabd2f"
-    readonly property color ochre: "#d79921"     // цвет бренда — gruvbox neutral yellow
-    readonly property color blue: "#83a598"
-    readonly property color purple: "#d3869b"
-    readonly property color aqua: "#8ec07c"
-    readonly property color orange: "#fe8019"
-
-    // акцент из настроек: рамки, prompt (и рамка фокуса niri — см. services/settings.js)
-    readonly property color accent: ({
-        ochre: ochre, yellow: yellow, orange: orange, green: green, aqua: aqua,
-        blue: blue, purple: purple, red: red
-    })[Settings.get("shell.accent")] ?? ochre
+    readonly property var scheme: S.palette(k => Settings.get(k))
+    readonly property bool dark: scheme.dark
+    readonly property color bg: scheme.bg
+    readonly property color bg0: scheme.bg0
+    readonly property color bg1: scheme.bg1
+    readonly property color bg2: scheme.bg2
+    readonly property color bg3: scheme.bg3
+    readonly property color hover: scheme.hover
+    readonly property color fg: scheme.fg
+    readonly property color fg0: scheme.fg0
+    readonly property color fgDim: scheme.fgDim
+    readonly property color gray: scheme.gray
+    readonly property color red: scheme.red
+    readonly property color green: scheme.green
+    readonly property color yellow: scheme.yellow
+    readonly property color ochre: scheme.ochre
+    readonly property color blue: scheme.blue
+    readonly property color purple: scheme.purple
+    readonly property color aqua: scheme.aqua
+    readonly property color orange: scheme.orange
+    readonly property color accent: scheme.accent
 
     // цвет по имени из настроек (акценты, цвета разметки скриншота): white/black — fg/bg
     function named(n) {

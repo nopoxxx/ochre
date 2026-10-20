@@ -18,7 +18,7 @@ PanelWindow {
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Background
     WlrLayershell.namespace: "ochre-wallpaper"
-    color: "#282828"   // виден по краям в режиме fit
+    color: Theme.bg0   // виден по краям в режиме fit
 
     readonly property string src: Wallpaper.current ? "file://" + encodeURI(Wallpaper.current) : ""
     readonly property int mode: Wallpaper.fill === "fit" ? Image.PreserveAspectFit
