@@ -226,6 +226,7 @@ test("niriFiles: приватные окна — block-out-from и зелёна�
     const rules = o => S.niriFiles(getter(o), {}, [])["window-rules.kdl"];
     assert.match(rules({}), /block-out-from "screencast"/);
     assert.ok(rules({}).includes("active-color " + JSON.stringify(pal.green)));
+    assert.match(rules({}), /focus-ring \{\s+off\s+\}/);
     assert.match(rules({ "niri.rules.privateShots": true }), /block-out-from "screen-capture"/);
     assert.doesNotMatch(rules({ "niri.rules.private": "" }), /block-out-from/);
 });
