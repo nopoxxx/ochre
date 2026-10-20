@@ -248,7 +248,20 @@ function sections(outputs, layout, home) {
             { key: "shell.notify.mute", label: "мьют микрофона и звука", type: "bool", def: true, hint: "уведомление, когда микрофон или звук по умолчанию выключается и включается — биндом, клавишей, pavucontrol" },
             { key: "shell.notify.typing", label: "эффект набора", type: "bool", def: true, hint: "заголовок уведомления печатается по символу" },
             { key: "shell.notify.anim", label: "анимация", type: "enum", options: SHELL_ANIMS, def: "slide", hint: "появление и исчезновение; slide — от края экрана. " + SHELL_ANIM_HINT },
-            act("notifyTest", "проверить", "прислать тестовое уведомление")
+            act("notifyTest", "проверить", "прислать тестовое уведомление"),
+            { header: "звуки" },
+            { key: "shell.sound", label: "звуки на события", type: "bool", def: true, hint: "короткие сигналы в духе PC-спикера; свой звук — ~/.config/ochre/sounds/<событие>.wav (или .oga, .ogg)" },
+            { key: "shell.sound.level", label: "громкость, %", type: "int", min: 10, max: 100, step: 10, def: 60 },
+            { key: "shell.sound.duck", label: "при музыке, %", type: "int", min: 0, max: 100, step: 10, def: 40, hint: "доля громкости, пока что-то играет (MPRIS); 0 — молчать" },
+            { key: "shell.sound.notify", label: "уведомления", type: "bool", def: true, hint: "notify, critical; в «не беспокоить» — только critical" },
+            { key: "shell.sound.lock", label: "блокировка", type: "bool", def: true, hint: "lock, unlock, auth-fail — неверный пароль" },
+            { key: "shell.sound.shot", label: "скриншоты и запись", type: "bool", def: true, hint: "screenshot, rec-start, rec-stop" },
+            { key: "shell.sound.power", label: "питание", type: "bool", def: true, hint: "plug, unplug, battery-low — заряд 15% и ниже" },
+            { key: "shell.sound.mute", label: "мьют", type: "bool", def: true, hint: "mute, unmute — микрофон и звук по умолчанию" },
+            { key: "shell.sound.volume", label: "громкость", type: "bool", def: false, hint: "volume — тик при каждом изменении" },
+            { key: "shell.sound.timer", label: "таймер", type: "bool", def: true, hint: "timer — конец отсчёта" },
+            { key: "shell.sound.login", label: "мелодия входа", type: "bool", def: true, hint: "login — один раз за сессию, не при перезапуске shell" },
+            act("soundTest", "проверить", "сыграть мелодию входа с текущей громкостью")
         ] },
 
         { id: "lock", title: "блокировка", rows: [
