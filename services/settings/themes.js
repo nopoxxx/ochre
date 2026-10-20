@@ -1,5 +1,6 @@
 .pragma library
 
+var ACCENT_ROLES = ["ochre", "yellow", "orange", "green", "aqua", "blue", "purple", "red"];
 var ROLES = ["bg", "bg0", "bg1", "bg2", "bg3", "hover", "fg", "fg0", "fgDim", "gray",
     "red", "green", "yellow", "orange", "blue", "purple", "aqua", "ochre"];
 
@@ -200,7 +201,8 @@ function palette(get, user) {
     const eight = [p.bg0, p.red, p.green, p.yellow, p.blue, p.purple, p.aqua, p.fg];
     p.ansi = own.ansi ?? eight.concat(eight);
     p.icons = own.icons ?? base.icons;
-    p.accent = p[get("shell.accent")] ?? p.ochre;
+    const accent = get("shell.accent");
+    p.accent = ACCENT_ROLES.includes(accent) ? p[accent] : p.ochre;
     return p;
 }
 

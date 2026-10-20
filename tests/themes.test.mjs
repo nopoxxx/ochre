@@ -19,6 +19,9 @@ test("palette: неизвестная тема — Gruvbox", () => {
 test("palette: акцент — цвет палитры по имени", () => {
     assert.equal(P.palette(getter({ "shell.accent": "blue" })).accent, "#83a598");
     assert.equal(P.palette(getter({ "shell.accent": "nope" })).accent, "#d79921");
+    assert.deepEqual(P.ACCENT_ROLES, Object.keys(S.ACCENTS));
+    for (const k of ["bg", "fg", "gray", "dark", "ansi", "constructor"])
+        assert.equal(P.palette(getter({ "shell.accent": k })).accent, "#d79921", k);
 });
 
 test("palette: недостающие роли — из Gruvbox, hover/fgDim/ansi вычисляются", () => {
