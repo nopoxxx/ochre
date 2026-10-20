@@ -120,6 +120,7 @@ Scope {
                     break;
                 case "shellRollback": ShellUpdate.rollback(); break;
                 case "restartShell": ShellUpdate.restartShell(); break;
+                case "report": Errors.report(); break;
                 case "greeterUpdate": ShellUpdate.updateGreeter(); break;
                 default: console.warn("settings: неизвестное действие", name);
                 }

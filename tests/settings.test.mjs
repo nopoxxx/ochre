@@ -169,3 +169,42 @@ test("searchRows: находит по подписи, ключу и перево
     const tr = s => (s === "акцентный цвет" ? "accent color" : s);
     assert.ok(S.searchRows(secs, "accent color", tr).some(r => r.key === "shell.accent"));
 });
+
+const mon = (name, make, model, serial) => ({ name, make, model, serial });
+
+test("outputIds: make model serial, без серийника или у двух одинаковых — разъём", () => {
+    const ids = S.outputIds([
+        mon("DP-1", "Dell Inc.", "DELL U2720Q", "ABC123"),
+        mon("eDP-1", "BOE", "0x0BCA", ""),
+        mon("HDMI-A-1", "LG", "27GL850", "X1"),
+        mon("HDMI-A-2", "LG", "27GL850", "x1")
+    ]);
+    assert.deepEqual(ids, { "DP-1": "Dell Inc. DELL U2720Q ABC123", "eDP-1": "eDP-1", "HDMI-A-1": "HDMI-A-1", "HDMI-A-2": "HDMI-A-2" });
+});
+
+test("migrateOutputKeys: разъём → модель, вместе с «расположением»", () => {
+    const ids = { "DP-1": "Dell Inc. DELL U2720Q ABC123", "eDP-1": "eDP-1" };
+    const v = S.migrateOutputKeys({
+        "niri.out.DP-1.scale": 1.5,
+        "niri.out.DP-1.place": "right:eDP-1",
+        "niri.out.eDP-1.place": "left:DP-1",
+        "shell.accent": "blue"
+    }, ids);
+    assert.deepEqual(v, {
+        "niri.out.Dell Inc. DELL U2720Q ABC123.scale": 1.5,
+        "niri.out.Dell Inc. DELL U2720Q ABC123.place": "right:eDP-1",
+        "niri.out.eDP-1.place": "left:Dell Inc. DELL U2720Q ABC123",
+        "shell.accent": "blue"
+    });
+    assert.equal(S.migrateOutputKeys(v, ids), null);
+});
+
+test("migrateOutputKeys: уже есть ключ по модели — он важнее старого", () => {
+    const v = S.migrateOutputKeys({ "niri.out.M S 1.scale": 2, "niri.out.DP-1.scale": 1 }, { "DP-1": "M S 1" });
+    assert.deepEqual(v, { "niri.out.M S 1.scale": 2 });
+});
+
+test("niriFiles: монитор по модели — output с make model serial", () => {
+    const files = S.niriFiles(getter(), { "Dell Inc. DELL U2720Q ABC123": { scale: 1.5 } }, []);
+    assert.match(files["displays.kdl"], /output "Dell Inc\. DELL U2720Q ABC123" \{\n    scale 1\.5/);
+});

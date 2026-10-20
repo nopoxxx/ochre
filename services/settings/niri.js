@@ -118,6 +118,38 @@ function logicalSize(mode, scale, transform) {
     return { w: Math.round(w), h: Math.round(h) };
 }
 
+function outputIds(outs) {
+    const full = o => o.make && o.model && o.serial ? o.make + " " + o.model + " " + o.serial : "";
+    const ids = {};
+    for (const o of outs) {
+        const id = full(o);
+        ids[o.name] = id && outs.filter(x => full(x).toLowerCase() === id.toLowerCase()).length === 1 ? id : o.name;
+    }
+    return ids;
+}
+
+function migrateOutputKeys(values, ids) {
+    const out = {};
+    let changed = false;
+    for (const k in values) {
+        const m = k.match(/^niri\.out\.(.+)\.(\w+)$/);
+        if (!m) {
+            out[k] = values[k];
+            continue;
+        }
+        const nk = "niri.out." + (ids[m[1]] ?? m[1]) + "." + m[2];
+        let v = values[k];
+        if (m[2] === "place" && typeof v === "string" && v.includes(":")) {
+            const i = v.indexOf(":"), to = v.slice(i + 1);
+            if (ids[to]) v = v.slice(0, i + 1) + ids[to];
+        }
+        if (nk !== k || v !== values[k]) changed = true;
+        if (nk !== k && nk in values) continue;
+        out[nk] = v;
+    }
+    return changed ? out : null;
+}
+
 // ── файлы ~/.config/niri/ochre/ ───────────────────────────────────
 // main.kdl подключает остальные; в config.kdl — include "ochre/main.kdl" и в самом конце include "ochre/keys.kdl"
 
