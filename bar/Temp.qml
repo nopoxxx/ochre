@@ -9,4 +9,6 @@ Seg {
     label: "temp"
     value: Sys.cpuTemp + "°"
     valueColor: Sys.cpuTemp > 85 ? Theme.red : Sys.cpuTemp > 70 ? Theme.yellow : Theme.fg
+
+    SysUse { metrics: ["temp"] }   // Sys читает метрики, только пока модуль есть
 }

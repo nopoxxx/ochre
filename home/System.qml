@@ -81,4 +81,6 @@ Section {
             }
         }
     }
+
+    SysUse { metrics: ["cpu", "mem", "gpu", "temp"] }   // Sys читает метрики, только пока модуль есть
 }

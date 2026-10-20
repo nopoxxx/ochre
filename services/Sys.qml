@@ -3,7 +3,8 @@ import Quickshell
 import Quickshell.Io
 import QtQuick
 
-// Метрики системы из /proc и /sys
+// Метрики системы из /proc и /sys. Читаются, только пока их кто-то показывает: модуль ставит внутрь
+// SysUse { metrics: ["cpu", "mem"] } — метрики cpu, mem, net, gpu, temp; никого нет — таймер стоит.
 Singleton {
     id: root
 
@@ -23,6 +24,16 @@ Singleton {
     readonly property int interval: 2000
     property var _prevCpu: null
     property var _prevNet: null
+
+    // подписчики по метрикам: { cpu: 2, net: 1 }; меняется только копией — иначе привязки не увидят
+    property var _use: ({})
+    readonly property bool active: Object.keys(_use).some(m => _use[m] > 0)
+    function use(metrics, d) {
+        const u = Object.assign({}, _use);
+        for (const m of metrics) u[m] = Math.max(0, (u[m] ?? 0) + d);
+        _use = u;
+    }
+    function wanted(m) { return (_use[m] ?? 0) > 0; }
 
     function fmtRate(b) {
         if (b >= 1048576) return (b / 1048576).toFixed(1) + "M";
@@ -142,16 +153,18 @@ Singleton {
 
     Timer {
         interval: root.interval
-        running: true
+        running: root.active
         repeat: true
         triggeredOnStart: true
         onTriggered: {
-            stat.reload();
-            mem.reload();
-            net.reload();
-            if (root.gpuBusyPath) gpuBusy.reload();
-            if (root.gpuTempPath) gpuTempFile.reload();
-            if (root.cpuTempPath) cpuTempFile.reload();
+            // прошлые отсчёты сбрасываются, пока метрику не смотрят: после паузы первая разница была бы средней за всё время
+            if (root.wanted("cpu")) stat.reload(); else root._prevCpu = null;
+            if (root.wanted("mem")) mem.reload();
+            if (root.wanted("net")) net.reload(); else root._prevNet = null;
+            if (root.wanted("gpu") && root.gpuBusyPath) gpuBusy.reload();
+            if ((root.wanted("gpu") || root.wanted("temp")) && root.gpuTempPath) gpuTempFile.reload();
+            if (root.wanted("temp") && root.cpuTempPath) cpuTempFile.reload();
         }
     }
+    onActiveChanged: if (!active) { _prevCpu = null; _prevNet = null; }
 }

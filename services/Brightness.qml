@@ -4,7 +4,9 @@ import Quickshell.Io
 import QtQuick
 
 // Яркость подсветки экрана (/sys/class/backlight, первое устройство). Нет подсветки (десктоп) — available: false.
-// Изменения извне (клавиши → brightnessctl) inotify в sysfs не видит — читаем раз в 400 мс.
+// Изменения извне (клавиши → brightnessctl) inotify в sysfs не видит. Ядро шлёт uevent change на каждую запись
+// яркости (sysfs, горячие клавиши ACPI) — слушаем `udevadm monitor`. Пока событий не было, опрос раз в 400 мс:
+// вдруг на этом железе их нет; после первого — раз в 5 с, на случай пропущенных.
 Singleton {
     id: root
 
@@ -40,8 +42,23 @@ Singleton {
         onLoaded: root.raw = parseInt(text())
     }
 
+    property bool events: false   // udev уже присылал события: опрос можно реже
+
+    Process {
+        running: root.available
+        // pdeathsig: умрёт вместе с qs — иначе каждый перезапуск shell оставлял бы ещё один udevadm
+        command: ["setpriv", "--pdeathsig", "TERM", "udevadm", "monitor", "--udev", "--subsystem-match=backlight"]
+        stdout: SplitParser {
+            onRead: line => {
+                if (!/\bchange\b/.test(line)) return;
+                root.events = true;
+                file.reload();
+            }
+        }
+    }
+
     Timer {
-        interval: 400
+        interval: root.events ? 5000 : 400
         running: root.available
         repeat: true
         onTriggered: file.reload()

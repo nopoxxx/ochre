@@ -13,4 +13,6 @@ Seg {
     onLeftClicked: procs.toggle()
 
     ProcsPopup { id: procs; owner: root; bar: root.bar; sort: "mem" }
+
+    SysUse { metrics: ["mem"] }   // Sys читает метрики, только пока модуль есть
 }
