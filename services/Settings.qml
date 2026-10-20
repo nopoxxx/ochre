@@ -29,6 +29,7 @@ Singleton {
     readonly property bool writable: loaded && !greeterMode && !broken
     property int _retries: 0
     property var outputs: []
+    readonly property var outputIds: S.outputIds(outputs)
     property bool open: false   // окно настроек
     property string page: ""    // открытый раздел (id из S.sections) — окно возвращается к нему
 
@@ -101,6 +102,18 @@ Singleton {
     }
 
     function refreshOutputs() { outputsProc.running = true; }
+
+    function outKey(name) { return outputIds[name] ?? name; }
+
+    function migrateOutputs() {
+        if (!writable || !outputs.length) return;
+        const v = S.migrateOutputKeys(values, outputIds);
+        if (!v) return;
+        values = v;
+        save.restart();
+    }
+    onOutputIdsChanged: migrateOutputs()
+    onWritableChanged: migrateOutputs()
 
     function writeNiri() {
         if (!writable) return;
@@ -315,6 +328,7 @@ Singleton {
                             name: x.name,
                             make: x.make ?? "",
                             model: x.model ?? "",
+                            serial: x.serial ?? "",
                             physical: x.physical_size ?? [0, 0],
                             modes,
                             mode: cur ? modeStr(cur) : "",

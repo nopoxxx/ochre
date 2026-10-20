@@ -21,7 +21,7 @@ Singleton {
         || Object.keys(probes).length > 0 || Object.keys(dirs).some(d => d.endsWith("/night") && dirs[d].length > 0)
     readonly property bool night: hasNight && Wl.isNight(clock, Weather.sun)
     readonly property string focusedOutput: Niri.focusedWorkspace?.output ?? Quickshell.screens[0]?.name ?? ""
-    readonly property string current: imageFor(focusedOutput, Wl.wsKey(Niri.focusedWorkspace))
+    readonly property string current: imageFor(focusedOutput, wsKeyOf(Niri.focusedWorkspace))
     property var folders: []
     property string fill: "fill"           // fill | fit | stretch
     readonly property var fillModes: ["fill", "fit", "stretch"]
@@ -73,13 +73,29 @@ Singleton {
         return [s.all].concat(Object.values(s.outputs), Object.values(s.workspaces));
     }
 
+    function wsKeyOf(ws) {
+        return Wl.wsKey(ws, ws ? Settings.outKey(ws.output) : "");
+    }
+
     function activeWs(output) {
-        return Wl.wsKey(Niri.workspaces.find(w => w.output === output && w.is_active) ?? null);
+        return wsKeyOf(Niri.workspaces.find(w => w.output === output && w.is_active) ?? null);
+    }
+
+    function migrateOutputs() {
+        if (!Settings.writable || !Settings.outputs.length) return;
+        const s = Wl.migrateOutputs(slots, Settings.outputIds);
+        if (s) save(s);
+    }
+
+    Connections {
+        target: Settings
+        function onOutputIdsChanged() { root.migrateOutputs(); }
+        function onWritableChanged() { root.migrateOutputs(); }
     }
 
     function resolveFor(output, ws) {
         const i = Quickshell.screens.findIndex(s => s.name === output);
-        return Wl.resolve(slots, output, ws, night, p => probes[p] === true, p => dirs[p] ?? null, pos[output] ?? Math.max(0, i));
+        return Wl.resolve(slots, Settings.outKey(output), ws, night, p => probes[p] === true, p => dirs[p] ?? null, pos[output] ?? Math.max(0, i));
     }
 
     function imageFor(output, ws) {
@@ -87,7 +103,7 @@ Singleton {
     }
 
     function targetKey(level) {
-        return level === "output" ? focusedOutput : level === "ws" ? Wl.wsKey(Niri.focusedWorkspace) : "";
+        return level === "output" ? Settings.outKey(focusedOutput) : level === "ws" ? wsKeyOf(Niri.focusedWorkspace) : "";
     }
 
     function slotOf(s, level, key) {
@@ -224,6 +240,7 @@ Singleton {
         onLoaded: {
             root.slots = Wl.parseState(text());
             root.scan();
+            root.migrateOutputs();
         }
         onLoadFailed: error => { if (error === FileViewError.FileNotFound) legacy.path = root.stateFile; }
     }
