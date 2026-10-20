@@ -20,6 +20,7 @@ optdepends=(
     'adw-gtk-theme: GTK-приложения в цветах shell'
     'gruvbox-plus-icon-theme: иконки темы Gruvbox'
     'papirus-icon-theme: иконки остальных тем'
+    'matugen: тема Wallpaper — палитра из обоев'
     'gammastep: ночной режим'
     'wf-recorder: запись экрана'
     'slurp: запись выделенной области'

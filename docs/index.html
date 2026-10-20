@@ -223,7 +223,7 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
     <li><b>меню</b> <kbd>Mod+D</kbd> для действий: программы, обои, пакеты pacman/AUR, питание;</li>
     <li><b>настройки</b> <kbd>Mod+S</kbd> в стиле menuconfig с поиском — без правки конфигов руками;</li>
     <li><b>окна</b> мониторов, биндов и обоев (wallhaven.cc);</li>
-    <li><b>темы</b>: Gruvbox, Catppuccin, Rosé Pine, Tokyo Night, Everforest, Kanagawa, Solarized, Nord, Dracula — shell, niri, GTK, Qt, btop, терминал и greeter в одной палитре;</li>
+    <li><b>темы</b>: Gruvbox, Catppuccin, Rosé Pine, Tokyo Night, Everforest, Kanagawa, Solarized, Nord, Dracula и Wallpaper (палитра из обоев через matugen) — shell, niri, GTK, Qt, btop, терминал и greeter в одной палитре;</li>
     <li><b>блокировка и greeter</b> как getty, уведомления как лог, обновление shell одним кликом.</li>
   </ul>
 </section>
@@ -294,6 +294,7 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
     <tr><td><kbd>Mod+D</kbd></td><td>меню</td></tr>
     <tr><td><kbd>Mod+Space</kbd></td><td>сразу список программ</td></tr>
     <tr><td><kbd>Mod+S</kbd></td><td>настройки</td></tr>
+    <tr><td><kbd>Mod+/</kbd></td><td>шпаргалка клавиш: все сочетания по группам, с поиском</td></tr>
     <tr><td><kbd>Mod+Return</kbd></td><td>терминал (выбранный в настройках)</td></tr>
     <tr><td><kbd>Mod+E</kbd></td><td>файловый менеджер</td></tr>
     <tr><td><kbd>Mod+Shift+B</kbd></td><td>браузер</td></tr>
@@ -389,7 +390,8 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
       клик — пауза, правый — стоп, колёсико — ±1 минута; переживает перезапуск shell;</li>
     <li><code>=</code> и выражение — калькулятор: <code>=2^10</code>, <code>=(1,5+2)*3</code>, <code>=sqrt(2)</code>; <kbd>↵</kbd> копирует ответ.
       Есть <code>+ - * / % ^</code>, скобки, <code>sqrt abs round floor ceil ln log sin cos tan</code>, <code>pi</code>, <code>e</code>;</li>
-    <li>префиксы меняются в <code>settings → вид → меню</code> (например <code>!</code> вместо <code>&gt;</code>); пустой — выключен;</li>
+    <li><code>!вопрос</code> — Claude Code в обычном окне терминала из <code>~</code>; просто <code>!</code> — <code>new</code> (новая сессия) и <code>continue</code> (продолжить последнюю). Команду можно сменить в настройках, а вместо Claude Code выбрать Google AI Mode в браузере;</li>
+    <li>префиксы меняются в <code>settings → вид → меню</code> (например <code>$</code> вместо <code>&gt;</code>); пустой — выключен;</li>
     <li>всё настраиваемое — не в меню, а в окне настроек (<code>settings</code>).</li>
   </ul>
 </section>
@@ -573,6 +575,11 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
   в списке рядом с названием — полоска её цветов. <code>тёмная или светлая</code> — режим; светлой нет у Nord и Dracula.
   Переключить режим: плитка «тема» в <code>home</code> → быстро или <code>qs ipc call theme toggle</code> (<code>dark</code>, <code>light</code>, <code>get</code>).
   Тема меняет сразу shell, рамки niri, терминал (и уже открытые окна), greeter и приложения.</p>
+  <p><code>Wallpaper</code> — палитра из текущих обоев сфокусированного экрана: её строит <code>matugen</code> (ставит установщик),
+  обои сменились — сменилась и палитра. Есть тёмный и светлый вариант. Характер палитры — <code>схема из обоев</code>:
+  <code>tonal-spot</code> (спокойная), <code>content</code> и <code>fidelity</code> (ближе к картинке), <code>expressive</code>,
+  <code>fruit-salad</code>, <code>rainbow</code> (ярче), <code>neutral</code>, <code>monochrome</code>. Акцент выбирается как обычно:
+  <code>ochre</code> — главный цвет обоев, остальные — цвета Gruvbox, сдвинутые к нему.</p>
   <h2>Темы приложений</h2>
   <p><code>look/</code> → <code>темы Qt и GTK</code>: GTK- и Qt-приложения в той же палитре, с тем же акцентом и шрифтом,
   что и shell, — через adw-gtk3 / libadwaita и qt6ct. Firefox и Chromium берут тёмную или светлую схему через портал.

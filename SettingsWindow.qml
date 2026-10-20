@@ -93,12 +93,13 @@ Scope {
             function runAction(name) {
                 Settings.open = false;
                 // из этих окон Esc возвращает сюда же
-                Settings.returnHere = ["picker", "wallhaven", "binds", "displays", "lockPreview"].includes(name);
+                Settings.returnHere = ["picker", "wallhaven", "binds", "cheatsheet", "displays", "lockPreview"].includes(name);
                 const ipc = (...args) => Ochre.ipc(...args);
                 switch (name) {
                 case "picker": Wallpaper.pickerSource = "local"; Wallpaper.pickerOpen = true; break;
                 case "wallhaven": Wallpaper.pickerSource = "wallhaven"; Wallpaper.pickerOpen = true; break;
                 case "binds": ipc("binds", "toggle"); break;
+                case "cheatsheet": ipc("cheatsheet", "toggle"); break;
                 case "hotkeys": Niri.action("show-hotkey-overlay"); break;
                 case "displays": ipc("displays", "toggle"); break;
                 case "lock": ipc("lock", "lock"); break;
@@ -405,7 +406,7 @@ Scope {
             }
             readonly property var swatchKeys: ["shell.accent", "shell.shot.color"]
             readonly property var opens: ["picker", "wallhaven", "binds", "displays", "home", "wifi", "audio", "editNiri",
-                "editShell", "editTerminal", "lockPreview", "hotkeys", "fastfetch"]
+                "editShell", "editTerminal", "lockPreview", "hotkeys", "cheatsheet", "fastfetch"]
 
             TextMetrics {
                 id: cell

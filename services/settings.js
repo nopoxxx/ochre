@@ -24,11 +24,12 @@ var APP_ENV = N.APP_ENV, OPEN_SHADER = N.OPEN_SHADER, CLOSE_SHADER = N.CLOSE_SHA
 var FONT = T.FONT, ICONS = T.ICONS, GNOME_ACCENTS = T.GNOME_ACCENTS, fontPt = T.fontPt, gtkColors = T.gtkColors, gtkCss = T.gtkCss, qtColors = T.qtColors, qtFont = T.qtFont, themeFiles = T.themeFiles, btopTheme = T.btopTheme, themeGsettings = T.themeGsettings, iconTheme = T.iconTheme, iconOverlay = T.iconOverlay;
 var TERM_COLORS = TM.TERM_COLORS, TERM_INCLUDE = TM.TERM_INCLUDE, termFiles = TM.termFiles, termMigrate = TM.termMigrate, termOsc = TM.termOsc;
 var FASTFETCH_STYLES = FF.FASTFETCH_STYLES, FASTFETCH_MARK = FF.FASTFETCH_MARK, fastfetchConfig = FF.fastfetchConfig;
-var THEMES = P.THEMES, ROLES = P.ROLES, mix = P.mix, palette = P.palette, themeStrip = P.themeStrip;
+var THEMES = P.THEMES, ROLES = P.ROLES, mix = P.mix, palette = P.palette, themeStrip = P.themeStrip, hasLight = P.hasLight, wallTheme = P.wallTheme, WALL_SCHEMES = P.WALL_SCHEMES;
 
 function themeLabels() {
     const out = {};
     for (const id in THEMES) out[id] = THEMES[id].name;
+    out.wallpaper = "Wallpaper";
     return out;
 }
 
@@ -48,9 +49,12 @@ function sections(outputs, layout, home) {
     return [
         { id: "look", title: "вид", rows: [
             { header: "цвет и шрифт" },
-            { key: "shell.theme.name", label: "тема", type: "enum", options: Object.keys(THEMES), labels: themeLabels(), def: "gruvbox", hint: "палитра shell и приложений" },
+            { key: "shell.theme.name", label: "тема", type: "enum", options: Object.keys(THEMES).concat("wallpaper"), labels: themeLabels(), def: "gruvbox",
+              hint: "палитра shell и приложений; Wallpaper — из текущих обоев (нужен matugen), пока её нет — Gruvbox" },
+            { key: "shell.theme.scheme", label: "схема из обоев", type: "enum", options: WALL_SCHEMES, def: "tonal-spot",
+              hint: "для темы Wallpaper: tonal-spot — спокойная, content и fidelity — ближе к цветам картинки, expressive, fruit-salad и rainbow — ярче, neutral и monochrome — почти серые" },
             { key: "shell.theme.mode", label: "тёмная или светлая", type: "enum", options: ["dark", "light"], def: "dark",
-              hint: "светлой нет у Nord и Dracula — у них остаётся тёмная; переключить: ochre ipc call theme toggle" },
+              hint: "светлой нет у Nord и Dracula — у них остаётся тёмная; у Wallpaper есть обе; переключить: ochre ipc call theme toggle" },
             { key: "shell.accent", label: "акцентный цвет", type: "enum", options: Object.keys(ACCENTS), def: "ochre", hint: "рамки окон shell, prompt, рамка фокуса niri и акцент в приложениях" },
             { key: "shell.fontSize", label: "размер шрифта", type: "int", min: 10, max: 28, step: 1, def: 16 },
             { key: "shell.lang", label: "язык", type: "enum", options: ["auto", "ru", "en"], def: "auto",
@@ -89,6 +93,10 @@ function sections(outputs, layout, home) {
             { key: "shell.launcher.prefix.remove", label: "префикс: удалить", type: "text", def: "-", hint: "«-htop» — установленные пакеты, ↵ — pacman -Rns; пусто — выключено" },
             { key: "shell.launcher.prefix.timer", label: "префикс: таймер", type: "text", def: "%", hint: "«%25m чай» — таймер; без срока — готовые и стоп; пусто — выключено" },
             { key: "shell.launcher.prefix.calc", label: "префикс: калькулятор", type: "text", def: "=", hint: "«=2^10» — калькулятор, ↵ — копировать ответ; пусто — выключено" },
+            { key: "shell.launcher.prefix.ai", label: "префикс: AI", type: "text", def: "!", hint: "«!вопрос» — спросить AI; пусто — выключено" },
+            { key: "shell.launcher.ai", label: "AI", type: "enum", options: ["claude", "google"], def: "claude",
+              hint: "claude — Claude Code в окне терминала (без вопроса — новая сессия или продолжить); google — Google AI Mode в браузере" },
+            { key: "shell.launcher.ai.cmd", label: "команда AI", type: "text", def: "claude", hint: "что запускать для AI claude; вопрос — последним аргументом" },
             { key: "shell.launcher.files.dir", label: "где искать файлы", type: "text", def: "~", hint: "каталог для поиска файлов; скрытые и из .gitignore пропускаются" },
             { key: "shell.launcher.web", label: "поисковик", type: "enum", options: ["duckduckgo", "google", "startpage", "brave", "custom"], def: "duckduckgo",
               hint: "custom — адрес из строки ниже" },
@@ -145,7 +153,8 @@ function sections(outputs, layout, home) {
 
             { header: "клавиши" },
             act("binds", "бинды", "все сочетания niri и ochre: изменить, добавить, отключить"),
-            act("hotkeys", "подсказка клавиш", "окно niri со всеми сочетаниями (Mod+Shift+/)"),
+            act("cheatsheet", "шпаргалка клавиш", "все сочетания поверх экрана, по группам, с поиском (Mod+/)"),
+            act("hotkeys", "подсказка клавиш niri", "окно niri со всеми сочетаниями (Mod+Shift+/)"),
             { key: "niri.key.micMute", label: "мьют микрофона", type: "combo", def: "", action: MUTE_BINDS["niri.key.micMute"].action, hint: "вкл/выкл микрофон по умолчанию (wpctl); работает и на экране блокировки" },
             { key: "niri.key.audioMute", label: "мьют звука", type: "combo", def: "", action: MUTE_BINDS["niri.key.audioMute"].action, hint: "вкл/выкл звук на устройстве вывода по умолчанию — наушники или колонки (wpctl)" },
 

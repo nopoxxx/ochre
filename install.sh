@@ -435,8 +435,8 @@ else
 fi
 
 # ── программы ────────────────────────────────────────────────────────
-# браузер, файловый менеджер, программы и иконки Gruvbox Plus и Papirus (их shell включает в GTK и Qt по теме)
-EXTRA=("${APP_PKGS[@]}" gruvbox-plus-icon-theme papirus-icon-theme)
+# браузер, файловый менеджер, программы, иконки Gruvbox Plus и Papirus (их shell включает в GTK и Qt по теме), matugen для темы Wallpaper
+EXTRA=("${APP_PKGS[@]}" gruvbox-plus-icon-theme papirus-icon-theme matugen/matugen-bin)
 [ -n "${BROWSER_PKG[$BROWSER]}" ] && EXTRA+=("${BROWSER_PKG[$BROWSER]}")
 [ -n "${FILES_PKG[$FILES]}" ] && EXTRA+=("${FILES_PKG[$FILES]}")
 
@@ -841,7 +841,7 @@ cat <<EOF
   ${A}Mod+Space${N}    программы        ${A}Super+Alt+L${N}   блокировка$([ "$FILES" != none ] && printf '\n  %sMod+E%s        %s' "$A" "$N" "$FILES")
   ${A}Mod+Tab${N}      обзор            ${A}Mod+Shift+S${N}   скриншот с разметкой (и Print)$([ "$BROWSER" != none ] && printf '\n  %sMod+Shift+B%s  %s' "$A" "$N" "$BROWSER")
   ${A}Mod+A${N}        меню home        ${A}Mod+Shift+V${N}   история буфера
-  ${A}Mod+Shift+/${N}  все клавиши niri ${A}Mod+Alt+R${N}     запись экрана
+  ${A}Mod+/${N}        все клавиши      ${A}Mod+Alt+R${N}     запись экрана
 
   ${D}документация: https://nopoxxx.github.io/ochre/${N}
 EOF
