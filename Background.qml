@@ -3,14 +3,16 @@ import Quickshell.Wayland
 import QtQuick
 import QtQuick.Effects
 import qs.services
+import "services/wallpaper.js" as Wl
 
-// Обои на нижнем слое layer-shell; новая картинка появляется поверх старой переходом shell.wallpaper.transition:
+// Обои на нижнем слое layer-shell (картинка, gif, видео или шейдер — WallLayer); новые появляются поверх старых
+// переходом shell.wallpaper.transition:
 //   type   — печатается строками слева направо, во главе строки курсор █ цвета акцента
 //   blocks — проступает случайными клетками, как на старом терминале
 //   scan   — развёртка сверху вниз со светящейся строкой
 //   fade   — проявляется; none — сразу; random — каждый раз другой
 // Маска — прямоугольники в ShaderEffectSource, сам переход — MultiEffect (свои шейдеры не нужны).
-// Первая картинка при запуске shell — всегда fade.
+// Первая картинка при запуске shell — всегда fade. Живые обои стоят на паузе по Wallpaper.livePlaying.
 PanelWindow {
     id: bg
 
@@ -23,8 +25,7 @@ PanelWindow {
     readonly property string ws: Wallpaper.activeWs(screen?.name ?? "")
     property string shownWs: ws
     onWsChanged: Qt.callLater(() => shownWs = ws)
-    readonly property string path: Wallpaper.imageFor(screen?.name ?? "", ws)
-    readonly property string src: path ? "file://" + encodeURI(path) : ""
+    readonly property string src: Wallpaper.imageFor(screen?.name ?? "", ws)
     readonly property int mode: Wallpaper.fill === "fit" ? Image.PreserveAspectFit
         : Wallpaper.fill === "stretch" ? Image.Stretch
         : Image.PreserveAspectCrop
@@ -36,41 +37,61 @@ PanelWindow {
     property bool quick: false
     readonly property bool masked: p < 1 && style !== "fade"
 
+    // два слоя по очереди: новые обои грузятся в свободный, старый остаётся как был (видео не начинается заново)
+    property bool flip: false
+    readonly property Item cur: flip ? lb : la
+    readonly property Item prev: flip ? la : lb
+    readonly property bool playing: Wallpaper.livePlaying(screen?.name ?? "")
+
     onSrcChanged: {
         const want = Settings.get("shell.wallpaper.transition");
         quick = !first && ws !== shownWs;
-        style = quick || first || !prev.source ? "fade"
+        style = quick || first || !cur.path ? "fade"
             : want === "random" ? styles[Math.floor(Math.random() * styles.length)] : want;
         first = false;
-        prev.source = cur.source;
         anim.stop();
         p = 0;
-        cur.source = src;
+        flip = !flip;
+        if (cur.path === src && cur.ready) start();
+        else cur.path = src;
     }
 
-    Image {
-        id: prev
-        anchors.fill: parent
-        fillMode: bg.mode
-        asynchronous: true
+    function start() {
+        if (style === "none") done();
+        else anim.restart();
     }
 
-    Image {
-        id: cur
+    function done() {
+        p = 1;
+        prev.path = "";
+        // постер шейдера для greeter, хуков и окна обоев — снимок кадра, когда слой уже виден целиком
+        const path = cur.path;
+        if (Wl.kindOf(path) === "shader" && !Wallpaper.posters[path])
+            cur.grabToImage(r => { if (r.saveToFile(Wallpaper.posterOf(path))) Wallpaper.posterSaved(path); });
+    }
 
+    WallLayer {
+        id: la
         anchors.fill: parent
+        z: bg.cur === la ? 1 : 0
         fillMode: bg.mode
-        asynchronous: true
-        source: bg.src
-        opacity: bg.style === "fade" ? bg.p : 1
-        visible: !bg.masked
-        onStatusChanged: if (status === Image.Ready) {
-            if (bg.style === "none") {
-                bg.p = 1;
-                prev.source = "";
-            }
-            else anim.restart();
-        }
+        fps: Settings.get("shell.wallpaper.live.fps")
+        playing: bg.cur === la && bg.playing
+        opacity: bg.cur === la && bg.style === "fade" ? bg.p : 1
+        visible: bg.cur === la ? !bg.masked : path !== ""
+        onShown: if (bg.cur === la) bg.start()
+    }
+
+    WallLayer {
+        id: lb
+        anchors.fill: parent
+        z: bg.cur === lb ? 1 : 0
+        fillMode: bg.mode
+        fps: Settings.get("shell.wallpaper.live.fps")
+        playing: bg.cur === lb && bg.playing
+        opacity: bg.cur === lb && bg.style === "fade" ? bg.p : 1
+        visible: bg.cur === lb ? !bg.masked : path !== ""
+        onShown: if (bg.cur === lb) bg.start()
     }
 
     NumberAnimation {
@@ -82,14 +103,15 @@ PanelWindow {
         duration: (bg.quick ? 150 : bg.style === "fade" ? 450 : bg.style === "blocks" ? 700 : 900) / Settings.get("shell.anim.speed")
         easing.type: bg.style === "fade" ? Easing.OutCubic : Easing.Linear
         // иначе в режиме fit старая картинка торчала бы из-под новой по краям
-        onFinished: prev.source = ""
+        onFinished: bg.done()
     }
 
     // новая картинка сквозь маску
     MultiEffect {
         anchors.fill: parent
+        z: 2
         visible: bg.masked
-        source: cur
+        source: bg.cur
         maskEnabled: true
         maskSource: maskSrc
         maskThresholdMin: 0.5
@@ -98,6 +120,7 @@ PanelWindow {
 
     ShaderEffectSource {
         id: maskSrc
+        z: 2
         anchors.fill: parent
         sourceItem: mask
         hideSource: true
@@ -158,6 +181,7 @@ PanelWindow {
 
     // ── поверх перехода: курсоры type и строка развёртки ──
     Repeater {
+        z: 3
         model: bg.masked && bg.style === "type" ? mask.rows : 0
         Rectangle {
             required property int index
@@ -173,6 +197,7 @@ PanelWindow {
     }
 
     Rectangle {
+        z: 3
         visible: bg.masked && bg.style === "scan"
         y: Math.round(bg.p * parent.height) - height / 2
         width: parent.width

@@ -1,10 +1,13 @@
 pragma Singleton
 import Quickshell
 import Quickshell.Io
+import Quickshell.Services.UPower
 import QtQuick
 import "wallpaper.js" as Wl
 
-// Текущие обои, локальная коллекция, фирменные обои ochre и загрузка с wallhaven.cc
+// Текущие обои, локальная коллекция, фирменные обои ochre и загрузка с wallhaven.cc.
+// Живые обои (видео, шейдеры): постеры ~/.cache/ochre/wall-posters/<md5 пути>.png — для greeter, хуков, блокировки
+// и окна выбора; видео — кадр ffmpeg, шейдер — снимок из Background. Свой .frag собирается qsb в ~/.cache/ochre/wall-shaders.
 Singleton {
     id: root
 
@@ -27,6 +30,18 @@ Singleton {
     readonly property var fillModes: ["fill", "fit", "stretch"]
     property var local: []                 // пути к файлам в dir
     property string downloading: ""        // id обоев, которые сейчас качаются
+
+    readonly property string posterDir: Quickshell.env("HOME") + "/.cache/ochre/wall-posters"
+    readonly property string shaderDir: Quickshell.env("HOME") + "/.cache/ochre/wall-shaders"
+    property var posters: ({})             // путь живых обоев → есть постер
+    property var shaders: ({})             // путь .frag → собранный .qsb
+    property var shaderErrors: ({})        // путь .frag → ошибка qsb (уведомление — один раз)
+    readonly property string still: stillOf(current)
+    property bool locked: false            // ставит LockScreen: под блокировкой живые обои стоят
+
+    // фирменные живые обои — шейдеры extras/wallpapers/live, цвета берут из темы сами
+    readonly property var brandLiveNames: ["rain", "grid", "dots"]
+    readonly property var brandLive: brandLiveNames.map(n => brandDir + "/live/ochre-" + n + ".frag")
 
     // окно выбора
     property bool pickerOpen: false
@@ -68,6 +83,87 @@ Singleton {
     property bool _noState: false
     readonly property bool _wantDefault: _noState && Settings.writable
     on_WantDefaultChanged: if (_wantDefault) { _noState = false; set(brandPath("horizon", accent)); }
+
+    function kindOf(path) { return Wl.kindOf(path); }
+
+    function posterOf(path) {
+        return posterDir + "/" + Qt.md5(path) + ".png";
+    }
+
+    // картинка вместо обоев там, где живые не нужны или невозможны (greeter, хуки, превью); "" — постера ещё нет
+    function stillOf(path) {
+        return !path || !Wl.isLive(path) ? path : posters[path] ? posterOf(path) : "";
+    }
+
+    function posterSaved(path) {
+        posters = Object.assign({}, posters, { [path]: true });
+    }
+
+    // .qsb для ShaderEffect: готовый файл, собранный рядом (фирменные: name.frag.qsb) или в кэше; "" — ещё не собран
+    function shaderOf(path) {
+        if (/\.qsb$/i.test(path)) return path;
+        if (path.startsWith(brandDir + "/")) return path + ".qsb";
+        return shaders[path] ?? "";
+    }
+
+    // пауза живых обоев: shell.wallpaper.live выключен, блокировка, игровой режим, батарея, fullscreen-окно на мониторе
+    function livePlaying(output) {
+        return Settings.get("shell.wallpaper.live") && !locked && !Game.on
+            && !(Settings.get("shell.wallpaper.live.battery") && UPower.onBattery)
+            && !(Settings.get("shell.wallpaper.live.pause") === "fullscreen" && fullscreenOn(output));
+    }
+
+    // активное окно стола на мониторе — во весь монитор (у niri в IPC нет флага fullscreen: сверяем размер окна)
+    function fullscreenOn(output) {
+        const ws = Niri.workspaces.find(w => w.output === output && w.is_active);
+        const win = ws && ws.active_window_id != null ? Niri.windows[ws.active_window_id] : null;
+        const size = win && !win.is_floating ? win.layout?.window_size : null;
+        const out = Settings.outputs.find(o => o.name === output);
+        return !!(size && out && out.w && size[0] >= out.w - 1 && size[1] >= out.h - 1);
+    }
+
+    // все живые обои, которые могут понадобиться: назначенные, в папках слайдшоу, в коллекции и фирменные
+    readonly property var liveFiles: {
+        const all = [];
+        for (const slot of slotsOf(slots)) for (const t of ["day", "night"]) if (slot[t]) all.push(slot[t]);
+        for (const d in dirs) for (const f of dirs[d]) all.push(f);
+        for (const f of local.concat(brandLive)) all.push(f);
+        return all.filter((p, i) => Wl.isLive(p) && all.indexOf(p) === i).sort();
+    }
+    onLiveFilesChanged: prepTimer.restart()
+
+    function prep() {
+        if (preparer.running) { prepTimer.restart(); return; }
+        const args = [];
+        for (const p of liveFiles) {
+            const k = Wl.kindOf(p);
+            if (k === "video") { if (!posters[p]) args.push("V", p, posterOf(p)); }
+            else {
+                if (!posters[p]) args.push("P", p, posterOf(p));
+                if (/\.frag$/i.test(p) && !p.startsWith(brandDir + "/") && !shaders[p]) args.push("S", p, shaderDir + "/" + Qt.md5(p) + ".qsb");
+            }
+        }
+        if (!args.length) return;
+        // V: кадр ffmpeg (с 1-й секунды, у коротких — первый); P: есть ли снимок; S: готовый name.frag.qsb рядом, свежий кэш или qsb
+        preparer.command = ["sh", "-c", `
+            q=$(command -v qsb || command -v qsb6 || echo /usr/lib/qt6/bin/qsb)
+            while [ $# -ge 3 ]; do
+                case $1 in
+                V) [ -f "$3" ] || { ffmpeg -nostdin -loglevel error -y -ss 1 -i "$2" -frames:v 1 -vf "scale='min(1920,iw)':-2" "$3.part.png" 2>/dev/null \
+                        && [ -s "$3.part.png" ] || ffmpeg -nostdin -loglevel error -y -i "$2" -frames:v 1 -vf "scale='min(1920,iw)':-2" "$3.part.png"; } \
+                        && [ -s "$3.part.png" ] && mv -f "$3.part.png" "$3"
+                    rm -f "$3.part.png"
+                    [ -f "$3" ] && printf 'P\t%s\n' "$2" ;;
+                P) [ -f "$3" ] && printf 'P\t%s\n' "$2" ;;
+                S) if [ -f "$2.qsb" ] && [ ! "$2" -nt "$2.qsb" ]; then printf 'Q\t%s\t%s\n' "$2" "$2.qsb"
+                    elif [ -f "$3" ] && [ ! "$2" -nt "$3" ]; then printf 'Q\t%s\t%s\n' "$2" "$3"
+                    elif err=$("$q" --glsl "100es,120,150" --hlsl 50 --msl 12 -o "$3" "$2" 2>&1); then printf 'Q\t%s\t%s\n' "$2" "$3"
+                    else printf 'E\t%s\t%s\n' "$2" "$(printf '%s' "$err" | tr '\n\t' '  ' | cut -c1-300)"; fi ;;
+                esac
+                shift 3
+            done`, "sh"].concat(args);
+        preparer.running = true;
+    }
 
     function slotsOf(s) {
         return [s.all].concat(Object.values(s.outputs), Object.values(s.workspaces));
@@ -156,7 +252,7 @@ Singleton {
         for (const slot of slotsOf(slots)) for (const t of ["day", "night"]) {
             const v = slot[t];
             if (!v) continue;
-            if (/\.(png|jpe?g|webp)$/i.test(v)) { if (t === "day") args.push("F:" + Wl.nightVariant(v)); }
+            if (Wl.MEDIA.test(v)) { if (t === "day") args.push("F:" + Wl.nightVariant(v)); }
             else args.push("D:" + v, "D:" + v + "/night");
         }
         scanner.command = ["sh", "-c", `
@@ -164,7 +260,7 @@ Singleton {
                 p=\${a#?:}
                 case $a in
                 D:*) [ -d "$p" ] || continue; printf 'E\\t%s\\n' "$p"
-                    find "$p" -maxdepth 1 -type f \\( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \\) |
+                    find "$p" -maxdepth 1 -type f | grep -iE '${root.extRe}' |
                         while IFS= read -r f; do printf 'D\\t%s\\t%s\\n' "$p" "$f"; done ;;
                 F:*) [ -f "$p" ] && printf 'F\\t%s\\n' "$p" ;;
                 esac
@@ -231,7 +327,40 @@ Singleton {
         xhr.send();
     }
 
-    Component.onCompleted: Quickshell.execDetached(["mkdir", "-p", dir, stateFile.slice(0, stateFile.lastIndexOf("/"))])
+    // расширения обоев для grep -E в скриптах (константа из wallpaper.js, не данные пользователя)
+    readonly property string extRe: "\\.(" + Wl.EXTS.join("|") + ")$"
+
+    Component.onCompleted: Quickshell.execDetached(["mkdir", "-p", dir, stateFile.slice(0, stateFile.lastIndexOf("/")), posterDir, shaderDir])
+
+    Timer {
+        id: prepTimer
+        interval: 300
+        onTriggered: root.prep()
+    }
+
+    Process {
+        id: preparer
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const p = Object.assign({}, root.posters);
+                const q = Object.assign({}, root.shaders);
+                const e = Object.assign({}, root.shaderErrors);
+                for (const l of this.text.split("\n")) {
+                    const c = l.split("\t");
+                    if (c[0] === "P") p[c[1]] = true;
+                    else if (c[0] === "Q") { q[c[1]] = c[2]; delete e[c[1]]; }
+                    else if (c[0] === "E" && !(c[1] in e)) {
+                        e[c[1]] = c[2];
+                        Quickshell.execDetached(["notify-send", "-a", "ochre", I18n.tr("Шейдер обоев не собрался"),
+                            c[1].slice(c[1].lastIndexOf("/") + 1) + ": " + (c[2] || I18n.tr("нет qsb (qt6-shadertools)"))]);
+                    }
+                }
+                root.posters = p;
+                root.shaders = q;
+                root.shaderErrors = e;
+            }
+        }
+    }
 
     FileView {
         id: slotsView
@@ -301,8 +430,7 @@ Singleton {
     Process {
         id: lister
         running: true
-        command: ["find", root.dir, "-maxdepth", "1", "-type", "f",
-            "(", "-iname", "*.jpg", "-o", "-iname", "*.jpeg", "-o", "-iname", "*.png", "-o", "-iname", "*.webp", ")"]
+        command: ["find", root.dir, "-maxdepth", "1", "-type", "f", "("].concat(Wl.findNames(), [")"])
         stdout: StdioCollector {
             onStreamFinished: root.local = this.text.split("\n").filter(l => l).sort()
         }
@@ -316,7 +444,7 @@ Singleton {
                 [ -d "$d" ] || continue
                 d=\${d%/}
                 [ "\${d##*/}" = night ] && continue
-                f=$(find "$d" -maxdepth 1 -type f \\( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \\) | sort | head -n 1)
+                f=$(find "$d" -maxdepth 1 -type f | grep -iE '${root.extRe}' | sort | head -n 1)
                 printf '%s\\t%s\\n' "$d" "$f"
             done`, "sh", root.dir]
         stdout: StdioCollector {

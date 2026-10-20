@@ -1,6 +1,29 @@
 .pragma library
 
 var IMAGE = /\.(png|jpe?g|webp)$/i;
+var MEDIA = /\.(png|jpe?g|webp|gif|mp4|webm|mkv|mov|m4v|frag|qsb)$/i;
+var EXTS = ["jpg", "jpeg", "png", "webp", "gif", "mp4", "webm", "mkv", "mov", "m4v", "frag", "qsb"];
+
+// image — картинка; anim — gif и webp (AnimatedImage: у статичного webp один кадр); video; shader — .frag (собирается qsb) или .qsb
+function kindOf(path) {
+    if (/\.(gif|webp)$/i.test(path)) return "anim";
+    if (/\.(mp4|webm|mkv|mov|m4v)$/i.test(path)) return "video";
+    if (/\.(frag|qsb)$/i.test(path)) return "shader";
+    return IMAGE.test(path) ? "image" : "";
+}
+
+// живые — те, у кого нет готовой картинки для greeter, хуков и превью
+function isLive(path) {
+    const k = kindOf(path);
+    return k === "video" || k === "shader";
+}
+
+// аргументы find: -iname '*.jpg' -o -iname '*.png' …
+function findNames() {
+    const a = [];
+    for (let i = 0; i < EXTS.length; i++) a.push(...(i ? ["-o"] : []), "-iname", "*." + EXTS[i]);
+    return a;
+}
 
 function wsKey(ws, out) {
     return ws ? (out || ws.output) + "/" + (ws.name || ws.idx) : "";
@@ -34,7 +57,7 @@ function parseState(text) {
 }
 
 function nightVariant(path) {
-    const m = path.match(IMAGE);
+    const m = path.match(MEDIA);
     return m ? path.slice(0, m.index) + "-night" + m[0] : path + "/night";
 }
 
@@ -56,7 +79,7 @@ function resolve(state, output, ws, night, exists, listDir, pos) {
             const p = tries[i];
             const list = listDir(p);
             if (list && list.length) return { path: list[pos % list.length], count: list.length };
-            if (IMAGE.test(p) && (i === tries.length - 1 || exists(p))) return { path: p, count: 0 };
+            if (MEDIA.test(p) && (i === tries.length - 1 || exists(p))) return { path: p, count: 0 };
         }
     }
     return { path: "", count: 0 };

@@ -515,6 +515,13 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
   <p>Первыми в сетке — фирменные обои ochre: <code>horizon</code>, <code>sundown</code>, <code>field</code>, <code>tty</code>.
   Первые три нарисованы под каждый акцент: пока они стоят, смена акцента в <code>look/</code> меняет и их. При первом запуске
   стоит <code>horizon</code>.</p>
+  <p><b>Живые обои.</b> В коллекцию можно класть видео (<code>mp4</code>, <code>webm</code>, <code>mkv</code>, <code>mov</code>), <code>gif</code>
+  и шейдеры <code>.frag</code>; играют без звука и по кругу, переходы работают как с картинками. За фирменными картинками идут
+  фирменные шейдеры <code>rain</code>, <code>grid</code>, <code>dots</code> — они сами берут цвета темы и акцента.
+  Обои стоят на паузе, пока на мониторе окно во весь экран, на блокировке, в игровом режиме и от батареи
+  (<code>look/ → обои</code>: живые обои, пауза, кадров у шейдеров). Greeter, блокировка и хук <code>wallpaper</code> получают
+  постер — первый кадр. Видео нужны <code>qt6-multimedia-ffmpeg</code> и <code>ffmpeg</code>, своим шейдерам — <code>qt6-shadertools</code>;
+  униформы шейдера описаны в <code>extras/wallpapers/live/README.md</code>.</p>
 <figure class="shot"><a href="shots/wallpapers.webp"><img src="shots/wallpapers.webp" alt="фирменные обои в окне выбора" width="1285" height="262" loading="lazy"></a><figcaption>фирменные обои — первым рядом, в варианте текущего акцента</figcaption></figure>
 </section>
 
@@ -719,7 +726,7 @@ Password: <span class="blink">█</span></div>
   Нет файла или он не исполняемый — ничего не происходит. При запуске shell хуки не срабатывают — только на изменения.</p>
   <div class="tbl"><table>
     <tr><th>файл</th><th>когда</th><th>аргументы</th></tr>
-    <tr><td><code>wallpaper</code></td><td>сменились обои на мониторе в фокусе</td><td>путь, монитор</td></tr>
+    <tr><td><code>wallpaper</code></td><td>сменились обои на мониторе в фокусе</td><td>картинка (у видео и шейдера — постер), монитор, файл обоев</td></tr>
     <tr><td><code>theme</code></td><td>сменились акцент, тема или режим</td><td>цвет акцента <code>#rrggbb</code>, акцент, тема, <code>dark</code>|<code>light</code></td></tr>
     <tr><td><code>lock</code>, <code>unlock</code></td><td>экран заблокирован, разблокирован</td><td>—</td></tr>
     <tr><td><code>game</code></td><td>игровой режим</td><td><code>on</code>|<code>off</code></td></tr>

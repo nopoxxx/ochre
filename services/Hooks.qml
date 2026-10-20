@@ -4,7 +4,7 @@ import QtQuick
 import "hooks.js" as H
 
 // Хуки на события: исполняемый ~/.config/ochre/hooks/<событие> с данными в аргументах (нет файла — ничего).
-//   wallpaper <путь> <монитор>               обои на мониторе в фокусе
+//   wallpaper <картинка> <монитор> <файл>    обои на мониторе в фокусе; у живых (видео, шейдер) картинка — постер, файл — сами обои
 //   theme <hex акцента> <акцент> <тема> <dark|light>
 //   lock, unlock                              блокировка (зовёт LockScreen)
 //   game on|off, dnd on|off                   игровой режим, действующий «не беспокоить»
@@ -16,7 +16,7 @@ Singleton {
     property bool ready: false
     property var last: ({})
 
-    readonly property string wallpaper: Wallpaper.current ? JSON.stringify([Wallpaper.current, Wallpaper.focusedOutput]) : ""
+    readonly property string wallpaper: Wallpaper.still ? JSON.stringify([Wallpaper.still, Wallpaper.focusedOutput, Wallpaper.current]) : ""
     readonly property string theme: JSON.stringify(H.themeArgs(k => Settings.get(k)))
     readonly property bool game: Game.on
     readonly property bool dnd: Notifs.dnd

@@ -61,7 +61,7 @@ function sections(outputs, layout, home) {
               hint: "Terminess в интерфейсе GTK- и Qt-приложений; моноширинный шрифт ставится всегда" },
 
             { header: "обои" },
-            act("picker", "выбрать обои", "локальная коллекция ~/Pictures/Wallpapers (Mod+Shift+W); Ctrl+T — все экраны, экран или стол, Ctrl+N — день или ночь"),
+            act("picker", "выбрать обои", "локальная коллекция ~/Pictures/Wallpapers: картинки, gif, видео, шейдеры (Mod+Shift+W); Ctrl+T — все экраны, экран или стол, Ctrl+N — день или ночь"),
             act("wallhaven", "найти на wallhaven", "поиск на wallhaven.cc, скачанные — в коллекцию"),
             { key: "shell.wallpaper.transition", label: "переход", type: "enum", options: ["type", "blocks", "scan", "fade", "none", "random"], def: "type",
               hint: "type — печатается строками, blocks — клетками, scan — развёрткой, fade — проявляется, random — каждый раз другой" },
@@ -69,6 +69,13 @@ function sections(outputs, layout, home) {
               hint: "минуты между картинками, если обоям экрана или стола назначена папка; 0 — не листать" },
             { key: "shell.wallpaper.order", label: "порядок слайдшоу", type: "enum", options: ["random", "cycle"], def: "random", hint: "random — случайно, cycle — по кругу" },
             { key: "wallpaper.fill", label: "заполнение", type: "enum", options: ["fill", "fit", "stretch"], def: "fill", hint: "fill — обрезать, fit — вписать с полосами, stretch — растянуть" },
+            { key: "shell.wallpaper.live", label: "живые обои", type: "bool", def: true,
+              hint: "видео (mp4, webm, mkv), gif и шейдеры .frag двигаются; выключено — стоит первый кадр" },
+            { key: "shell.wallpaper.live.pause", label: "пауза живых обоев", type: "enum", options: ["fullscreen", "never"], def: "fullscreen",
+              hint: "fullscreen — пока на мониторе окно во весь экран, never — не останавливать; на блокировке и в игровом режиме — всегда пауза" },
+            { key: "shell.wallpaper.live.battery", label: "пауза от батареи", type: "bool", def: true, hint: "живые обои стоят, пока ноутбук не на зарядке" },
+            { key: "shell.wallpaper.live.fps", label: "кадров у шейдеров", type: "int", min: 10, max: 60, step: 5, def: 30,
+              hint: "сколько раз в секунду перерисовывать шейдерные обои; видео идёт со своей частотой" },
 
             { header: "меню" },
             { key: "shell.launcher.rows", label: "строк в меню", type: "int", min: 6, max: 24, step: 1, def: 12, hint: "высота меню Mod+D" },
