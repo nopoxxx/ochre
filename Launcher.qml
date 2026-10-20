@@ -62,15 +62,6 @@ Scope {
             "bash", cmd, I18n.tr("не найдено: %1 — поставь Claude Code или смени команду в look/ → меню", cmd)].concat(args));
     }
 
-    // fastfetch с конфигом ochre и акцентом shell; окно закрывается по Enter
-    function about() {
-        const c = Theme.accent;
-        const ansi = "38;2;" + [c.r, c.g, c.b].map(x => Math.round(x * 255)).join(";");
-        Term.float(["bash", "-c",
-            'printf "\\e[?25l"; fastfetch -c "$1" --logo-type file --logo "$3" --logo-color-1 "$2" --logo-color-2 "$2"; printf "\\n  \\e[90m%s\\e[0m" "$4"; read -rs',
-            "bash", Quickshell.shellDir + "/extras/fastfetch/config.jsonc", ansi, Quickshell.shellDir + "/extras/fastfetch/ochre-large.txt", I18n.tr("↵ — закрыть")]);
-    }
-
     function openPicker(source) {
         Wallpaper.pickerSource = source;
         Wallpaper.pickerOpen = true;
@@ -268,7 +259,7 @@ Scope {
                 { label: "reboot", desc: I18n.tr("перезагрузка"), alias: ["restart"], confirm: true, run: () => spawn(["systemctl", "reboot"]) },
                 { label: "poweroff", desc: I18n.tr("выключение"), alias: ["shutdown", I18n.tr("выключить")], confirm: true, run: () => spawn(["systemctl", "poweroff"]) }
             ] },
-            { label: "about", icon: icons.about, desc: I18n.tr("о системе: fastfetch"), run: () => about() },
+            { label: "about", icon: icons.about, desc: I18n.tr("о системе: fastfetch"), run: () => Term.fastfetch() },
             { label: "help", icon: icons.about, desc: I18n.tr("главные клавиши и подсказки (ochre --help)"), alias: [I18n.tr("помощь"), I18n.tr("справка"), I18n.tr("клавиши")], run: () => Ochre.ipc("welcome", "open") }
         ]
     })

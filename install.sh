@@ -626,7 +626,7 @@ else
     info "оставил ваш конфиг"
 fi
 
-# fastfetch в стиле панели — только если своего конфига нет (about в меню берёт конфиг из shell сам)
+# fastfetch в стиле панели — только если своего конфига нет; дальше его ведёт shell (Mod+S → вид → стиль fastfetch)
 ff="$HOME/.config/fastfetch/config.jsonc"
 if [ ! -f "$ff" ]; then
     install -Dm644 "$DEST/extras/fastfetch/config.jsonc" "$ff"

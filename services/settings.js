@@ -7,6 +7,7 @@
 .import "settings/apptheme.js" as T
 .import "settings/themes.js" as P
 .import "settings/term.js" as TM
+.import "settings/fastfetch.js" as FF
 
 // Схема окна настроек; генерация ~/.config/niri/ochre/*.kdl — в settings/niri.js.
 //   niri.*      — уходят в конфиг niri
@@ -22,6 +23,7 @@ var MUTE_BINDS = B.MUTE_BINDS, COMBO_RE = B.COMBO_RE, MODS = B.MODS, comboKey = 
 var APP_ENV = N.APP_ENV, OPEN_SHADER = N.OPEN_SHADER, CLOSE_SHADER = N.CLOSE_SHADER, glslColor = N.glslColor, animBlocks = N.animBlocks, HOT_CORNERS = N.HOT_CORNERS, TRANSFORMS = N.TRANSFORMS, niriTransform = N.niriTransform, logicalSize = N.logicalSize, outputIds = N.outputIds, migrateOutputKeys = N.migrateOutputKeys, NIRI_FILES = N.NIRI_FILES, niriFileOf = N.niriFileOf, GAME_OFF = N.GAME_OFF, niriFiles = N.niriFiles, greeterNiri = N.greeterNiri, privateAppIds = N.privateAppIds;
 var FONT = T.FONT, ICONS = T.ICONS, GNOME_ACCENTS = T.GNOME_ACCENTS, fontPt = T.fontPt, gtkColors = T.gtkColors, gtkCss = T.gtkCss, qtColors = T.qtColors, qtFont = T.qtFont, themeFiles = T.themeFiles, btopTheme = T.btopTheme, themeGsettings = T.themeGsettings, iconTheme = T.iconTheme, iconOverlay = T.iconOverlay;
 var TERM_COLORS = TM.TERM_COLORS, TERM_INCLUDE = TM.TERM_INCLUDE, termFiles = TM.termFiles, termMigrate = TM.termMigrate, termOsc = TM.termOsc;
+var FASTFETCH_STYLES = FF.FASTFETCH_STYLES, FASTFETCH_MARK = FF.FASTFETCH_MARK, fastfetchConfig = FF.fastfetchConfig;
 var THEMES = P.THEMES, ROLES = P.ROLES, mix = P.mix, palette = P.palette, themeStrip = P.themeStrip, hasLight = P.hasLight, wallTheme = P.wallTheme, WALL_SCHEMES = P.WALL_SCHEMES;
 
 function themeLabels() {
@@ -63,6 +65,9 @@ function sections(outputs, layout, home) {
               hint: "схема (тёмная или светлая), палитра темы, акцент и иконки (Gruvbox Plus или Papirus с папками цвета акцента) в GTK (adw-gtk3, libadwaita) и Qt (qt6ct); открытые окна — после перезапуска приложения" },
             { key: "shell.theme.font", label: "шрифт shell в приложениях", type: "bool", def: true,
               hint: "Terminess в интерфейсе GTK- и Qt-приложений; моноширинный шрифт ставится всегда" },
+            { key: "shell.fastfetch", label: "стиль fastfetch", type: "enum", options: Object.keys(FASTFETCH_STYLES), def: "panel",
+              hint: "panel — как панель, compact — короче, minimal — минимум строк, tty — без логотипа, в рамке, full — всё; для about в меню и ~/.config/fastfetch/config.jsonc, если его поставил ochre" },
+            act("fastfetch", "показать fastfetch", "about в плавающем терминале"),
 
             { header: "обои" },
             act("picker", "выбрать обои", "локальная коллекция ~/Pictures/Wallpapers (Mod+Shift+W); Ctrl+T — все экраны, экран или стол, Ctrl+N — день или ночь"),

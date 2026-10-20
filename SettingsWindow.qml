@@ -112,6 +112,7 @@ Scope {
                 case "editNiri": Term.edit(Quickshell.env("HOME") + "/.config/niri/config.kdl"); break;
                 case "editShell": Term.edit(Quickshell.shellDir); break;
                 case "editTerminal": Term.edit(Term.configPath); break;
+                case "fastfetch": Term.fastfetch(); break;
                 case "shellUpdate":
                     if (Ochre.system)
                         Quickshell.execDetached(["notify-send", "-a", "ochre", I18n.tr("ochre поставлен пакетом"),
@@ -405,7 +406,7 @@ Scope {
             }
             readonly property var swatchKeys: ["shell.accent", "shell.shot.color"]
             readonly property var opens: ["picker", "wallhaven", "binds", "displays", "home", "wifi", "audio", "editNiri",
-                "editShell", "editTerminal", "lockPreview", "hotkeys", "cheatsheet"]
+                "editShell", "editTerminal", "lockPreview", "hotkeys", "cheatsheet", "fastfetch"]
 
             TextMetrics {
                 id: cell
