@@ -18,7 +18,8 @@ depends=(
 optdepends=(
     'qt6ct: Qt-приложения в цветах shell'
     'adw-gtk-theme: GTK-приложения в цветах shell'
-    'gruvbox-plus-icon-theme: иконки Gruvbox Plus'
+    'gruvbox-plus-icon-theme: иконки темы Gruvbox'
+    'papirus-icon-theme: иконки остальных тем'
     'gammastep: ночной режим'
     'wf-recorder: запись экрана'
     'slurp: запись выделенной области'

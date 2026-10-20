@@ -5,7 +5,7 @@
 *тёплая терминальная оболочка для niri*
 
 Оболочка рабочего стола для [niri](https://github.com/YaLTeR/niri) на [Quickshell](https://quickshell.org) в стиле терминала:
-панель — строка shell, меню — fzf, настройки — menuconfig. Палитра Gruvbox, шрифт Terminess.
+панель — строка shell, меню — fzf, настройки — menuconfig. Девять палитр (по умолчанию Gruvbox), тёмные и светлые, шрифт Terminess.
 
 ```
 user@ochre ~/ws/{1,[2]} [1] ❯ kitty  # ~        [‹ 󰙯 󰓓] · cpu ▂▃▅▇ 4% · mem 1.7G · vol 40% · ru · 21:58

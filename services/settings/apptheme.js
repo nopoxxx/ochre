@@ -15,8 +15,38 @@ var text = C.text;
 
 const FONT = "Terminess Nerd Font Mono";
 
-// иконки в цветах Gruvbox (AUR gruvbox-plus-icon-theme, ставит install.sh); без них GTK и Qt берут hicolor
+// иконки темы: Gruvbox Plus (AUR gruvbox-plus-icon-theme) или Papirus (papirus-icon-theme), их ставит install.sh;
+// без них GTK и Qt берут hicolor. Папки Papirus — цвета акцента: тема-надстройка в ~/.local/share/icons (iconOverlay)
 const ICONS = "Gruvbox-Plus-Dark";
+const PAPIRUS_FOLDERS = { ochre: "yellow", yellow: "yellow", orange: "orange", red: "red", green: "green", aqua: "teal", blue: "blue", purple: "violet" };
+const PAPIRUS_SIZES = [22, 24, 32, 48, 64];
+
+function iconOverlayOf(get) {
+    const icons = P.palette(get).icons;
+    if (!/^Papirus/.test(icons)) return null;
+    const color = PAPIRUS_FOLDERS[get("shell.accent")] ?? "yellow";
+    return { name: "ochre-" + icons + "-" + color, base: icons, color };
+}
+
+function iconTheme(get) {
+    const o = iconOverlayOf(get);
+    return o ? o.name : P.palette(get).icons;
+}
+
+function iconOverlay(get) {
+    if (!get("shell.theme.sync")) return null;
+    const o = iconOverlayOf(get);
+    if (!o) return null;
+    const dirs = PAPIRUS_SIZES.map(n => n + "x" + n + "/places");
+    o.index = ["[Icon Theme]",
+        "Name=" + o.name,
+        "Comment=" + o.base + " с папками цвета " + o.color + " — сгенерировано ochre",
+        "Inherits=" + o.base + ",hicolor",
+        "Directories=" + dirs.join(","),
+        ...[].concat(...PAPIRUS_SIZES.map(n => ["", "[" + n + "x" + n + "/places]", "Context=Places", "Size=" + n, "Type=Fixed"])),
+        ""].join("\n");
+    return o;
+}
 
 // accent-color в GNOME — фиксированный набор; точный цвет задаёт ochre.css
 const GNOME_ACCENTS = { ochre: "yellow", yellow: "yellow", orange: "orange", green: "green", aqua: "teal", blue: "blue", purple: "purple", red: "red" };
@@ -112,7 +142,7 @@ function themeFiles(get, home) {
             "[Appearance]",
             "color_scheme_path=" + home + "/.config/qt6ct/colors/ochre.conf",
             "custom_palette=true",
-            "icon_theme=" + ICONS,
+            "icon_theme=" + iconTheme(get),
             "standard_dialogs=xdgdesktopportal",
             "style=Fusion",
             "",
@@ -156,7 +186,7 @@ function themeGsettings(get) {
     return [
         ["color-scheme", s(dark ? "prefer-dark" : "prefer-light")],
         ["gtk-theme", s(dark ? "adw-gtk3-dark" : "adw-gtk3")],
-        ["icon-theme", s(ICONS)],
+        ["icon-theme", s(iconTheme(get))],
         ["accent-color", s(GNOME_ACCENTS[get("shell.accent")] ?? "yellow")],
         ["cursor-size", String(get("niri.cursor.size"))],
         ["monospace-font-name", font],

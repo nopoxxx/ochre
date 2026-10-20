@@ -209,7 +209,7 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
   <p>Оболочка рабочего стола для композитора <a href="https://github.com/YaLTeR/niri">niri</a> на
   <a href="https://quickshell.org">Quickshell</a>, целиком в стиле терминала: панель — строка shell-приглашения,
   меню — <code>fzf</code>, настройки — <code>menuconfig</code>, уведомления — строки лога, блокировка — <code>getty</code>.
-  Палитра Gruvbox dark hard, шрифт Terminess (Terminus). Для Arch Linux и производных.</p>
+  Девять палитр (по умолчанию Gruvbox dark hard), тёмные и светлые, шрифт Terminess (Terminus). Для Arch Linux и производных.</p>
   <p class="c-gray">Раньше назывался nopox-shell. Обновление переносит всё само: настройки — в <code>~/.config/ochre/</code>,
   конфиг niri — в <code>~/.config/niri/ochre/</code> вместе с <code>include</code> в <code>config.kdl</code>.
   Greeter под старым именем переустановите: <kbd>Mod+S</kbd> → <code>system/</code> → обновить greeter.</p>
@@ -222,7 +222,7 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
     <li><b>меню</b> <kbd>Mod+D</kbd> для действий: программы, обои, пакеты pacman/AUR, питание;</li>
     <li><b>настройки</b> <kbd>Mod+S</kbd> в стиле menuconfig с поиском — без правки конфигов руками;</li>
     <li><b>окна</b> мониторов, биндов и обоев (wallhaven.cc);</li>
-    <li><b>темы GTK и Qt</b> в той же палитре, с тем же акцентом и шрифтом;</li>
+    <li><b>темы</b>: Gruvbox, Catppuccin, Rosé Pine, Tokyo Night, Everforest, Kanagawa, Solarized, Nord, Dracula — shell, niri, GTK, Qt, btop, терминал и greeter в одной палитре;</li>
     <li><b>блокировка и greeter</b> как getty, уведомления как лог, обновление shell одним кликом.</li>
   </ul>
 </section>
@@ -236,7 +236,7 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
   <p>Установщик сначала задаёт вопросы, показывает итог и только потом ставит:</p>
   <div class="tbl"><table>
     <tr><th>выбор</th><th>варианты</th></tr>
-    <tr><td>терминал</td><td>kitty, alacritty, ghostty, foot — конфиг в Gruvbox + Terminess, <kbd>Mod+Return</kbd></td></tr>
+    <tr><td>терминал</td><td>kitty, alacritty, ghostty, foot — конфиг с Terminess, цвета — из темы shell, <kbd>Mod+Return</kbd></td></tr>
     <tr><td>оболочка</td><td>zsh (подсказки и подсветка), fish, bash — приглашение как панель: <code>user@host ~/путь ❯</code>, красный <span class="c-red">❯</span> после ошибки</td></tr>
     <tr><td>браузер</td><td>Helium, Firefox, Zen, Chromium, Brave, Vivaldi — станет браузером по умолчанию, <kbd>Mod+Shift+B</kbd></td></tr>
     <tr><td>файлы</td><td>Thunar, Nautilus, Dolphin, Nemo или yazi в терминале, <kbd>Mod+E</kbd></td></tr>
@@ -451,7 +451,7 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
 <div class="mock"><div class="win"><div class="ttl">~/settings/look/</div><span class="row"><span class="c-gray">── shell ─────────────────────────────────</span></span><span class="sel"><span class="c-acc">▌</span> акцентный цвет    <span class="c-gray">yellow →</span> <span class="c-acc b">‹ blue ›</span>  <span class="c-acc b">[↵]</span></span><span class="row">  размер шрифта            16</span><span class="row"><span class="c-gray">── приложения ────────────────────────────</span></span><span class="row">  темы Qt и GTK            <span class="c-green">[*]</span></span><span class="row">  шрифт shell в приложениях <span class="c-green">[*]</span></span><span class="row"><span class="c-gray">── обои ──────────────────────────────────</span></span><span class="row">  выбрать                  <span class="c-gray">…</span></span><span class="row">  заполнение               <span class="c-acc">‹ fill ›</span> <span class="c-acc">*</span></span><span class="row"> </span><span class="hints"><i>↵</i> применить  <i>esc</i> отмена  <i>←→</i> значение  <i>r</i> по умолчанию</span></div></div>
   <div class="tbl"><table>
     <tr><th>раздел</th><th>что внутри</th></tr>
-    <tr><td><code>look/</code></td><td>акцент (<code>ochre</code> — цвет бренда — и 7 цветов Gruvbox), размер шрифта, язык интерфейса (<code>auto</code> — по системе, русский, английский), темы Qt и GTK, обои, высота и анимация меню, индикатор громкости и яркости, скорость анимаций</td></tr>
+    <tr><td><code>look/</code></td><td>тема, тёмная или светлая, акцент (<code>ochre</code> — цвет бренда — и 7 цветов палитры), размер шрифта, язык интерфейса (<code>auto</code> — по системе, русский, английский), темы Qt и GTK, обои, высота и анимация меню, индикатор громкости и яркости, скорость анимаций</td></tr>
     <tr><td><code>windows/</code></td><td>отступы, колонки, рамка фокуса, обводка, тени, скругление, прозрачность неактивных, анимации niri: <code>default</code>, <code>snappy</code>, <code>bouncy</code> (пружины) и <code>terminal</code> — окно выводится строками с курсором, закрытое гаснет, как кинескоп</td></tr>
     <tr><td><code>input/</code></td><td>клавиатура и раскладки, <a href="#binds">бинды</a>, мьют микрофона и звука, горячие углы, мышь и тачпад, курсор</td></tr>
     <tr><td><code>bar/</code></td><td>модули по зонам, положение и стиль панели, prompt, часы, график cpu, трей</td></tr>
@@ -566,9 +566,16 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
 
 <section class="win" id="themes">
   <div class="ttl">~/docs/themes</div>
+  <h2>Темы</h2>
+  <p><code>look/</code> → <code>тема</code>: Gruvbox, Catppuccin, Rosé Pine, Tokyo Night, Everforest, Kanagawa, Solarized, Nord или Dracula;
+  в списке рядом с названием — полоска её цветов. <code>тёмная или светлая</code> — режим; светлой нет у Nord и Dracula.
+  Переключить режим: плитка «тема» в <code>home</code> → быстро или <code>qs ipc call theme toggle</code> (<code>dark</code>, <code>light</code>, <code>get</code>).
+  Тема меняет сразу shell, рамки niri, терминал (и уже открытые окна), greeter и приложения.</p>
   <h2>Темы приложений</h2>
-  <p><code>look/</code> → <code>темы Qt и GTK</code>: GTK- и Qt-приложения в той же палитре Gruvbox, с тем же акцентом и шрифтом,
-  что и shell, и иконками Gruvbox Plus — через adw-gtk3 / libadwaita и qt6ct. Firefox и Chromium берут тёмную схему через портал.</p>
+  <p><code>look/</code> → <code>темы Qt и GTK</code>: GTK- и Qt-приложения в той же палитре, с тем же акцентом и шрифтом,
+  что и shell, — через adw-gtk3 / libadwaita и qt6ct. Firefox и Chromium берут тёмную или светлую схему через портал.
+  Иконки: у Gruvbox — Gruvbox Plus, у остальных тем — Papirus с папками цвета акцента
+  (тема-надстройка в <code>~/.local/share/icons/ochre-Papirus-*</code>, без sudo).</p>
   <p><code>btop</code> — тоже: тема <code>ochre</code> с рамками цвета акцента, прямыми углами и фоном терминала
   (в <code>btop.conf</code> shell ставит <code>color_theme</code>, <code>theme_background</code> и <code>rounded_corners</code>, остальное не трогает).</p>
   <p class="c-gray">Уже открытые окна подхватывают изменения после перезапуска приложения; новые — сразу.
@@ -661,6 +668,7 @@ Password: <span class="blink">█</span></div>
     <tr><td><code>~/.config/niri/config.kdl</code></td><td>ваш конфиг niri — подключает <code>ochre/main.kdl</code> в начале и <code>ochre/keys.kdl</code> в конце</td></tr>
     <tr><td><code>~/.config/gtk-{3,4}.0/ochre.css</code></td><td>палитра GTK, подключается первой строкой <code>gtk.css</code></td></tr>
     <tr><td><code>~/.config/qt6ct/</code></td><td>палитра и шрифт Qt</td></tr>
+    <tr><td><code>~/.config/ochre/term/</code></td><td>цвета терминала из темы — подключаются из конфига терминала</td></tr>
     <tr><td><code>~/.local/state/ochre/</code></td><td>текущие обои и режим заполнения</td></tr>
     <tr><td><code>~/Pictures/Wallpapers/</code></td><td>коллекция обоев и загрузки с wallhaven</td></tr>
     <tr><td><code>~/.cache/cliphist/db</code></td><td>история буфера обмена</td></tr>
@@ -682,6 +690,7 @@ Password: <span class="blink">█</span></div>
 <span class="p">❯ </span>qs ipc call binds toggle        <span class="cm"># бинды</span>
 <span class="p">❯ </span>qs ipc call clipboard toggle    <span class="cm"># история буфера обмена</span>
 <span class="p">❯ </span>qs ipc call home toggle         <span class="cm"># меню home; home open, home close</span>
+<span class="p">❯ </span>qs ipc call theme toggle        <span class="cm"># тёмная ↔ светлая; theme dark, theme light, theme get</span>
 <span class="p">❯ </span>qs ipc call record toggle       <span class="cm"># запись экрана; record region, record screen, record stop</span>
 <span class="p">❯ </span>qs ipc call shot region         <span class="cm"># скриншот; shot window — сразу окно, shot edit &lt;путь&gt; — разметить файл</span>
 <span class="p">❯ </span>qs ipc call lock lock           <span class="cm"># блокировка; lock preview — предпросмотр без пароля</span>

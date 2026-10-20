@@ -19,6 +19,9 @@ test("palette: неизвестная тема — Gruvbox", () => {
 test("palette: акцент — цвет палитры по имени", () => {
     assert.equal(P.palette(getter({ "shell.accent": "blue" })).accent, "#83a598");
     assert.equal(P.palette(getter({ "shell.accent": "nope" })).accent, "#d79921");
+    assert.deepEqual(P.ACCENT_ROLES, Object.keys(S.ACCENTS));
+    for (const k of ["bg", "fg", "gray", "dark", "ansi", "constructor"])
+        assert.equal(P.palette(getter({ "shell.accent": k })).accent, "#d79921", k);
 });
 
 test("palette: недостающие роли — из Gruvbox, hover/fgDim/ansi вычисляются", () => {
@@ -148,4 +151,29 @@ test("greeter: фон niri из темы последнего пользоват
     assert.equal(S.greeterNiri(getter()), 'layout {\n    background-color "#1d2021"\n}\n');
     assert.match(S.greeterNiri(getter({ "shell.theme.name": "nord" })), new RegExp(P.THEMES.nord.dark.bg));
     assert.match(S.greeterNiri(getter({ "shell.theme.mode": "light" })), /#f9f5d7/);
+});
+
+test("превью: полоска цветов темы в текущем режиме", () => {
+    const nord = P.THEMES.nord.dark;
+    assert.deepEqual(S.themeStrip("nord", getter()), [nord.bg, nord.fg, nord.red, nord.green, nord.yellow, nord.blue, nord.purple, nord.aqua, nord.ochre]);
+    assert.equal(S.themeStrip("gruvbox", getter({ "shell.theme.mode": "light" }))[0], "#f9f5d7");
+    assert.equal(S.themeStrip("nope", getter())[0], "#1d2021");
+});
+
+test("иконки: Gruvbox Plus у Gruvbox, у остальных — Papirus с папками цвета акцента", () => {
+    const on = o => getter(Object.assign({ "shell.theme.sync": true }, o));
+    assert.equal(S.iconTheme(on({})), "Gruvbox-Plus-Dark");
+    assert.equal(S.iconOverlay(on({})), null);
+    const nord = on({ "shell.theme.name": "nord", "shell.accent": "aqua" });
+    assert.equal(S.iconTheme(nord), "ochre-Papirus-Dark-teal");
+    const o = S.iconOverlay(nord);
+    assert.deepEqual([o.name, o.base, o.color], ["ochre-Papirus-Dark-teal", "Papirus-Dark", "teal"]);
+    assert.match(o.index, /^Inherits=Papirus-Dark,hicolor$/m);
+    assert.match(o.index, /^\[48x48\/places\]\nContext=Places\nSize=48\nType=Fixed$/m);
+    assert.equal(S.iconTheme(on({ "shell.theme.name": "catppuccin", "shell.theme.mode": "light", "shell.accent": "purple" })), "ochre-Papirus-Light-violet");
+    assert.equal(S.iconTheme(on({ "shell.theme.name": "nord" })), "ochre-Papirus-Dark-yellow");
+    assert.equal(S.iconOverlay(getter({ "shell.theme.sync": false, "shell.theme.name": "nord" })), null);
+    const files = S.themeFiles(nord, "/home/u");
+    assert.match(files["qt6ct/qt6ct.conf"], /^icon_theme=ochre-Papirus-Dark-teal$/m);
+    assert.equal(Object.fromEntries(S.themeGsettings(nord))["icon-theme"], "'ochre-Papirus-Dark-teal'");
 });

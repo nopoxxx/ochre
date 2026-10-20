@@ -34,7 +34,8 @@ Rectangle {
     z: 10
     x: Math.max(Theme.pad, Math.min(dropBox.box.width - width - Theme.pad, anchor.x))
     y: below ? anchor.y + anchor.height + 2 : Math.max(Theme.pad, anchor.y - height - 2)
-    width: Math.max(dropBox.win.cw * 22, dropBox.win.cw * (maxLen + 4) + 8)
+    readonly property bool themes: r?.key === "shell.theme.name"
+    width: Math.max(dropBox.win.cw * 22, dropBox.win.cw * (maxLen + 4) + 8) + (themes ? dropBox.win.cw * 12 : 0)
     height: dropCol.implicitHeight + 8
     color: Theme.bg
     border.color: Theme.accent
@@ -63,6 +64,12 @@ Rectangle {
                     anchors { verticalCenter: parent.verticalCenter; left: parent.left; leftMargin: dropBox.win.cw }
                     text: (parent.sel ? "● " : "  ") + dropBox.win.optionLabel(dropBox.r, parent.modelData)
                     color: parent.sel ? Theme.accent : Theme.fg
+                }
+                ThemeStrip {
+                    visible: dropBox.themes
+                    anchors { verticalCenter: parent.verticalCenter; right: parent.right; rightMargin: dropBox.win.cw }
+                    name: visible ? parent.modelData : ""
+                    size: Math.round(dropBox.win.cw)
                 }
                 MouseArea {
                     id: optHover

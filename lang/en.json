@@ -559,7 +559,7 @@
   "стол %1": "workspace %1",
   "стоп": "stop",
   "строк в меню": "menu lines",
-  "схема (тёмная или светлая), палитра темы, акцент и иконки Gruvbox Plus в GTK (adw-gtk3, libadwaita) и Qt (qt6ct); открытые окна — после перезапуска приложения": "scheme (dark or light), theme palette, accent and Gruvbox Plus icons in GTK (adw-gtk3, libadwaita) and Qt (qt6ct); open windows — after the app restarts",
+  "схема (тёмная или светлая), палитра темы, акцент и иконки (Gruvbox Plus или Papirus с папками цвета акцента) в GTK (adw-gtk3, libadwaita) и Qt (qt6ct); открытые окна — после перезапуска приложения": "scheme (dark or light), theme palette, accent and icons (Gruvbox Plus, or Papirus with accent-colored folders) in GTK (adw-gtk3, libadwaita) and Qt (qt6ct); open windows — after the app restarts",
   "сюда фокус при запуске niri": "focus goes here when niri starts",
   "таймер": "timer",
   "так выглядит анимация %1": "this is how the %1 animation looks",
