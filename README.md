@@ -52,7 +52,7 @@ ochre setup
 
 ## Разработка
 
-Карта проекта, соглашения и подводные камни — [`AGENTS.md`](AGENTS.md). Исходник документации — [`docs/index.html`](docs/index.html).
+Исходник документации — [`docs/index.html`](docs/index.html).
 
 ## Лицензия
 

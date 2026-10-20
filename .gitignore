@@ -1,1 +1,6 @@
 __pycache__/
+
+# заметки и инструкции агентов — только локально
+AGENTS.md
+CLAUDE.md
+TODO.md
