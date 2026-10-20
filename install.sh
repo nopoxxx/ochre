@@ -435,8 +435,8 @@ else
 fi
 
 # ── программы ────────────────────────────────────────────────────────
-# браузер, файловый менеджер, программы и иконки Gruvbox Plus (их shell включает в GTK и Qt)
-EXTRA=("${APP_PKGS[@]}" gruvbox-plus-icon-theme)
+# браузер, файловый менеджер, программы и иконки Gruvbox Plus и Papirus (их shell включает в GTK и Qt по теме)
+EXTRA=("${APP_PKGS[@]}" gruvbox-plus-icon-theme papirus-icon-theme)
 [ -n "${BROWSER_PKG[$BROWSER]}" ] && EXTRA+=("${BROWSER_PKG[$BROWSER]}")
 [ -n "${FILES_PKG[$FILES]}" ] && EXTRA+=("${FILES_PKG[$FILES]}")
 
