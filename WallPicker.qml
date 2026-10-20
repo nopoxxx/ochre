@@ -313,6 +313,19 @@ Scope {
                             color: Theme.gray
                             elide: Text.ElideMiddle
                         }
+                        T {
+                            visible: win.assigned !== ""
+                            text: "  [" + I18n.tr("сброс") + "]"
+                            color: resetArea.containsMouse ? Theme.fg : Theme.accent
+                            font.bold: true
+                            MouseArea {
+                                id: resetArea
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: win.clearTarget()
+                            }
+                        }
                     }
 
                     Rectangle {
