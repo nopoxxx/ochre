@@ -5,7 +5,7 @@ import QtQuick
 import "settings.js" as S
 
 // Темы приложений вслед за shell (настройки shell.theme.*, shell.accent, shell.fontSize, niri.cursor.size):
-//   GTK — ~/.config/gtk-{3,4}.0/ochre.css (палитра Gruvbox и акцент; @import в начале gtk.css)
+//   GTK — ~/.config/gtk-{3,4}.0/ochre.css (палитра темы и акцент; @import в начале gtk.css)
 //         и gsettings org.gnome.desktop.interface (тёмная схема, adw-gtk3-dark, акцент, шрифт, курсор);
 //   Qt  — ~/.config/qt6ct/ (палитра, Fusion, шрифт); QT_QPA_PLATFORMTHEME задаёт misc.kdl;
 //   btop — ~/.config/btop/themes/ochre.theme и color_theme / theme_background / rounded_corners в btop.conf.
@@ -15,14 +15,22 @@ Singleton {
 
     readonly property string home: Quickshell.env("HOME")
 
+    property string termText: ""
+    readonly property string termRel: Term.configPath.slice((home + "/.config/").length)
+    readonly property var termMigrated: termText ? S.termMigrate(Term.name, termText) : null
+
     // весь результат одной строкой: настройки меняются часто, а пишем только при реальной разнице
     readonly property string state: Settings.writable
         ? JSON.stringify({
             files: S.themeFiles(k => Settings.get(k), home),
+            migrate: termMigrated ? [termRel, termMigrated, termText] : [],
+            osc: termMigrated || (S.TERM_INCLUDE[Term.name] && termText.includes(S.TERM_INCLUDE[Term.name]))
+                ? S.termOsc(S.palette(k => Settings.get(k))) : "",
             gsettings: S.themeGsettings(k => Settings.get(k))
         })
         : ""
     property string _applied: ""
+    property string _osc: ""
 
     onStateChanged: debounce.restart()
 
@@ -33,7 +41,10 @@ Singleton {
         const s = JSON.parse(state);
         const args = [];
         for (const path in s.files) args.push(path, s.files[path]);
-        args.push("--");
+        const osc = _osc && s.osc !== _osc ? s.osc : "";
+        if (s.osc) _osc = s.osc;
+        args.push("--", osc);
+        args.push(...(s.migrate.length ? s.migrate : ["", "", ""]));
         for (const [key, value] of s.gsettings) args.push(key, value);
         writer.command = ["sh", "-c", `
             d=$1; shift
@@ -44,6 +55,14 @@ Singleton {
                 shift 2
             done
             shift
+            osc=$1; shift
+            [ -n "$osc" ] && for t in /dev/pts/[0-9]*; do
+                [ -O "$t" ] && [ -w "$t" ] && timeout 1 sh -c 'printf "%s" "$1" > "$2"' sh "$osc" "$t"
+            done 2>/dev/null
+            if [ -n "$1" ] && [ ! -e "$d/$1.bak-ochre" ]; then
+                printf '%s' "$3" > "$d/$1.bak-ochre" && printf '%s' "$2" > "$d/$1.ochre-tmp" && mv -f "$d/$1.ochre-tmp" "$d/$1"
+            fi
+            shift 3
             # ochre.css — последним среди @import в gtk.css: из одинаковых @define-color побеждает последний,
             # а остатки других тем (noctalia.css и т.п.) иначе перебили бы палитру. @import — до остальных правил
             for v in gtk-3.0 gtk-4.0; do
@@ -81,6 +100,14 @@ Singleton {
         id: debounce
         interval: 500
         onTriggered: root.apply()
+    }
+
+    FileView {
+        path: Settings.writable && Term.configPath ? Term.configPath : ""
+        watchChanges: true
+        onFileChanged: reload()
+        onLoaded: root.termText = text()
+        onLoadFailed: root.termText = ""
     }
 
     Process {
