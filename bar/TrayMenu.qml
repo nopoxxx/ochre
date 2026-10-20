@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Layouts
 import qs
 import qs.bar
+import qs.services
 
 // Меню приложения из трея (DBusMenu) в TUI-рамке вместо нативного QMenu.
 // Подменю открываются на месте, как каталоги: ‹ .. — назад.
@@ -112,7 +113,7 @@ TuiPopup {
 
     T {
         visible: pop.entries.length === 0
-        text: "  загрузка…"
+        text: I18n.tr("  загрузка…")
         color: Theme.gray
     }
 }

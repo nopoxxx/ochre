@@ -15,7 +15,7 @@ TuiPopup {
 
     T {
         visible: ShellUpdate.behind === 0 && !ShellUpdate.error
-        text: ShellUpdate.checking ? "проверка…" : "ochre актуален"
+        text: ShellUpdate.checking ? I18n.tr("проверка…") : I18n.tr("ochre актуален")
         color: Theme.gray
     }
 
@@ -33,13 +33,13 @@ TuiPopup {
 
     T {
         visible: ShellUpdate.behind > 15
-        text: "… ещё " + (ShellUpdate.behind - 15)
+        text: I18n.tr("… ещё %1", ShellUpdate.behind - 15)
         color: Theme.gray
     }
 
     T {
         visible: ShellUpdate.dirty
-        text: "! есть локальные правки — git pull --ff-only может не пройти"
+        text: I18n.tr("! есть локальные правки — git pull --ff-only может не пройти")
         color: Theme.yellow
     }
 
@@ -57,7 +57,7 @@ TuiPopup {
 
         T {
             visible: ShellUpdate.behind > 0
-            text: ShellUpdate.updating ? "[обновление…]" : "[обновить]"
+            text: ShellUpdate.updating ? I18n.tr("[обновление…]") : I18n.tr("[обновить]")
             color: Theme.accent
             font.bold: true
 
@@ -69,7 +69,7 @@ TuiPopup {
         }
 
         T {
-            text: "[проверить]"
+            text: I18n.tr("[проверить]")
             color: Theme.gray
 
             MouseArea {
@@ -81,7 +81,7 @@ TuiPopup {
 
         T {
             visible: ShellUpdate.greeterSeparate
-            text: "[обновить greeter]"
+            text: I18n.tr("[обновить greeter]")
             color: Theme.gray
 
             MouseArea {

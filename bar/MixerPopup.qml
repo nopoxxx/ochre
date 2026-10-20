@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import qs
 import qs.bar
+import qs.services
 
 // Микшер: общая громкость, громкость приложений, выбор устройства вывода
 TuiPopup {
@@ -28,7 +29,7 @@ TuiPopup {
 
     T {
         visible: pop.streams.length > 0
-        text: "── приложения " + "─".repeat(30)
+        text: I18n.tr("── приложения ") + "─".repeat(30)
         color: Theme.gray
     }
 
@@ -42,7 +43,7 @@ TuiPopup {
     }
 
     T {
-        text: "── вывод " + "─".repeat(34)
+        text: I18n.tr("── вывод ") + "─".repeat(34)
         color: Theme.gray
     }
 

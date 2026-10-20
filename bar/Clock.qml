@@ -10,8 +10,8 @@ Seg {
 
     readonly property string format: Settings.get("shell.bar.clock")
 
-    // Qt.locale() — чтобы «ddd» был на языке системы, а не всегда по-английски
-    value: Qt.locale().toString(clock.date, format)
+    // I18n.locale — «ddd» на языке интерфейса (Qt.formatDate всегда пишет по-английски)
+    value: I18n.locale.toString(clock.date, format)
     valueColor: Theme.orange
     bold: true
     onLeftClicked: cal.toggle()

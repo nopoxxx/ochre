@@ -91,7 +91,7 @@ TuiPopup {
 
     T {
         visible: Notifs.history.length > pop.limit
-        text: "… ещё " + (Notifs.history.length - pop.limit)
+        text: I18n.tr("… ещё %1", Notifs.history.length - pop.limit)
         color: Theme.gray
     }
 
