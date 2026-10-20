@@ -100,7 +100,7 @@ Singleton {
             m = l.match(/^\s*·.*╰──\s*(.*)$/);
             if (m && !label) { label = m[1].trim(); line = last || line; }
         }
-        const title = (b[0] ?? "").replace(/^[\s×]+/, "").trim() || "конфиг не прошёл проверку";
+        const title = (b[0] ?? "").replace(/^[\s×]+/, "").trim() || I18n.tr("конфиг не прошёл проверку");
         return { file, line, text: label && !title.toLowerCase().includes(label.toLowerCase()) ? title + " — " + label : title };
     }
 

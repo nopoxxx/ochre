@@ -183,14 +183,14 @@ Singleton {
             onStreamFinished: {
                 const out = this.text;
                 if (out.includes("NIRIFAIL"))
-                    Quickshell.execDetached(["notify-send", "-a", "ochre", "-u", "critical", "ochre: config.kdl не переведён",
-                        "После замены include \"nopox/…\" на \"ochre/…\" niri validate не проходит — config.kdl оставлен как был. "
-                        + "Поправьте include в ~/.config/niri/config.kdl вручную (Mod+S → system/ → niri)."]);
+                    Quickshell.execDetached(["notify-send", "-a", "ochre", "-u", "critical", I18n.tr("ochre: config.kdl не переведён"),
+                        I18n.tr("После замены include \"nopox/…\" на \"ochre/…\" niri validate не проходит — config.kdl оставлен как был.")
+                        + " " + I18n.tr("Поправьте include в ~/.config/niri/config.kdl вручную (Mod+S → system/ → niri).")]);
                 const did = (out.match(/^DID(.*)$/m) ?? ["", ""])[1].trim().split(" ").filter(x => x);
                 if (did.length)
-                    Quickshell.execDetached(["notify-send", "-a", "ochre", "nopox-shell теперь ochre",
-                        "Настройки — ~/.config/ochre, конфиг niri — ~/.config/niri/ochre."
-                        + (did.includes("greeter") ? " Greeter стоит под старым именем — обновите его: Mod+S → system/ → обновить greeter." : "")]);
+                    Quickshell.execDetached(["notify-send", "-a", "ochre", I18n.tr("nopox-shell теперь ochre"),
+                        I18n.tr("Настройки — ~/.config/ochre, конфиг niri — ~/.config/niri/ochre.")
+                        + (did.includes("greeter") ? " " + I18n.tr("Greeter стоит под старым именем — обновите его: Mod+S → system/ → обновить greeter.") : "")]);
             }
         }
         onExited: root.renamed = true
@@ -221,7 +221,7 @@ Singleton {
                     retry.restart();
                     return;
                 }
-                root.giveUp("не разбирается как JSON");
+                root.giveUp(I18n.tr("не разбирается как JSON"));
                 return;
             }
             root._retries = 0;
@@ -255,9 +255,9 @@ Singleton {
         loaded = true;
         console.warn("settings.json не прочитан (" + why + ") — работаю на умолчаниях, сохранение выключено");
         if (!greeterMode)
-            Quickshell.execDetached(["notify-send", "-a", "ochre", "-u", "critical", "Настройки не прочитаны",
-                file + ": " + why + ". Shell работает на умолчаниях и ничего не сохраняет, чтобы не затереть файл. "
-                + "Исправьте или удалите его и перезапустите shell."]);
+            Quickshell.execDetached(["notify-send", "-a", "ochre", "-u", "critical", I18n.tr("Настройки не прочитаны"),
+                I18n.tr("%1: %2. Shell работает на умолчаниях и ничего не сохраняет, чтобы не затереть файл.", file, why)
+                + " " + I18n.tr("Исправьте или удалите его и перезапустите shell.")]);
     }
 
     property bool _migrated: false
@@ -289,10 +289,10 @@ Singleton {
             [ -f "$1/keys.kdl" ] || printf 'binds {\\n}\\n' > "$1/keys.kdl"
             if niri validate -c config.kdl >/dev/null 2>&1; then
                 rm -f nopox.kdl nopox-binds.kdl nopox-keys.kdl
-                notify-send -a ochre "Настройки niri разложены по файлам" "~/.config/niri/ochre/ — input, displays, layout, window-rules, …"
+                notify-send -a ochre "$2" "$3"
             else
                 mv -f config.kdl.bak-ochre-split config.kdl
-            fi`, "sh", root.niriDir]
+            fi`, "sh", root.niriDir, I18n.tr("Настройки niri разложены по файлам"), I18n.tr("~/.config/niri/ochre/ — input, displays, layout, window-rules, …")]
     }
 
     Process {

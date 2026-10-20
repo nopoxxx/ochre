@@ -129,8 +129,8 @@ Singleton {
     IpcHandler {
         target: "cava"
         function get(): string {
-            return "source " + (root.source || "—") + (root.perPlayer ? " (поток " + (root.player?.dbusName ?? "?") + ")" : " (весь звук)")
-                + (root.active ? ", работает" : ", стоит");
+            return "source " + (root.source || "—") + (root.perPlayer ? I18n.tr(" (поток ") + (root.player?.dbusName ?? "?") + ")" : I18n.tr(" (весь звук)"))
+                + (root.active ? I18n.tr(", работает") : I18n.tr(", стоит"));
         }
     }
 }

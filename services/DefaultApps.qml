@@ -42,40 +42,43 @@ Singleton {
         const desk = b ? (desktops[browser] ?? "") : "";
         const argv = ["sh", "-c", applyScript, "sh",
             s, s ? S.SHELL_PKGS[s] : "", Quickshell.shellDir + "/extras/shell",
-            b ? b.pkg : "", desk];
+            b ? b.pkg : "", desk,
+            I18n.tr("── оболочка: %1", s), I18n.tr("готово: %1 — с нового входа", s), I18n.tr("── браузер: %1", b ? b.pkg : ""),
+            I18n.tr("браузер по умолчанию:"), I18n.tr("~/.zshrc: приглашение ochre")];
         // терминал нужен для пароля (chsh, sudo) и для установки; известный браузер ставится молча
         runner.command = s || (b && !desk) ? Term.cmd(argv, { cls: "ochre-term", hold: true }) : argv;
         runner.running = true;
     }
 
-    // $1 оболочка, $2 её пакеты, $3 extras/shell, $4 пакет браузера, $5 его .desktop (пусто — не установлен).
+    // $1 оболочка, $2 её пакеты, $3 extras/shell, $4 пакет браузера, $5 его .desktop (пусто — не установлен);
+    // $6…$10 — переведённые сообщения (I18n): в тексте скрипта русского нет.
     // Шаги независимы: отказ от chsh не мешает сменить браузер
     readonly property string applyScript: `
         desktop_of() { pacman -Qlq "$1" 2>/dev/null | grep -m1 '^/usr/share/applications/.*[.]desktop$' | xargs -r basename; }
-        s=$1 spkgs=$2 ex=$3 bpkg=$4 bdesk=$5
+        s=$1 spkgs=$2 ex=$3 bpkg=$4 bdesk=$5 m_shell=$6 m_done=$7 m_browser=$8 m_default=$9 m_zsh=\${10}
         [ -n "$s" ] && (
             set -e
-            echo "── оболочка: $s"
+            echo "$m_shell"
             command -v "$s" >/dev/null || sudo pacman -S --needed $spkgs
             case "$s" in
-                zsh) [ -f ~/.zshrc ] || { cp "$ex/zshrc" ~/.zshrc; echo "~/.zshrc: приглашение ochre"; } ;;
+                zsh) [ -f ~/.zshrc ] || { cp "$ex/zshrc" ~/.zshrc; echo "$m_zsh"; } ;;
                 fish) install -Dm644 "$ex/ochre.fish" ~/.config/fish/conf.d/ochre.fish
                       f=~/.config/fish/functions/fish_prompt.fish
                       [ -f "$f" ] || install -Dm644 "$ex/fish_prompt.fish" "$f" ;;
                 bash) grep -qsE '>>> (ochre|nopox-shell) >>>' ~/.bashrc || { echo; cat "$ex/bashrc"; } >> ~/.bashrc ;;
             esac
             chsh -s "$(command -v "$s")"
-            echo "готово: $s — с нового входа"
+            echo "$m_done"
         )
         [ -n "$bpkg" ] && (
             set -e
             if [ -z "$bdesk" ]; then
-                echo "── браузер: $bpkg"
+                echo "$m_browser"
                 paru -S --needed "$bpkg"
                 bdesk=$(desktop_of "$bpkg")
             fi
             xdg-settings set default-web-browser "$bdesk"
-            echo "браузер по умолчанию: $bdesk"
+            echo "$m_default $bdesk"
         )
         true`
 

@@ -46,7 +46,7 @@ Singleton {
     property var queued: null
 
     function announce(mic, muted, device) {
-        const title = mic ? (muted ? "Микрофон выключен" : "Микрофон включён") : (muted ? "Звук выключен" : "Звук включён");
+        const title = mic ? (muted ? I18n.tr("Микрофон выключен") : I18n.tr("Микрофон включён")) : (muted ? I18n.tr("Звук выключен") : I18n.tr("Звук включён"));
         const icon = mic ? (muted ? "microphone-sensitivity-muted" : "microphone-sensitivity-high")
             : (muted ? "audio-volume-muted" : "audio-volume-high");
         queued = [title, device, icon];

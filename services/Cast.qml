@@ -125,7 +125,7 @@ org.freedesktop.impl.portal.ScreenCast=ochre;gnome;"
     IpcHandler {
         target: "cast"
         function get(): string {
-            return (root.connected ? "connected" : "not connected") + (root.request ? ", ждёт выбора: " + JSON.stringify(root.request) : "");
+            return (root.connected ? "connected" : "not connected") + (root.request ? I18n.tr(", ждёт выбора: ") + JSON.stringify(root.request) : "");
         }
         function cancel(): void { root.answer(null); }
     }

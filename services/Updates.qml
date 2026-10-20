@@ -29,7 +29,7 @@ Singleton {
 
     Process {
         id: upgrade
-        command: Term.cmd(["bash", "-c", "paru -Syu; echo; read -n1 -rsp 'готово, нажмите любую клавишу'"], { cls: "ochre-term" })
+        command: Term.cmd(["bash", "-c", 'paru -Syu; echo; read -n1 -rsp "$1"', "bash", I18n.tr("готово, нажмите любую клавишу")], { cls: "ochre-term" })
         onExited: root.check()
     }
 

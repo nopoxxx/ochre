@@ -17,8 +17,9 @@ Singleton {
     function set(v) {
         if (v === on || apply.running) return;
         Quickshell.execDetached(["notify-send", "-a", "ochre", "-t", "2000", "-h", "boolean:transient:true",
-            v ? "Игровой режим включён" : "Игровой режим выключен",
-            v ? "без анимаций и теней" + (Settings.get("shell.game.dnd") ? ", уведомления — только критичные" : "") : "эффекты niri вернулись"]);
+            v ? I18n.tr("Игровой режим включён") : I18n.tr("Игровой режим выключен"),
+            v ? (Settings.get("shell.game.dnd") ? I18n.tr("без анимаций и теней, уведомления — только критичные") : I18n.tr("без анимаций и теней"))
+              : I18n.tr("эффекты niri вернулись")]);
         pending = v;
         apply.start();
     }

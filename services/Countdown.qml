@@ -90,13 +90,13 @@ Singleton {
     }
 
     function finish(late) {
-        const what = label || "таймер";
+        const what = label || I18n.tr("таймер");
         stop();
         Quickshell.execDetached(["sh", "-c", `
             notify-send -a ochre -u critical -i alarm-symbolic "⏱ $1" "$2"
             f=/usr/share/sounds/freedesktop/stereo/complete.oga
             [ -f "$f" ] && command -v pw-play >/dev/null && pw-play "$f"`,
-            "sh", what, late ? "время вышло, пока shell не работал" : "прошло " + fmt(total)]);
+            "sh", what, late ? I18n.tr("время вышло, пока shell не работал") : I18n.tr("прошло %1", fmt(total))]);
     }
 
     function update() {
@@ -146,12 +146,12 @@ Singleton {
         target: "timer"
         function start(spec: string): string {
             const p = root.parseSpec(spec);
-            if (!p) return "не понял длительность: 25m, 1h30m, 90s, 5:00";
+            if (!p) return I18n.tr("не понял длительность: 25m, 1h30m, 90s, 5:00");
             root.start(p.sec, p.label);
             return root.fmt(p.sec) + (p.label ? " " + p.label : "");
         }
         function pause(): void { root.toggle(); }
         function stop(): void { root.stop(); }
-        function get(): string { return root.active ? root.fmt(root.left) + (root.paused ? " (пауза)" : "") + (root.label ? " " + root.label : "") : "нет"; }
+        function get(): string { return root.active ? root.fmt(root.left) + (root.paused ? I18n.tr(" (пауза)") : "") + (root.label ? " " + root.label : "") : I18n.tr("нет"); }
     }
 }

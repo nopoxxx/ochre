@@ -85,7 +85,7 @@ Singleton {
                 root.error = "";
                 for (const line of this.text.split("\n")) {
                     if (line === "NOREPO") root.isRepo = false;
-                    else if (line === "NOUPSTREAM") root.error = "у ветки нет upstream";
+                    else if (line === "NOUPSTREAM") root.error = I18n.tr("у ветки нет upstream");
                     else if (line.startsWith("FETCHFAIL")) root.error = "git fetch: " + line.slice(10);
                     else if (line.startsWith("UP ")) root.upstream = line.slice(3);
                     else if (line === "DIRTY") root.dirty = true;
@@ -97,8 +97,8 @@ Singleton {
                 root.commits = commits;
                 root.checking = false;
                 if (prev === 0 && commits.length > 0 && Settings.get("shell.update.notify"))
-                    Quickshell.execDetached(["notify-send", "-a", "ochre", "Доступно обновление ochre",
-                        commits.length + " новых коммитов в " + root.upstream + " — клик по ochre ↑ на панели"]);
+                    Quickshell.execDetached(["notify-send", "-a", "ochre", I18n.tr("Доступно обновление ochre"),
+                        I18n.tr("%1 новых коммитов в %2 — клик по ochre ↑ на панели", commits.length, root.upstream)]);
             }
         }
     }
@@ -110,13 +110,13 @@ Singleton {
         onExited: code => {
             root.updating = false;
             if (code !== 0) {
-                root.error = "git pull: " + (pullOut.text.trim().split("\n").pop() || "код " + code);
+                root.error = "git pull: " + (pullOut.text.trim().split("\n").pop() || I18n.tr("код %1", code));
                 return;
             }
             root.commits = [];
             root.updated = true;
-            root.restartShell("ochre обновлён",
-                root.greeterSeparate ? "Greeter обновляется отдельно: Mod+S → system/ → обновить greeter" : "");
+            root.restartShell(I18n.tr("ochre обновлён"),
+                root.greeterSeparate ? I18n.tr("Greeter обновляется отдельно: Mod+S → system/ → обновить greeter") : "");
         }
     }
 
@@ -132,9 +132,9 @@ Singleton {
             const v = text().trim();
             if (root.version && v && v !== root.version)
                 Quickshell.execDetached(["sh", "-c",
-                    'v=$1; shift; a=$(notify-send -a ochre -A restart=перезапустить "ochre обновлён до $v" "Перезапустите shell, чтобы взять новую версию"); '
+                    'a=$(notify-send -a ochre -A restart="$1" "$2" "$3"); shift 3; '
                     + '[ "$a" = restart ] || exit 0; ' + Ochre.restartScript,
-                    "sh", v].concat(Ochre.sel));
+                    "sh", I18n.tr("перезапустить"), I18n.tr("ochre обновлён до %1", v), I18n.tr("Перезапустите shell, чтобы взять новую версию")].concat(Ochre.sel));
             if (v) root.version = v;
         }
     }

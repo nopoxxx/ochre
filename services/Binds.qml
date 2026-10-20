@@ -190,9 +190,9 @@ Singleton {
             if (root._prevKeys === null) return;
             // в выводе niri — рамки диагностики; берём последнюю строку «× …» и место «╭─[файл:строка]»
             const lines = validateErr.text.split("\n").map(l => l.replace(/\x1b\[[0-9;]*m/g, ""));
-            const what = lines.filter(l => l.includes("×")).map(l => l.split("×").pop().trim()).pop() ?? "ошибка конфига";
+            const what = lines.filter(l => l.includes("×")).map(l => l.split("×").pop().trim()).pop() ?? I18n.tr("ошибка конфига");
             const where = lines.map(l => l.match(/╭─\[([^\]]+)\]/)?.[1]).filter(x => x).pop();
-            root.error = "niri не принял бинд — отменено: " + what + (where ? " (" + where + ")" : "");
+            root.error = I18n.tr("niri не принял бинд — отменено: %1", what + (where ? " (" + where + ")" : ""));
             const prev = root._prevKeys;
             root._prevKeys = null;
             if (Object.keys(prev).length) Settings.set("niri.keys", prev);
