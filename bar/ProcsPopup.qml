@@ -53,7 +53,7 @@ TuiPopup {
                 id: rowText
                 text: line.modelData.pid.padStart(7) + line.modelData.cpu.padStart(6) + line.modelData.mem.padStart(6)
                     + "  " + line.modelData.comm.slice(0, 20).padEnd(20) + "      "
-                color: hover.hovered ? Theme.fg : Qt.darker(Theme.fg, 1.15)
+                color: hover.hovered ? Theme.fg : Theme.fgDim
             }
 
             T {

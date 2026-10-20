@@ -85,7 +85,7 @@ Section {
 
             Layout.fillWidth: true
             implicitHeight: lineText.implicitHeight
-            color: sec.isCur(index) ? Theme.bg1 : hover.hovered ? Qt.darker(Theme.bg1, 1.3) : "transparent"
+            color: sec.isCur(index) ? Theme.bg1 : hover.hovered ? Theme.hover : "transparent"
 
             T {
                 id: lineText

@@ -723,7 +723,7 @@ Scope {
                                 T {
                                     textFormat: Text.StyledText
                                     text: Fuzzy.highlight(row.item.label, row.modelData.pos, Theme.orange) + (row.isDir ? "/" : "")
-                                    color: row.isDir ? Theme.blue : row.current ? Theme.fg : Qt.darker(Theme.fg, 1.15)
+                                    color: row.isDir ? Theme.blue : row.current ? Theme.fg : Theme.fgDim
                                     font.bold: row.current
                                 }
                                 T {

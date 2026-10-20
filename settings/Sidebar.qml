@@ -78,7 +78,7 @@ Rectangle {
 
                 Layout.fillWidth: true
                 implicitHeight: side.win.lineH * 1.35
-                color: current ? Theme.bg1 : secHover.containsMouse ? Qt.darker(Theme.bg1, 1.35) : "transparent"
+                color: current ? Theme.bg1 : secHover.containsMouse ? Theme.hover : "transparent"
 
                 Rectangle { visible: sec.current; width: 3; height: parent.height; color: Theme.accent }
                 RowLayout {
@@ -93,7 +93,7 @@ Rectangle {
                         Layout.fillWidth: true
                         elide: Text.ElideRight
                         text: I18n.tr(sec.modelData.title)
-                        color: sec.current ? Theme.accent : secHover.containsMouse ? Theme.fg : Qt.darker(Theme.fg, 1.15)
+                        color: sec.current ? Theme.accent : secHover.containsMouse ? Theme.fg : Theme.fgDim
                         font.bold: sec.current
                     }
                     T { text: String(sec.index + 1); color: Theme.bg2 }

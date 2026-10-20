@@ -88,7 +88,7 @@ TuiPopup {
                 color: line.e.isSeparator ? Theme.bg2
                     : !line.e.enabled ? Theme.gray
                     : line.e.hasChildren ? Theme.blue
-                    : line.active ? Theme.fg : Qt.darker(Theme.fg, 1.15)
+                    : line.active ? Theme.fg : Theme.fgDim
                 font.bold: line.active
             }
 

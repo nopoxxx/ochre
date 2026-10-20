@@ -18,7 +18,7 @@ Rectangle {
 
     Layout.fillWidth: true
     implicitHeight: Math.max(texts.implicitHeight, control.implicitHeight) + win.cw * 1.4
-    color: current ? Theme.bg1 : rowHover.containsMouse ? Qt.darker(Theme.bg1, 1.35) : "transparent"
+    color: current ? Theme.bg1 : rowHover.containsMouse ? Theme.hover : "transparent"
 
     onCurrentChanged: if (current) Qt.callLater(() => { if (line.win) line.win.scrollTo(line); })   // окно могли закрыть
 
@@ -92,7 +92,7 @@ Rectangle {
                 elide: Text.ElideRight
                 textFormat: Text.StyledText
                 text: I18n.tr(line.r.label ?? "") + (line.win.changed(line.r) ? ` <font color="${Theme.accent}">*</font>` : "")
-                color: line.r.type === "action" ? Theme.blue : line.current ? Theme.fg : Qt.darker(Theme.fg, 1.08)
+                color: line.r.type === "action" ? Theme.blue : line.current ? Theme.fg : Theme.fgDim
                 font.bold: line.current
             }
             T {
