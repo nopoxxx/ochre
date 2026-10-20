@@ -211,6 +211,14 @@ function sections(outputs, layout, home) {
             { key: "shell.weather.units", label: "единицы", type: "enum", options: ["metric", "imperial"], def: "metric", hint: "metric — °C и м/с, imperial — °F и mph" },
             { key: "shell.weather.days", label: "прогноз, дней", type: "int", min: 0, max: 7, step: 1, def: 3 },
 
+            { header: "календарь" },
+            act("calendarEdit", "календари", "~/.config/ochre/calendars.conf: строка на календарь — имя, адрес, пользователь. .ics по ссылке или файлом; Google и Outlook — секретный адрес iCal; CalDAV (Nextcloud, Fastmail) — адрес и пользователь"),
+            act("calendarLogin", "пароли CalDAV", "спросит пароли в терминале и положит в связку ключей (secret-tool), в конфиге их нет"),
+            act("calendarRefresh", "обновить", "сейчас; само — раз в «обновлять» минут и после правки calendars.conf"),
+            { key: "shell.calendar.refresh", label: "обновлять, мин", type: "int", min: 5, max: 240, step: 5, def: 15 },
+            { key: "shell.calendar.remind", label: "напоминать, мин", type: "int", min: 0, max: 120, step: 5, def: 10, hint: "уведомление до начала события; 0 — не напоминать. События на весь день — без напоминаний" },
+            { key: "shell.calendar.days", label: "ближайшие, дней", type: "int", min: 1, max: 31, step: 1, def: 7, hint: "сколько дней вперёд показывать в home и в попапе часов" },
+
             { header: "ночной режим" },
             { key: "shell.night.on", label: "включён", type: "bool", def: false, hint: "тёплые цвета экрана (gammastep); переключатель — и в меню home" },
             { key: "shell.night.temp", label: "температура, K", type: "int", min: 2500, max: 6000, step: 100, def: 4000, hint: "меньше — теплее; днём — 6500" },
