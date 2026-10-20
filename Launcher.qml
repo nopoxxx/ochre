@@ -15,7 +15,8 @@ import "services/emoji.js" as Emoji
 // Запрос в корне ищет по меню сразу: программы и вложенные действия (system/reboot).
 // Остальное — только префиксами в корне (настраиваются, look/ → меню): «=выражение» — калькулятор,
 // «> cmd» — в терминале, «/имя» — файлы, «? запрос» — веб-поиск, «:имя» — эмодзи в буфер,
-// «@имя» — окна niri, «+пакет» / «-пакет» — установить / удалить, «%25m чай» — таймер.
+// «@имя» — окна niri, «+пакет» / «-пакет» — установить / удалить, «%25m чай» — таймер,
+// «!вопрос» — Claude Code в терминале.
 //   qs ipc call launcher apps   — сразу список программ
 Scope {
     id: root
@@ -52,6 +53,14 @@ Scope {
     }
 
     function spawn(argv) { Quickshell.execDetached(argv); }
+
+    // AI-агент (shell.launcher.ai.cmd, по умолчанию claude) в обычном окне терминала, из ~
+    function ai(args) {
+        const cmd = String(Settings.get("shell.launcher.ai.cmd") ?? "").trim() || "claude";
+        Term.open(["bash", "-c",
+            'cd ~; command -v "${1%% *}" >/dev/null || { printf "%s\\n" "$2"; read -rs; exit 1; }; exec $1 "${@:3}"',
+            "bash", cmd, I18n.tr("не найдено: %1 — поставь Claude Code или смени команду в look/ → меню", cmd)].concat(args));
+    }
 
     // fastfetch с конфигом ochre и акцентом shell; окно закрывается по Enter
     function about() {
@@ -137,7 +146,8 @@ Scope {
         { kind: "install", p: Settings.get("shell.launcher.prefix.install") },
         { kind: "remove", p: Settings.get("shell.launcher.prefix.remove") },
         { kind: "timer", p: Settings.get("shell.launcher.prefix.timer") },
-        { kind: "calc", p: Settings.get("shell.launcher.prefix.calc") }
+        { kind: "calc", p: Settings.get("shell.launcher.prefix.calc") },
+        { kind: "ai", p: Settings.get("shell.launcher.prefix.ai") }
     ].map(x => ({ kind: x.kind, p: String(x.p ?? "").trim() })).filter(x => x.p)
      .sort((a, b) => b.p.length - a.p.length)   // «>>» раньше «>», если заданы оба
 
@@ -342,6 +352,10 @@ Scope {
         if (name === "web")
             return query ? [{ label: query, desc: I18n.tr("↵ — искать: %1", Settings.get("shell.launcher.web")), pin: true, run: () => spawn(["xdg-open", webUrl(query)]) }]
                 : [{ label: prefixOf("web"), desc: I18n.tr("что искать в интернете"), pin: true }];
+        if (name === "ai")
+            return query ? [{ label: prefixOf("ai") + " " + query, desc: I18n.tr("↵ — спросить в Claude Code"), pin: true, run: () => ai([query]) }]
+                : [{ label: "new", desc: I18n.tr("новая сессия Claude Code"), pin: true, run: () => ai([]) },
+                   { label: "continue", desc: I18n.tr("продолжить последнюю сессию"), pin: true, run: () => ai(["--continue"]) }];
         if (name === "files")
             return query ? fileHits : [];
         if (name === "emoji")

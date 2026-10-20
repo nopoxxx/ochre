@@ -84,6 +84,8 @@ function sections(outputs, layout, home) {
             { key: "shell.launcher.prefix.remove", label: "префикс: удалить", type: "text", def: "-", hint: "«-htop» — установленные пакеты, ↵ — pacman -Rns; пусто — выключено" },
             { key: "shell.launcher.prefix.timer", label: "префикс: таймер", type: "text", def: "%", hint: "«%25m чай» — таймер; без срока — готовые и стоп; пусто — выключено" },
             { key: "shell.launcher.prefix.calc", label: "префикс: калькулятор", type: "text", def: "=", hint: "«=2^10» — калькулятор, ↵ — копировать ответ; пусто — выключено" },
+            { key: "shell.launcher.prefix.ai", label: "префикс: AI", type: "text", def: "!", hint: "«!вопрос» — Claude Code в окне терминала; без вопроса — новая сессия или продолжить; пусто — выключено" },
+            { key: "shell.launcher.ai.cmd", label: "команда AI", type: "text", def: "claude", hint: "что запускать для префикса AI; вопрос — последним аргументом" },
             { key: "shell.launcher.files.dir", label: "где искать файлы", type: "text", def: "~", hint: "каталог для поиска файлов; скрытые и из .gitignore пропускаются" },
             { key: "shell.launcher.web", label: "поисковик", type: "enum", options: ["duckduckgo", "google", "startpage", "brave", "custom"], def: "duckduckgo",
               hint: "custom — адрес из строки ниже" },
