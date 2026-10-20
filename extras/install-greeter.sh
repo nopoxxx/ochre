@@ -42,6 +42,8 @@ fi
 rm -rf /usr/share/nopox-shell
 rm -f /etc/greetd/nopox-niri.kdl
 install -d -m755 -o greeter -g greeter /var/lib/ochre-greeter/.greeter
+[ -f /var/lib/ochre-greeter/.greeter/niri.kdl ] || printf 'layout {\n    background-color "#1d2021"\n}\n' > /var/lib/ochre-greeter/.greeter/niri.kdl
+chown greeter:greeter /var/lib/ochre-greeter/.greeter/niri.kdl
 getent passwd | awk -F: '$3>=1000 && $3<60000 && $7 !~ /(nologin|false)$/ {print $1}' | while read -r u; do
     install -d -m755 -o "$u" -g "$(id -gn "$u")" "/var/lib/ochre-greeter/$u"
 done

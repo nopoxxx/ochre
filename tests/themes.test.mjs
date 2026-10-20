@@ -143,3 +143,9 @@ test("светлый режим: настройка, gsettings и niri", () => {
     assert.equal(gs("dark")["gtk-theme"], "'adw-gtk3-dark'");
     assert.equal(S.niriFileOf("shell.theme.mode"), "layout.kdl");
 });
+
+test("greeter: фон niri из темы последнего пользователя", () => {
+    assert.equal(S.greeterNiri(getter()), 'layout {\n    background-color "#1d2021"\n}\n');
+    assert.match(S.greeterNiri(getter({ "shell.theme.name": "nord" })), new RegExp(P.THEMES.nord.dark.bg));
+    assert.match(S.greeterNiri(getter({ "shell.theme.mode": "light" })), /#f9f5d7/);
+});

@@ -4,6 +4,7 @@ import Quickshell.Wayland
 import Quickshell.Services.Greetd
 import QtQuick
 import qs.services
+import "services/settings.js" as S
 
 // Точка входа greeter: qs -p <shell>/greeter.qml (с OCHRE_GREETER=1); <shell> — /usr/share/ochre у пакета,
 // /usr/local/share/ochre — копия git-установки (extras/install-greeter.sh).
@@ -85,6 +86,16 @@ ShellRoot {
                 return { name, exec };
             })
         }
+    }
+
+    FileView {
+        id: niriBg
+        path: root.stateDir + "/niri.kdl"
+        printErrors: false
+        readonly property string want: Settings.loaded ? S.greeterNiri(k => Settings.get(k)) : ""
+        function sync() { if (want && text() !== want) setText(want); }
+        onWantChanged: if (loaded) sync()
+        onLoaded: sync()
     }
 
     // ── greetd ─────────────────────────────────────────────────────
