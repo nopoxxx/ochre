@@ -38,6 +38,7 @@ function sections(outputs, layout, home) {
     return [
         { id: "look", title: "вид", rows: [
             { header: "цвет и шрифт" },
+            { key: "shell.theme.name", label: "тема", type: "enum", options: Object.keys(THEMES), def: "gruvbox", hint: "палитра shell и приложений" },
             { key: "shell.accent", label: "акцентный цвет", type: "enum", options: Object.keys(ACCENTS), def: "ochre", hint: "рамки окон shell, prompt, рамка фокуса niri и акцент в приложениях" },
             { key: "shell.fontSize", label: "размер шрифта", type: "int", min: 10, max: 28, step: 1, def: 16 },
             { key: "shell.lang", label: "язык", type: "enum", options: ["auto", "ru", "en"], def: "auto",
