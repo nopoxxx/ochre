@@ -16,7 +16,7 @@ import "services/emoji.js" as Emoji
 // Остальное — только префиксами в корне (настраиваются, look/ → меню): «=выражение» — калькулятор,
 // «> cmd» — в терминале, «/имя» — файлы, «? запрос» — веб-поиск, «:имя» — эмодзи в буфер,
 // «@имя» — окна niri, «+пакет» / «-пакет» — установить / удалить, «%25m чай» — таймер,
-// «!вопрос» — Claude Code в терминале.
+// «!вопрос» — Claude Code в терминале или Google AI Mode в браузере.
 //   qs ipc call launcher apps   — сразу список программ
 Scope {
     id: root
@@ -352,6 +352,10 @@ Scope {
         if (name === "web")
             return query ? [{ label: query, desc: I18n.tr("↵ — искать: %1", Settings.get("shell.launcher.web")), pin: true, run: () => spawn(["xdg-open", webUrl(query)]) }]
                 : [{ label: prefixOf("web"), desc: I18n.tr("что искать в интернете"), pin: true }];
+        if (name === "ai" && Settings.get("shell.launcher.ai") === "google")
+            return query ? [{ label: prefixOf("ai") + " " + query, desc: I18n.tr("↵ — спросить Google AI"), pin: true,
+                              run: () => spawn(["xdg-open", "https://www.google.com/search?udm=50&q=" + encodeURIComponent(query)]) }]
+                : [{ label: prefixOf("ai"), desc: I18n.tr("вопрос для Google AI Mode"), pin: true }];
         if (name === "ai")
             return query ? [{ label: prefixOf("ai") + " " + query, desc: I18n.tr("↵ — спросить в Claude Code"), pin: true, run: () => ai([query]) }]
                 : [{ label: "new", desc: I18n.tr("новая сессия Claude Code"), pin: true, run: () => ai([]) },
