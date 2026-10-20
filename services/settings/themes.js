@@ -203,3 +203,8 @@ function palette(get, user) {
     p.accent = p[get("shell.accent")] ?? p.ochre;
     return p;
 }
+
+function themeStrip(name, get) {
+    const p = palette(k => k === "shell.theme.name" ? name : get(k));
+    return [p.bg, p.fg, p.red, p.green, p.yellow, p.blue, p.purple, p.aqua, p.ochre];
+}

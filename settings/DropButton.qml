@@ -8,7 +8,8 @@ Rectangle {
     property var r
     property int idx
 
-    implicitWidth: Math.max(win.cw * 16, dcT.implicitWidth + win.cw * 4)
+    readonly property bool themes: r.key === "shell.theme.name"
+    implicitWidth: Math.max(win.cw * 16, dcT.implicitWidth + win.cw * 4) + (themes ? win.cw * 12 : 0)
     implicitHeight: dcT.implicitHeight + 4
     color: dcHover.containsMouse ? Theme.bg1 : "transparent"
     border.color: win.drop === idx ? Theme.accent : Theme.bg2
@@ -18,6 +19,12 @@ Rectangle {
         anchors { verticalCenter: parent.verticalCenter; left: parent.left; leftMargin: dc.win.cw }
         text: dc.win.optionLabel(dc.r, dc.win.shown(dc.r))
         color: dc.win.drafted(dc.r) ? Theme.accent : Theme.fg
+    }
+    ThemeStrip {
+        visible: dc.themes
+        anchors { verticalCenter: parent.verticalCenter; right: parent.right; rightMargin: dc.win.cw * 2.6 }
+        name: visible ? dc.win.shown(dc.r) : ""
+        size: Math.round(dc.win.cw)
     }
     T {
         anchors { verticalCenter: parent.verticalCenter; right: parent.right; rightMargin: dc.win.cw * 0.6 }
