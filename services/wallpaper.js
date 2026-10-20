@@ -2,8 +2,29 @@
 
 var IMAGE = /\.(png|jpe?g|webp)$/i;
 
-function wsKey(ws) {
-    return ws ? ws.output + "/" + (ws.name || ws.idx) : "";
+function wsKey(ws, out) {
+    return ws ? (out || ws.output) + "/" + (ws.name || ws.idx) : "";
+}
+
+function migrateOutputs(state, ids) {
+    let changed = false;
+    const rekey = (map, of) => {
+        const out = {};
+        for (const k in map) {
+            const nk = of(k);
+            if (nk === k) continue;
+            changed = true;
+            if (!(nk in map)) out[nk] = map[k];
+        }
+        for (const k in map) if (of(k) === k) out[k] = map[k];
+        return out;
+    };
+    const outputs = rekey(state.outputs, k => ids[k] ?? k);
+    const workspaces = rekey(state.workspaces, k => {
+        const i = k.indexOf("/");
+        return i > 0 && ids[k.slice(0, i)] ? ids[k.slice(0, i)] + k.slice(i) : k;
+    });
+    return changed ? { all: state.all, outputs, workspaces } : null;
 }
 
 function parseState(text) {

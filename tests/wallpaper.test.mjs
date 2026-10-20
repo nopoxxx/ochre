@@ -91,3 +91,22 @@ test("isNight: вчерашний восход и закат — по време
     assert.equal(W.isNight(new Date(2026, 9, 20, 12, 0), sun), false);
     assert.equal(W.isNight(new Date(2026, 9, 20, 20, 0), sun), true);
 });
+
+test("wsKey: с ключом монитора", () => {
+    assert.equal(W.wsKey({ output: "DP-1", idx: 2, name: null }, "M S 1"), "M S 1/2");
+});
+
+test("migrateOutputs: обои экранов и столов — с разъёма на модель", () => {
+    const ids = { "DP-1": "M S 1", "eDP-1": "eDP-1" };
+    const s = W.migrateOutputs(st({
+        all: { day: "/a.png" },
+        outputs: { "DP-1": { day: "/o.png" }, "eDP-1": { day: "/e.png" } },
+        workspaces: { "DP-1/chat": { day: "/w.png" }, "eDP-1/1": { day: "/w1.png" } }
+    }), ids);
+    assert.deepEqual(s, st({
+        all: { day: "/a.png" },
+        outputs: { "M S 1": { day: "/o.png" }, "eDP-1": { day: "/e.png" } },
+        workspaces: { "M S 1/chat": { day: "/w.png" }, "eDP-1/1": { day: "/w1.png" } }
+    }));
+    assert.equal(W.migrateOutputs(s, ids), null);
+});

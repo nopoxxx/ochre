@@ -51,7 +51,7 @@ Scope {
 
     // ── значения: заданное вручную или текущее состояние niri ──
 
-    function key(o, prop) { return "niri.out." + o.name + "." + prop; }
+    function key(o, prop) { return "niri.out." + Settings.outKey(o.name) + "." + prop; }
 
     function val(o, prop) {
         const k = key(o, prop);
@@ -76,7 +76,9 @@ Scope {
         return { x: val(o, "x"), y: val(o, "y"), w: s.w, h: s.h };
     }
 
-    function byName(n) { return Settings.outputs.find(o => o.name === n) ?? null; }
+    function byName(n) { return Settings.outputs.find(o => Settings.outKey(o.name) === n || o.name === n) ?? null; }
+
+    function placeTo(p) { return p.slice(p.indexOf(":") + 1); }
 
     // записать координату явно, даже если она совпадает с текущей: в displays.kdl попадает только заданное
     function pin(o, prop, v) {
@@ -90,8 +92,8 @@ Scope {
             for (const o of Settings.outputs) {
                 const place = val(o, "place");
                 if (place === "auto") continue;
-                const [rel, name] = place.split(":");
-                const t = byName(name), tr = t ? rect(t) : null, r = rect(o);
+                const rel = place.split(":")[0];
+                const t = byName(placeTo(place)), tr = t ? rect(t) : null, r = rect(o);
                 if (!tr || !r) continue;
                 if (val(t, "place") === "auto") {
                     pin(t, "x", tr.x);
@@ -125,8 +127,8 @@ Scope {
         // «A слева от B» при «B справа от A» — встречная ссылка: B становится опорой (place сбрасываем,
         // координаты он получит в recomputePlacements)
         if (prop === "place" && v !== "auto") {
-            const t = byName(v.split(":")[1]);
-            if (t && val(t, "place").split(":")[1] === o.name) Settings.reset(key(t, "place"));
+            const t = byName(placeTo(v));
+            if (t && byName(placeTo(val(t, "place"))) === o) Settings.reset(key(t, "place"));
         }
         Settings.set(key(o, prop), v);
         recomputePlacements();
@@ -134,7 +136,7 @@ Scope {
 
     function resetOutput(o) {
         begin();
-        const prefix = "niri.out." + o.name + ".";
+        const prefix = "niri.out." + Settings.outKey(o.name) + ".";
         const keep = {};
         for (const k in Settings.values)
             if (k.startsWith("niri.out.") && !k.startsWith(prefix)) keep[k] = Settings.values[k];
@@ -187,7 +189,7 @@ Scope {
             readonly property var rows: {
                 const o = out;
                 if (!o) return [];
-                const others = outputs.filter(x => x !== o).map(x => x.name);
+                const others = outputs.filter(x => x !== o).map(x => Settings.outKey(x.name));
                 const places = ["auto"].concat(...others.map(n => ["right:" + n, "left:" + n, "above:" + n, "below:" + n]));
                 const r = [
                     { prop: "enabled", label: I18n.tr("включён"), type: "bool" },
@@ -203,8 +205,8 @@ Scope {
 
             function placeLabel(p) {
                 if (p === "auto") return "auto";
-                const [rel, n] = p.split(":");
-                return I18n.tr(({ right: "справа от %1", left: "слева от %1", above: "над %1", below: "под %1" })[rel], n);
+                const rel = p.split(":")[0], t = root.byName(root.placeTo(p));
+                return I18n.tr(({ right: "справа от %1", left: "слева от %1", above: "над %1", below: "под %1" })[rel], t ? t.name : root.placeTo(p));
             }
 
             function fmt(r) {
