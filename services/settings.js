@@ -144,7 +144,8 @@ function sections(outputs, layout, home) {
 
             { header: "клавиши" },
             act("binds", "бинды", "все сочетания niri и ochre: изменить, добавить, отключить"),
-            act("hotkeys", "подсказка клавиш", "окно niri со всеми сочетаниями (Mod+Shift+/)"),
+            act("cheatsheet", "шпаргалка клавиш", "все сочетания поверх экрана, по группам, с поиском (Mod+/)"),
+            act("hotkeys", "подсказка клавиш niri", "окно niri со всеми сочетаниями (Mod+Shift+/)"),
             { key: "niri.key.micMute", label: "мьют микрофона", type: "combo", def: "", action: MUTE_BINDS["niri.key.micMute"].action, hint: "вкл/выкл микрофон по умолчанию (wpctl); работает и на экране блокировки" },
             { key: "niri.key.audioMute", label: "мьют звука", type: "combo", def: "", action: MUTE_BINDS["niri.key.audioMute"].action, hint: "вкл/выкл звук на устройстве вывода по умолчанию — наушники или колонки (wpctl)" },
 

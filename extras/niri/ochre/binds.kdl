@@ -17,5 +17,6 @@ binds {
     Mod+Shift+T hotkey-overlay-title="Copy Text from the Screen" { spawn "qs" "ipc" "call" "shot" "ocr"; }
     Mod+Shift+C hotkey-overlay-title="Pick a Color" { spawn "qs" "ipc" "call" "shot" "pick"; }
     Mod+S hotkey-overlay-title="Settings" { spawn "qs" "ipc" "call" "settings" "toggle"; }
+    Mod+Slash hotkey-overlay-title="Keyboard Shortcuts" { spawn "qs" "ipc" "call" "cheatsheet" "toggle"; }
     Super+Alt+L hotkey-overlay-title="Lock the Screen" { spawn "qs" "ipc" "call" "lock" "lock"; }
 }
