@@ -43,7 +43,7 @@ function iconOverlay(get) {
         "Comment=" + o.base + " с папками цвета " + o.color + " — сгенерировано ochre",
         "Inherits=" + o.base + ",hicolor",
         "Directories=" + dirs.join(","),
-        ...PAPIRUS_SIZES.flatMap(n => ["", "[" + n + "x" + n + "/places]", "Context=Places", "Size=" + n, "Type=Fixed"]),
+        ...[].concat(...PAPIRUS_SIZES.map(n => ["", "[" + n + "x" + n + "/places]", "Context=Places", "Size=" + n, "Type=Fixed"])),
         ""].join("\n");
     return o;
 }
