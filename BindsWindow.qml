@@ -33,7 +33,8 @@ Scope {
             ["wallpaper", "picker", I18n.tr("обои")], ["cheatsheet", "toggle", I18n.tr("шпаргалка клавиш")], ["clipboard", "toggle", I18n.tr("история буфера обмена")], ["home", "toggle", I18n.tr("меню home")],
             ["record", "toggle", I18n.tr("запись экрана — начать / остановить")], ["lock", "lock", I18n.tr("блокировка")],
             ["notify", "dnd", I18n.tr("не беспокоить")], ["displays", "toggle", I18n.tr("мониторы")],
-            ["shot", "region", I18n.tr("скриншот с разметкой")], ["shot", "window", I18n.tr("скриншот окна")]
+            ["shot", "region", I18n.tr("скриншот с разметкой")], ["shot", "window", I18n.tr("скриншот окна")],
+            ["songrec", "recognize", I18n.tr("распознать песню")]
         ].map(([t, f, d]) => ({ name: "spawn " + Ochre.ipcArgv([t, f]).map(a => JSON.stringify(a)).join(" "), desc: "ochre: " + d })),
         { name: "spawn kitty", desc: I18n.tr("запустить программу: spawn <команда> [аргументы]") },
         { name: "off", desc: I18n.tr("отключить сочетание") }

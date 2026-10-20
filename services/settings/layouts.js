@@ -28,6 +28,7 @@ const MODULES = [
     { id: "notify", file: "Notify", desc: "уведомления: клик — история, правый — «не беспокоить»" },
     { id: "kbd", file: "Kbd", desc: "раскладка, клик — переключить" },
     { id: "clock", file: "Clock", desc: "часы, клик — календарь" },
+    { id: "songrec", file: "SongRec", desc: "распознать песню (songrec): клик — системный звук, правый — микрофон" },
     { id: "rec", file: "Rec", desc: "● REC 01:23 — идёт запись экрана, клик — остановить (видно только во время записи)" },
     { id: "home", file: "Home", desc: "значок меню home — для тех, у кого user@host убран с панели" }
 ];
