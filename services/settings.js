@@ -57,10 +57,13 @@ function sections(outputs, layout, home) {
               hint: "Terminess в интерфейсе GTK- и Qt-приложений; моноширинный шрифт ставится всегда" },
 
             { header: "обои" },
-            act("picker", "выбрать обои", "локальная коллекция ~/Pictures/Wallpapers (Mod+Shift+W)"),
+            act("picker", "выбрать обои", "локальная коллекция ~/Pictures/Wallpapers (Mod+Shift+W); Ctrl+T — все экраны, экран или стол, Ctrl+N — день или ночь"),
             act("wallhaven", "найти на wallhaven", "поиск на wallhaven.cc, скачанные — в коллекцию"),
             { key: "shell.wallpaper.transition", label: "переход", type: "enum", options: ["type", "blocks", "scan", "fade", "none", "random"], def: "type",
               hint: "type — печатается строками, blocks — клетками, scan — развёрткой, fade — проявляется, random — каждый раз другой" },
+            { key: "shell.wallpaper.interval", label: "слайдшоу", type: "int", min: 0, max: 240, step: 5, def: 30,
+              hint: "минуты между картинками, если обоям экрана или стола назначена папка; 0 — не листать" },
+            { key: "shell.wallpaper.order", label: "порядок слайдшоу", type: "enum", options: ["random", "cycle"], def: "random", hint: "random — случайно, cycle — по кругу" },
             { key: "wallpaper.fill", label: "заполнение", type: "enum", options: ["fill", "fit", "stretch"], def: "fill", hint: "fill — обрезать, fit — вписать с полосами, stretch — растянуть" },
 
             { header: "меню" },
