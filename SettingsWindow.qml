@@ -118,6 +118,7 @@ Scope {
                     else if (ShellUpdate.behind > 0) ShellUpdate.update();
                     else ShellUpdate.check(true);
                     break;
+                case "shellRollback": ShellUpdate.rollback(); break;
                 case "restartShell": ShellUpdate.restartShell(); break;
                 case "report": Errors.report(); break;
                 case "greeterUpdate": ShellUpdate.updateGreeter(); break;

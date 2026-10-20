@@ -23,7 +23,10 @@ ShellRoot {
 
     // поставлен пакетом: pacman меняет файлы под работающим shell, и перезагрузка посреди обновления
     // ломает его — перезапуск только по уведомлению после обновления (ShellUpdate)
-    Component.onCompleted: if (Ochre.system) Quickshell.watchFiles = false
+    Component.onCompleted: {
+        if (Ochre.system) Quickshell.watchFiles = false;
+        ShellUpdate.booted();
+    }
 
     // перечитать весь конфиг (и .js) в том же процессе: без qs kill, который в Quickshell 0.3.2 может упасть на выходе
     IpcHandler {
