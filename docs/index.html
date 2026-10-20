@@ -195,6 +195,7 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
     <li><a href="#update"><span class="mk">▌</span><span class="br">├─ </span><span class="nm">update</span></a></li>
     <li><a href="#files"><span class="mk">▌</span><span class="br">├─ </span><span class="nm">files</span></a></li>
     <li><a href="#ipc"><span class="mk">▌</span><span class="br">├─ </span><span class="nm">ipc</span></a></li>
+    <li><a href="#hooks"><span class="mk">▌</span><span class="br">├─ </span><span class="nm">hooks</span></a></li>
     <li><a href="#faq"><span class="mk">▌</span><span class="br">└─ </span><span class="nm">faq</span></a></li>
   </ol>
   <div class="accent-ctl">акцент: <button id="accentBtn" title="Сменить акцент — как в Mod+S → look/">‹ ochre ›</button></div>
@@ -630,6 +631,9 @@ Password: <span class="blink">█</span></div>
 │</span> <span class="b">Настройки не прочитаны</span>              <span class="c-red">│
 └─────────────────────────────────────┘</span></div>
   <p>Клик по <code>log</code> на панели — история (до 100), правый клик — «не беспокоить» (проходят только критичные).
+  В истории записи одного приложения собраны в группу <code>▾ Telegram (3)</code>, больше трёх — свёрнута.
+  Клавиши: <kbd>↑</kbd><kbd>↓</kbd> — строка, <kbd>↵</kbd> — действие (на группе — свернуть), <kbd>Space</kbd> <kbd>←</kbd><kbd>→</kbd> — свернуть и развернуть,
+  <kbd>Del</kbd> — убрать запись или всю группу, <kbd>d</kbd> — «не беспокоить», <kbd>Esc</kbd> — закрыть.
   Положение, время показа и максимум на экране — в <code>notify/</code>.</p>
   <p>Когда микрофон или звук по умолчанию выключается и включается — биндом, мультимедийной клавишей, из pavucontrol или кликом по
   <code>vol</code> — приходит короткое уведомление «Микрофон выключен» с названием устройства. Такие уведомления не копятся:
@@ -669,6 +673,7 @@ Password: <span class="blink">█</span></div>
     <tr><td><code>~/.config/gtk-{3,4}.0/ochre.css</code></td><td>палитра GTK, подключается первой строкой <code>gtk.css</code></td></tr>
     <tr><td><code>~/.config/qt6ct/</code></td><td>палитра и шрифт Qt</td></tr>
     <tr><td><code>~/.config/ochre/term/</code></td><td>цвета терминала из темы — подключаются из конфига терминала</td></tr>
+    <tr><td><code>~/.config/ochre/hooks/</code></td><td>ваши скрипты на события shell — см. <a href="#hooks">hooks</a></td></tr>
     <tr><td><code>~/.local/state/ochre/</code></td><td>текущие обои и режим заполнения</td></tr>
     <tr><td><code>~/Pictures/Wallpapers/</code></td><td>коллекция обоев и загрузки с wallhaven</td></tr>
     <tr><td><code>~/.cache/cliphist/db</code></td><td>история буфера обмена</td></tr>
@@ -702,6 +707,25 @@ Password: <span class="blink">█</span></div>
 <span class="p">❯ </span>qs ipc call errors get          <span class="cm"># ошибки shell и niri текстом; errors open, errors clear</span>
 <span class="p">❯ </span>qs ipc call privacy get         <span class="cm"># кто слушает микрофон и показывает экран</span>
 <span class="p">❯ </span>qs ipc call settings set shell.accent blue   <span class="cm"># любая настройка из Mod+S; "" — по умолчанию, settings get &lt;ключ&gt; — прочитать</span></code></pre>
+</section>
+
+<!-- ─────────────────────────── hooks ─────────────────────────── -->
+<section class="win" id="hooks">
+  <div class="ttl">~/docs/hooks</div>
+  <h2>Хуки</h2>
+  <p>Свой скрипт на событие shell: исполняемый файл <code>~/.config/ochre/hooks/&lt;событие&gt;</code>, данные приходят аргументами.
+  Нет файла или он не исполняемый — ничего не происходит. При запуске shell хуки не срабатывают — только на изменения.</p>
+  <div class="tbl"><table>
+    <tr><th>файл</th><th>когда</th><th>аргументы</th></tr>
+    <tr><td><code>wallpaper</code></td><td>сменились обои на мониторе в фокусе</td><td>путь, монитор</td></tr>
+    <tr><td><code>theme</code></td><td>сменились акцент, тема или режим</td><td>цвет акцента <code>#rrggbb</code>, акцент, тема, <code>dark</code>|<code>light</code></td></tr>
+    <tr><td><code>lock</code>, <code>unlock</code></td><td>экран заблокирован, разблокирован</td><td>—</td></tr>
+    <tr><td><code>game</code></td><td>игровой режим</td><td><code>on</code>|<code>off</code></td></tr>
+    <tr><td><code>dnd</code></td><td>«не беспокоить» (и через игровой режим)</td><td><code>on</code>|<code>off</code></td></tr>
+  </table></div>
+<pre class="cmd"><code><span class="p">❯ </span>mkdir -p ~/.config/ochre/hooks
+<span class="p">❯ </span>printf '#!/bin/sh\nwal -n -i "$1"\n' &gt; ~/.config/ochre/hooks/wallpaper
+<span class="p">❯ </span>chmod +x ~/.config/ochre/hooks/wallpaper   <span class="cm"># pywal вслед за обоями</span></code></pre>
 </section>
 
 <!-- ─────────────────────────── faq ─────────────────────────── -->

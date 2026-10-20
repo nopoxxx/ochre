@@ -33,12 +33,13 @@ PanelWindow {
     property string style: "fade"     // переход, который играет сейчас
     property real p: 1                 // 0 — старая картинка, 1 — новая
     property bool first: true
+    property bool quick: false
     readonly property bool masked: p < 1 && style !== "fade"
 
     onSrcChanged: {
         const want = Settings.get("shell.wallpaper.transition");
-        style = !first && ws !== shownWs ? "none"
-            : first || !prev.source ? "fade"
+        quick = !first && ws !== shownWs;
+        style = quick || first || !prev.source ? "fade"
             : want === "random" ? styles[Math.floor(Math.random() * styles.length)] : want;
         first = false;
         prev.source = cur.source;
@@ -78,7 +79,7 @@ PanelWindow {
         property: "p"
         from: 0
         to: 1
-        duration: (bg.style === "fade" ? 450 : bg.style === "blocks" ? 700 : 900) / Settings.get("shell.anim.speed")
+        duration: (bg.quick ? 150 : bg.style === "fade" ? 450 : bg.style === "blocks" ? 700 : 900) / Settings.get("shell.anim.speed")
         easing.type: bg.style === "fade" ? Easing.OutCubic : Easing.Linear
         // иначе в режиме fit старая картинка торчала бы из-под новой по краям
         onFinished: prev.source = ""

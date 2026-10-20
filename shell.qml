@@ -19,6 +19,7 @@ ShellRoot {
     readonly property var _cast: Cast             // бэкенд портала для демонстрации экрана: файлы и мост к демону
     readonly property var _game: Game             // IPC game (Mod+Shift+G)
     readonly property var _errors: Errors         // ошибки shell и niri — с запуска, а не с первой ошибки
+    readonly property var _hooks: Hooks           // ~/.config/ochre/hooks/<событие>
 
     // поставлен пакетом: pacman меняет файлы под работающим shell, и перезагрузка посреди обновления
     // ломает его — перезапуск только по уведомлению после обновления (ShellUpdate)
