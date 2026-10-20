@@ -418,6 +418,7 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
     <tr><td><code>заметки</code></td><td>начало <code>~/.config/ochre/notes.md</code>; <kbd>↵</kbd> — открыть в редакторе. По умолчанию скрыта</td></tr>
     <tr><td><code>уведомления</code></td><td>последние пять: <kbd>↵</kbd> — действие, <kbd>Del</kbd> — убрать, <code>[clear]</code></td></tr>
     <tr><td><code>система</code></td><td>cpu, память, диск, температуры; <kbd>↵</kbd> — btop</td></tr>
+    <tr><td><code>экран</code></td><td>время за экраном сегодня: всего и пять приложений, которые дольше всех были в фокусе. Считается по смене фокуса niri, без опроса; блокировка и простой дольше 5 минут не в счёт. Хранится 7 дней в <code>~/.local/state/ochre/screentime.json</code>. По умолчанию скрыта</td></tr>
     <tr><td><code>питание</code></td><td>батарея и профиль питания (эконом / баланс / мощность), если есть power-profiles-daemon</td></tr>
     <tr><td><code>wi-fi</code></td><td>сети рядом: <kbd>↵</kbd> — подключиться или отключиться; новой сети — поле пароля прямо под ней</td></tr>
     <tr><td><code>bluetooth</code></td><td>устройства: <kbd>↵</kbd> — подключить, отключить или сопрячь; <kbd>Del</kbd> — забыть</td></tr>
@@ -706,6 +707,7 @@ Password: <span class="blink">█</span></div>
 <span class="p">❯ </span>qs ipc call game toggle         <span class="cm"># игровой режим; game on, game off, game get</span>
 <span class="p">❯ </span>qs ipc call errors get          <span class="cm"># ошибки shell и niri текстом; errors open, errors clear, errors report</span>
 <span class="p">❯ </span>qs ipc call privacy get         <span class="cm"># кто слушает микрофон и показывает экран</span>
+<span class="p">❯ </span>qs ipc call screentime get      <span class="cm"># время за экраном сегодня: всего и по приложениям</span>
 <span class="p">❯ </span>qs ipc call settings set shell.accent blue   <span class="cm"># любая настройка из Mod+S; "" — по умолчанию, settings get &lt;ключ&gt; — прочитать</span></code></pre>
 </section>
 
