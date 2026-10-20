@@ -10,7 +10,7 @@ import "../services/glyphs.js" as G
 Section {
     id: sec
 
-    title: "сейчас играет"
+    title: I18n.tr("сейчас играет")
 
     readonly property var players: Mpris.players.values
     property int chosen: -1        // -1 — тот, что играет
@@ -124,8 +124,8 @@ Section {
                 Layout.fillWidth: true
                 visible: Settings.get("shell.home.lyrics") && Lyrics.key !== "" && sec.player === Lyrics.player && text !== ""
                 elide: Text.ElideRight
-                text: Lyrics.lines.length ? (Lyrics.current || "♪") : Lyrics.loading ? "♪ ищу текст…"
-                    : Lyrics.instrumental ? "♪ инструментал" : Lyrics.plain ? "♪ текст без разметки времени" : ""
+                text: Lyrics.lines.length ? (Lyrics.current || "♪") : Lyrics.loading ? I18n.tr("♪ ищу текст…")
+                    : Lyrics.instrumental ? I18n.tr("♪ инструментал") : Lyrics.plain ? I18n.tr("♪ текст без разметки времени") : ""
                 color: Lyrics.lines.length ? Theme.accent : Theme.gray
                 font.bold: Lyrics.lines.length > 0
             }

@@ -10,7 +10,7 @@ import "../services/glyphs.js" as G
 Section {
     id: sec
 
-    title: "звук и экран"
+    title: I18n.tr("звук и экран")
 
     readonly property var sink: Pipewire.defaultAudioSink
     readonly property var source: Pipewire.defaultAudioSource
@@ -58,7 +58,7 @@ Section {
             Layout.fillWidth: true
             current: sec.isCur(index)
             icon: bright ? G.g("bright") : mic ? G.g(off ? "micOff" : "mic") : G.g(off ? "volOff" : "vol")
-            label: bright ? "яркость" : mic ? "mic" : "vol"
+            label: bright ? I18n.tr("яркость") : mic ? "mic" : "vol"
             value: bright ? Brightness.value : Math.min(1, modelData.node.audio.volume)
             off: !bright && modelData.node.audio.muted
             onMoved: v => { sec.pick(index); sec.setValue(modelData, v); }

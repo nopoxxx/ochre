@@ -9,7 +9,7 @@ import qs.services
 Section {
     id: sec
 
-    title: "уведомления" + (Notifs.history.length ? " · " + Notifs.history.length : "")
+    title: I18n.tr("уведомления") + (Notifs.history.length ? " · " + Notifs.history.length : "")
 
     readonly property var shown: Notifs.history.slice(0, 5)
     count: shown.length + (shown.length ? 1 : 0)

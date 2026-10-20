@@ -12,7 +12,7 @@ import "../services/glyphs.js" as G
 Section {
     id: sec
 
-    title: "быстро"
+    title: I18n.tr("быстро")
 
     readonly property var wifiDev: Networking.devices.values.find(d => d.type === DeviceType.Wifi) ?? null
     readonly property var wifiNet: wifiDev?.networks.values.find(n => n.connected) ?? null
@@ -28,24 +28,24 @@ Section {
     // плитки: name — что это, sub — состояние
     readonly property var buttons: [
         { icon: G.g(Networking.wifiEnabled ? "wifi" : "wifiOff"), name: "wi-fi", page: "wifi",
-          sub: !Networking.wifiEnabled ? "выкл" : wifiNet ? wifiNet.name : "не подключено",
+          sub: !Networking.wifiEnabled ? I18n.tr("выкл") : wifiNet ? wifiNet.name : I18n.tr("не подключено"),
           on: Networking.wifiEnabled, active: wifiDev !== null && Networking.wifiHardwareEnabled,
           run: () => Networking.wifiEnabled = !Networking.wifiEnabled },
         { icon: G.g(!adapter?.enabled ? "btOff" : btConnected.length ? "btOn" : "bt"), name: "bluetooth", page: "bluetooth",
-          sub: !adapter ? "нет адаптера" : !adapter.enabled ? "выкл" : btConnected.length ? btConnected[0].name : "вкл",
+          sub: !adapter ? I18n.tr("нет адаптера") : !adapter.enabled ? I18n.tr("выкл") : btConnected.length ? btConnected[0].name : I18n.tr("вкл"),
           on: adapter?.enabled ?? false, active: adapter !== null,
           run: () => adapter.enabled = !adapter.enabled },
-        { icon: G.g("moon"), name: "ночь", sub: NightLight.on ? "тёплый экран" : "выкл", on: NightLight.on, active: NightLight.available,
+        { icon: G.g("moon"), name: I18n.tr("ночь"), sub: NightLight.on ? I18n.tr("тёплый экран") : I18n.tr("выкл"), on: NightLight.on, active: NightLight.available,
           run: () => NightLight.toggle() },
-        { icon: G.g(Notifs.dnd ? "dnd" : "bell"), name: "не беспокоить", sub: Notifs.dnd ? "только критичные" : "выкл",
+        { icon: G.g(Notifs.dnd ? "dnd" : "bell"), name: I18n.tr("не беспокоить"), sub: Notifs.dnd ? I18n.tr("только критичные") : I18n.tr("выкл"),
           on: Notifs.dnd, active: true, onColor: Theme.purple, run: () => Notifs.toggleDnd() },
-        { icon: G.g("game"), name: "игровой режим", sub: Game.on ? "без анимаций" : "выкл", on: Game.on, active: true, onColor: Theme.green,
+        { icon: G.g("game"), name: I18n.tr("игровой режим"), sub: Game.on ? I18n.tr("без анимаций") : I18n.tr("выкл"), on: Game.on, active: true, onColor: Theme.green,
           run: () => Game.toggle() },
-        { icon: G.g(micMuted ? "micOff" : "mic"), name: "микрофон", sub: !source ? "нет" : micMuted ? "выкл" : "вкл",
+        { icon: G.g(micMuted ? "micOff" : "mic"), name: I18n.tr("микрофон"), sub: !source ? I18n.tr("нет") : micMuted ? I18n.tr("выкл") : I18n.tr("вкл"),
           on: !micMuted && source !== null, active: source?.audio !== undefined && source !== null,
           run: () => sec.source.audio.muted = !sec.micMuted },
-        { icon: G.g(Recorder.recording ? "stop" : "rec"), name: "запись",
-          sub: Recorder.recording ? Math.floor(Recorder.elapsed / 60) + ":" + String(Recorder.elapsed % 60).padStart(2, "0") + " — остановить" : "экран",
+        { icon: G.g(Recorder.recording ? "stop" : "rec"), name: I18n.tr("запись"),
+          sub: Recorder.recording ? I18n.tr("%1 — остановить", Math.floor(Recorder.elapsed / 60) + ":" + String(Recorder.elapsed % 60).padStart(2, "0")) : I18n.tr("экран"),
           on: Recorder.recording, active: Recorder.available, onColor: Theme.red,
           run: () => { if (!Recorder.recording) sec.panel.close(); Recorder.toggle(); } }
     ]

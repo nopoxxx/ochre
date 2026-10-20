@@ -34,11 +34,11 @@ Section {
     }
 
     function status(d) {
-        if (d.pairing) return "сопряжение…";
-        if (d.state === BluetoothDeviceState.Connecting) return "подключение…";
-        if (d.state === BluetoothDeviceState.Disconnecting) return "отключение…";
-        if (d.connected) return "подключено" + (d.batteryAvailable ? " " + Math.round(d.battery * 100) + "%" : "");
-        return d.paired ? "сопряжено" : "";
+        if (d.pairing) return I18n.tr("сопряжение…");
+        if (d.state === BluetoothDeviceState.Connecting) return I18n.tr("подключение…");
+        if (d.state === BluetoothDeviceState.Disconnecting) return I18n.tr("отключение…");
+        if (d.connected) return (d.batteryAvailable ? I18n.tr("подключено %1%", Math.round(d.battery * 100)) : I18n.tr("подключено"));
+        return d.paired ? I18n.tr("сопряжено") : "";
     }
 
     function activate(i) {
@@ -63,12 +63,12 @@ Section {
 
     T {
         visible: sec.adapter !== null && !sec.adapter.enabled
-        text: "bluetooth выключен — включить в «быстро»"
+        text: I18n.tr("bluetooth выключен — включить в «быстро»")
         color: Theme.gray
     }
     T {
         visible: (sec.adapter?.enabled ?? false) && sec.devs.length === 0
-        text: "ищу устройства…"
+        text: I18n.tr("ищу устройства…")
         color: Theme.gray
     }
 

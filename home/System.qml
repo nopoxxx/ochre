@@ -9,7 +9,7 @@ import "../services/glyphs.js" as G
 Section {
     id: sec
 
-    title: "система"
+    title: I18n.tr("система")
     count: 1
 
     property real diskUsed: 0

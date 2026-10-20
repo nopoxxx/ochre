@@ -1,12 +1,13 @@
 import QtQuick
 import QtQuick.Layouts
 import qs
+import qs.services
 
 // Календарь месяца: ←→ — соседние месяцы, ↵ — вернуться к сегодняшнему.
 Section {
     id: sec
 
-    title: "календарь"
+    title: I18n.tr("календарь")
     count: 1
 
     function key(event) {

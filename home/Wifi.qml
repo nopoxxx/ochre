@@ -55,7 +55,7 @@ Section {
 
     T {
         visible: !Networking.wifiEnabled
-        text: "Wi-Fi выключен — включить в «быстро»"
+        text: I18n.tr("Wi-Fi выключен — включить в «быстро»")
         color: Theme.gray
     }
 
@@ -96,7 +96,7 @@ Section {
                     }
                     T {
                         color: Theme.gray
-                        text: (item.n.stateChanging ? "… " : item.n.connected ? "подключено " : item.n.known ? "известна " : "")
+                        text: (item.n.stateChanging ? "… " : item.n.connected ? I18n.tr("подключено ") : item.n.known ? I18n.tr("известна ") : "")
                             + sec.pct(item.n.signalStrength) + "%"
                     }
                     T { font.family: Theme.iconFont; text: sec.secured(item.n) ? " " + G.g("lock") : "  "; color: Theme.gray }
@@ -111,7 +111,7 @@ Section {
                 visible: sec.asking === item.n.name
                 Layout.fillWidth: true
                 spacing: 0
-                T { text: "  пароль: "; color: Theme.gray }
+                T { text: I18n.tr("  пароль: "); color: Theme.gray }
                 TextInput {
                     id: psk
                     Layout.fillWidth: true
@@ -138,7 +138,7 @@ Section {
         visible: sec.failed !== ""
         Layout.fillWidth: true
         wrapMode: Text.Wrap
-        text: "не удалось: " + sec.failed
+        text: I18n.tr("не удалось: %1", sec.failed)
         color: Theme.red
     }
 }

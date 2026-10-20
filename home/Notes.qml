@@ -14,7 +14,7 @@ Section {
     readonly property int max: 8
     property var lines: []
 
-    title: "заметки"
+    title: I18n.tr("заметки")
     count: 1
 
     function activate(i) {
@@ -48,7 +48,7 @@ Section {
 
             T {
                 visible: sec.lines.length === 0
-                text: "пусто — ↵ открыть notes.md в редакторе"
+                text: I18n.tr("пусто — ↵ открыть notes.md в редакторе")
                 color: Theme.gray
             }
 
@@ -67,7 +67,7 @@ Section {
 
             T {
                 visible: sec.lines.length > sec.max
-                text: "… ещё " + (sec.lines.length - sec.max) + " строк"
+                text: I18n.tr("… ещё %1 строк", sec.lines.length - sec.max)
                 color: Theme.gray
             }
         }

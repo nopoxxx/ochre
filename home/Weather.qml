@@ -9,7 +9,7 @@ import "../services/glyphs.js" as G
 Section {
     id: sec
 
-    title: "погода" + (Weather.place ? " · " + Weather.place.name : "")
+    title: I18n.tr("погода") + (Weather.place ? " · " + Weather.place.name : "")
     count: 1
 
     readonly property var now: Weather.current ? Weather.describe(Weather.current.code, Weather.current.day) : null
@@ -33,7 +33,7 @@ Section {
             T {
                 visible: !Weather.current
                 color: Weather.error ? Theme.red : Theme.gray
-                text: Weather.error ? Weather.error + " — ↵ повторить" : "загрузка…"
+                text: Weather.error ? I18n.tr("%1 — ↵ повторить", Weather.error) : I18n.tr("загрузка…")
                 Layout.fillWidth: true
                 wrapMode: Text.Wrap
             }
@@ -56,8 +56,7 @@ Section {
                     }
                     T {
                         color: Theme.gray
-                        text: "ощущается " + sec.deg(Weather.current?.feels ?? 0)
-                            + " · ветер " + (Weather.current?.wind ?? 0) + " " + Weather.windUnit
+                        text: I18n.tr("ощущается %1 · ветер %2 %3", sec.deg(Weather.current?.feels ?? 0), Weather.current?.wind ?? 0, Weather.windUnit)
                             + " · " + (Weather.current?.humidity ?? 0) + "%"
                     }
                 }
@@ -72,7 +71,7 @@ Section {
                     model: Weather.daily.slice(1)
                     Row {
                         required property var modelData
-                        T { text: Qt.locale().toString(modelData.date, "ddd") + " "; color: Theme.gray }
+                        T { text: I18n.locale.toString(modelData.date, "ddd") + " "; color: Theme.gray }
                         T { font.family: Theme.iconFont; text: Weather.describe(modelData.code, true).icon + " "; color: Theme.accent }
                         T { text: sec.deg(modelData.max) + " "; color: Theme.fg }
                         T { text: sec.deg(modelData.min); color: Theme.gray }

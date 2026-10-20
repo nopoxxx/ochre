@@ -105,7 +105,7 @@ Section {
 
     T {
         visible: sec.lines.length > sec.max
-        text: "… ещё " + (sec.lines.length - sec.max) + " — e: открыть файл"
+        text: I18n.tr("… ещё %1 — e: открыть файл", sec.lines.length - sec.max)
         color: Theme.gray
     }
 
@@ -135,14 +135,14 @@ Section {
 
     Btn {
         visible: !sec.adding
-        text: "+ добавить"
+        text: I18n.tr("+ добавить")
         current: sec.isCur(sec.shown.length)
         onClicked: { sec.pick(sec.shown.length); sec.activate(sec.shown.length); }
     }
 
     T {
         visible: sec.focused && !sec.adding
-        text: "↵ готово  a добавить  del удалить  c убрать сделанное  e редактор"
+        text: I18n.tr("↵ готово  a добавить  del удалить  c убрать сделанное  e редактор")
         color: Theme.gray
         font.pixelSize: Theme.fontSize - 2
     }

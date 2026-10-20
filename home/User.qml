@@ -17,7 +17,7 @@ Section {
 
     function fmtUptime(s) {
         const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60);
-        return (d ? d + "д " : "") + (d || h ? h + "ч " : "") + m + "м";
+        return d ? I18n.tr("%1д %2ч %3м", d, h, m) : h ? I18n.tr("%1ч %2м", h, m) : I18n.tr("%1м", m);
     }
 
     FileView { id: osRelease; path: "/etc/os-release" }

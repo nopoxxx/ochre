@@ -11,7 +11,7 @@ import "../services/glyphs.js" as G
 Section {
     id: sec
 
-    title: "питание"
+    title: I18n.tr("питание")
 
     property bool ppd: false
     readonly property var bat: UPower.displayDevice
@@ -20,9 +20,9 @@ Section {
     readonly property bool charging: hasBat && (bat.state === UPowerDeviceState.Charging || bat.state === UPowerDeviceState.PendingCharge)
 
     readonly property var profiles: !ppd ? [] : [
-        { p: PowerProfile.PowerSaver, icon: G.g("saver"), text: "эконом" },
-        { p: PowerProfile.Balanced, icon: G.g("balanced"), text: "баланс" }
-    ].concat(PowerProfiles.hasPerformanceProfile ? [{ p: PowerProfile.Performance, icon: G.g("performance"), text: "мощность" }] : [])
+        { p: PowerProfile.PowerSaver, icon: G.g("saver"), text: I18n.tr("эконом") },
+        { p: PowerProfile.Balanced, icon: G.g("balanced"), text: I18n.tr("баланс") }
+    ].concat(PowerProfiles.hasPerformanceProfile ? [{ p: PowerProfile.Performance, icon: G.g("performance"), text: I18n.tr("мощность") }] : [])
 
     available: hasBat || ppd
     count: profiles.length
@@ -39,7 +39,7 @@ Section {
     function fmtTime(s) {
         if (!(s > 0)) return "";
         const h = Math.floor(s / 3600), m = Math.round(s % 3600 / 60);
-        return (h ? h + "ч " : "") + m + "м";
+        return h ? I18n.tr("%1ч %2м", h, m) : I18n.tr("%1м", m);
     }
 
     Process {
@@ -60,8 +60,8 @@ Section {
         }
         T {
             text: Math.round(sec.pct * 100) + "%"
-                + (sec.charging ? (sec.bat.timeToFull > 0 ? " · до полной " + sec.fmtTime(sec.bat.timeToFull) : "")
-                                : (sec.bat?.timeToEmpty > 0 ? " · осталось " + sec.fmtTime(sec.bat.timeToEmpty) : ""))
+                + (sec.charging ? (sec.bat.timeToFull > 0 ? I18n.tr(" · до полной %1", sec.fmtTime(sec.bat.timeToFull)) : "")
+                                : (sec.bat?.timeToEmpty > 0 ? I18n.tr(" · осталось %1", sec.fmtTime(sec.bat.timeToEmpty)) : ""))
             color: Theme.fg
         }
     }
