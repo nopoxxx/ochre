@@ -126,7 +126,7 @@ var NIRI_FILES = ["input", "displays", "layout", "window-rules", "cursor", "anim
 // в каком файле живёт настройка — для подсказки в окне настроек
 function niriFileOf(key) {
     if (/^niri\.(kb|tp|mouse)\.|^niri\.(ffm|warp)$/.test(key)) return "input.kdl";
-    if (/^niri\.(gaps|colWidth|center|ring|border|shadow)$/.test(key) || key === "shell.accent" || key === "shell.theme.name") return "layout.kdl";
+    if (/^niri\.(gaps|colWidth|center|ring|border|shadow)$/.test(key) || key === "shell.accent" || key === "shell.theme.name" || key === "shell.theme.mode") return "layout.kdl";
     if (/^niri\.rules\./.test(key)) return "window-rules.kdl";
     if (/^niri\.cursor\./.test(key)) return "cursor.kdl";
     if (/^niri\.anim/.test(key)) return "animations.kdl";
