@@ -332,7 +332,12 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
   <h2>Панель</h2>
   <p>Строка shell-приглашения из модулей. Модули расставляются по зонам left / center / right в
   <kbd>Mod+S</kbd> → <code>bar/</code>: <kbd>←→</kbd> — зона, <kbd>Shift+↑↓</kbd> — порядок. Там же положение,
-  высота, floating-стиль, автоскрытие, разделитель и вид prompt.</p>
+  высота, стиль, автоскрытие, разделитель и вид prompt.</p>
+  <p>Панель встаёт на любой край: сверху, снизу, слева или справа. Боковая — колонка в 6 символов: модули в ней
+  столбиком, часы — часы над минутами, у <code>cpu</code>, <code>vol</code> и других — только число, <code>command</code> и
+  <code>media</code> сжаты до значка, попапы открываются сбоку. Стили: <code>full</code> — во всю ширину,
+  <code>floating</code> — с отступами и рамкой, <code>island</code> — все зоны одним блоком посередине,
+  <code>capsules</code> — каждая зона в своей рамке, <code>transparent</code> — без фона, только текст.</p>
   <div class="tbl"><table>
     <tr><th>модуль</th><th>что показывает · клики</th></tr>
     <tr><td><code>user</code></td><td><code>user@host</code> — стиль prompt настраивается; клик — <a href="#home">меню home</a></td></tr>
