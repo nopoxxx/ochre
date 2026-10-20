@@ -181,9 +181,9 @@ function sections(outputs, layout, home) {
             ...barRows(layout),
 
             { header: "панель" },
-            { key: "shell.bar.position", label: "положение", type: "enum", options: ["top", "bottom"], def: "top" },
-            { key: "shell.bar.height", label: "высота", type: "int", min: 18, max: 48, step: 2, def: 26 },
-            { key: "shell.bar.style", label: "стиль", type: "enum", options: ["full", "floating"], def: "full", hint: "floating — с отступами от краёв и рамкой цвета акцента" },
+            { key: "shell.bar.position", label: "положение", type: "enum", options: ["top", "bottom", "left", "right"], def: "top", hint: "left / right — узкая колонка: модули столбиком, длинные (command, media) сжаты до значка" },
+            { key: "shell.bar.height", label: "высота", type: "int", min: 18, max: 48, step: 2, def: 26, hint: "у боковой панели ширина — по тексту, 6 символов" },
+            { key: "shell.bar.style", label: "стиль", type: "enum", options: ["full", "floating", "island", "capsules", "transparent"], def: "full", hint: "floating — с отступами от краёв и рамкой цвета акцента  ·  island — все зоны одним блоком посередине  ·  capsules — каждая зона в своей рамке  ·  transparent — без фона, только текст" },
             { key: "shell.bar.opacity", label: "непрозрачность, %", type: "int", min: 30, max: 100, step: 5, def: 100 },
             { key: "shell.bar.autohide", label: "автоскрытие", type: "bool", def: false, hint: "панель появляется при наведении мыши на край экрана" },
             { key: "shell.bar.monitors", label: "мониторы", type: "enum", options: ["all", "primary"], def: "all" },

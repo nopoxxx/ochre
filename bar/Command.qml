@@ -10,6 +10,7 @@ Item {
 
     property var bar
     property bool available: true
+    readonly property bool vertical: bar?.vertical ?? false
 
     readonly property var win: Niri.focusedWindow
     readonly property string app: win?.app_id ?? ""
@@ -58,18 +59,18 @@ Item {
         id: row
 
         BarText {
-            text: Settings.get("shell.bar.symbol") + " "
+            text: Settings.get("shell.bar.symbol") + (root.vertical ? "" : " ")
             color: Niri.urgent ? Theme.red : Theme.accent
             font.bold: true
         }
-        BarText { text: root.shownText.slice(0, root.app.length); color: Theme.fg }
-        BarText { text: root.shownText.slice(root.app.length); color: Theme.gray }
+        BarText { visible: !root.vertical; text: root.shownText.slice(0, root.app.length); color: Theme.fg }
+        BarText { visible: !root.vertical; text: root.shownText.slice(root.app.length); color: Theme.gray }
 
         // курсор: мигает, когда «команды» нет, и стоит в конце, пока она печатается
         BarText {
             id: cursor
 
-            visible: !root.win || root.typing
+            visible: !root.vertical && (!root.win || root.typing)
             text: "█"
             color: Theme.fg
             opacity: 1

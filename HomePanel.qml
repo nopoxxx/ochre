@@ -48,13 +48,17 @@ Scope {
             // панель остаётся доступной: окно начинается под ней (или кончается над ней)
             readonly property bool barHere: !Settings.get("shell.bar.autohide")
                 && (Settings.get("shell.bar.monitors") === "all" || screen === Quickshell.screens[0])
-            readonly property bool barTop: Settings.get("shell.bar.position") === "top"
-            readonly property int barSpace: !barHere ? 0
-                : Theme.barHeight + (Settings.get("shell.bar.style") === "floating" ? 4 + 8 : 0)
+            readonly property string barEdge: Theme.barEdge
+            readonly property int barSpace: !barHere ? 0 : Theme.barThickness + Theme.barGap
 
             screen: Quickshell.screens.find(s => s.name === Home.screenName) ?? Quickshell.screens[0]
             anchors { top: true; bottom: true; left: true; right: true }
-            margins { top: barTop ? barSpace : 0; bottom: barTop ? 0 : barSpace }
+            margins {
+                top: barEdge === "top" ? barSpace : 0
+                bottom: barEdge === "bottom" ? barSpace : 0
+                left: barEdge === "left" ? barSpace : 0
+                right: barEdge === "right" ? barSpace : 0
+            }
             color: "transparent"
             exclusionMode: ExclusionMode.Ignore
             WlrLayershell.layer: WlrLayer.Overlay
@@ -200,7 +204,7 @@ Scope {
                     : win.style === "control" ? (win.right ? win.width - width - win.gap : win.gap)
                     : (win.right ? win.width - width : 0)
                 y: win.style === "dashboard" ? Math.max(win.gap, (win.height - height) / 3)
-                    : win.style === "control" ? (win.barTop ? win.gap : win.height - height - win.gap)
+                    : win.style === "control" ? (win.barEdge !== "bottom" ? win.gap : win.height - height - win.gap)
                     : 0
                 color: Theme.bg
                 border.color: Theme.accent
