@@ -35,6 +35,7 @@ Singleton {
             if (!node || node.id !== nodeId || known === undefined) { remember(); return; }
             if (muted === known) return;
             known = muted;
+            Sounds.play(muted ? "mute" : "unmute");
             if (root.enabled) root.announce(mic, muted, node.description || node.nickname || node.name || "");
         }
     }

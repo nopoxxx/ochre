@@ -19,6 +19,7 @@ Seg {
     available: player !== null && track !== ""
     label: player?.isPlaying ? "♪" : "‖"
     value: track + (player?.isPlaying && Cava.levels.length && Settings.get("shell.bar.viz") ? " " + Cava.bars(8) : "")
+    compact: player?.isPlaying && Cava.levels.length && Settings.get("shell.bar.viz") ? Cava.bars(4) : ""
     valueColor: player?.isPlaying ? Theme.fg : Theme.gray
 
     onLeftClicked: if (player?.canTogglePlaying) player.togglePlaying()

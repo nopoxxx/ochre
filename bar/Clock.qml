@@ -12,6 +12,7 @@ Seg {
 
     // I18n.locale — «ddd» на языке интерфейса (Qt.formatDate всегда пишет по-английски)
     value: I18n.locale.toString(clock.date, format)
+    compact: value.split(/[ :]/).join("\n")
     valueColor: Theme.orange
     bold: true
     onLeftClicked: cal.toggle()

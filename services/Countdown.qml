@@ -92,11 +92,8 @@ Singleton {
     function finish(late) {
         const what = label || I18n.tr("таймер");
         stop();
-        Quickshell.execDetached(["sh", "-c", `
-            notify-send -a ochre -u critical -i alarm-symbolic "⏱ $1" "$2"
-            f=/usr/share/sounds/freedesktop/stereo/complete.oga
-            [ -f "$f" ] && command -v pw-play >/dev/null && pw-play "$f"`,
-            "sh", what, late ? I18n.tr("время вышло, пока shell не работал") : I18n.tr("прошло %1", fmt(total))]);
+        Sounds.play("timer");
+        Quickshell.execDetached(["notify-send", "-a", "ochre", "-u", "critical", "-i", "alarm-symbolic", "--", "⏱ " + what, late ? I18n.tr("время вышло, пока shell не работал") : I18n.tr("прошло %1", fmt(total))]);
     }
 
     function update() {

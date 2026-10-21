@@ -16,13 +16,15 @@ Singleton {
     readonly property string home: Quickshell.env("HOME")
 
     property string termText: ""
+    property string fastfetchText: ""
     readonly property string termRel: Term.configPath.slice((home + "/.config/").length)
     readonly property var termMigrated: termText ? S.termMigrate(Term.name, termText) : null
 
     // весь результат одной строкой: настройки меняются часто, а пишем только при реальной разнице
     readonly property string state: Settings.writable
         ? JSON.stringify({
-            files: S.themeFiles(k => Settings.get(k), home),
+            files: Object.assign(S.themeFiles(k => Settings.get(k), home),
+                fastfetchText.startsWith(S.FASTFETCH_MARK) ? { "fastfetch/config.jsonc": S.fastfetchConfig(k => Settings.get(k), Quickshell.shellDir) } : {}),
             migrate: termMigrated ? [termRel, termMigrated, termText] : [],
             osc: termMigrated || (S.TERM_INCLUDE[Term.name] && termText.includes(S.TERM_INCLUDE[Term.name]))
                 ? S.termOsc(S.palette(k => Settings.get(k))) : "",
@@ -133,6 +135,14 @@ Singleton {
         onFileChanged: reload()
         onLoaded: root.termText = text()
         onLoadFailed: root.termText = ""
+    }
+
+    FileView {
+        path: Settings.writable ? root.home + "/.config/fastfetch/config.jsonc" : ""
+        watchChanges: true
+        onFileChanged: reload()
+        onLoaded: root.fastfetchText = text()
+        onLoadFailed: root.fastfetchText = ""
     }
 
     Process {

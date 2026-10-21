@@ -186,10 +186,50 @@ function mix(a, b, t) {
     return out;
 }
 
-function palette(get, user) {
+var WALL_SCHEMES = ["tonal-spot", "content", "expressive", "fidelity", "fruit-salad", "monochrome", "neutral", "rainbow"];
+
+function m3Color(colors, mode, name) {
+    const val = v => typeof v === "string" ? v : v && typeof v.color === "string" ? v.color : "";
+    const own = (o, k) => o && typeof o === "object" && Object.prototype.hasOwnProperty.call(o, k);
+    const c = own(colors[mode], name) ? val(colors[mode][name]) : own(colors[name], mode) ? val(colors[name][mode]) : "";
+    return /^#[0-9a-fA-F]{6}/.test(c) ? c.slice(0, 7).toLowerCase() : "";
+}
+
+function wallTheme(colors) {
+    if (!colors || typeof colors !== "object") return null;
+    const out = { name: "Wallpaper" };
+    for (const mode of ["dark", "light"]) {
+        const c = n => m3Color(colors, mode, n);
+        const need = ["surface_container_lowest", "surface_container_low", "surface_container_high", "surface_container_highest",
+            "outline_variant", "on_surface", "outline", "primary", "error"];
+        if (need.some(n => !c(n))) return null;
+        const base = THEMES.gruvbox[mode];
+        const tint = r => mix(base[r], c("primary"), 0.3);
+        out[mode] = {
+            bg: c("surface_container_lowest"), bg0: c("surface_container_low"), bg1: c("surface_container_high"),
+            bg2: c("surface_container_highest"), bg3: c("outline_variant"),
+            fg: c("on_surface"), fg0: mix(c("on_surface"), mode === "dark" ? "#ffffff" : "#000000", 0.4), gray: c("outline"),
+            red: mix(base.red, c("error"), 0.5), green: tint("green"), yellow: tint("yellow"), orange: tint("orange"),
+            blue: tint("blue"), purple: tint("purple"), aqua: tint("aqua"), ochre: c("primary"),
+            icons: mode === "dark" ? "Papirus-Dark" : "Papirus-Light"
+        };
+    }
+    return out;
+}
+
+function themeOf(get, user) {
     const name = get("shell.theme.name");
     const pick = (o, k) => o && Object.prototype.hasOwnProperty.call(o, k) ? o[k] : undefined;
-    const theme = pick(user, name) ?? pick(THEMES, name) ?? THEMES.gruvbox;
+    const wall = name === "wallpaper" ? get("shell.theme.wallpaper") : null;
+    return pick(user, name) ?? (wall && wall.dark && wall.light ? wall : undefined) ?? pick(THEMES, name) ?? THEMES.gruvbox;
+}
+
+function hasLight(get) {
+    return !!themeOf(get).light;
+}
+
+function palette(get, user) {
+    const theme = themeOf(get, user);
     const mode = get("shell.theme.mode") === "light" && theme.light ? "light" : "dark";
     const own = theme[mode] ?? theme.dark ?? theme.light ?? THEMES.gruvbox.dark;
     const isDark = own !== theme.light;

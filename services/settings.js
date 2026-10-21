@@ -7,6 +7,7 @@
 .import "settings/apptheme.js" as T
 .import "settings/themes.js" as P
 .import "settings/term.js" as TM
+.import "settings/fastfetch.js" as FF
 
 // Схема окна настроек; генерация ~/.config/niri/ochre/*.kdl — в settings/niri.js.
 //   niri.*      — уходят в конфиг niri
@@ -22,11 +23,13 @@ var MUTE_BINDS = B.MUTE_BINDS, COMBO_RE = B.COMBO_RE, MODS = B.MODS, comboKey = 
 var APP_ENV = N.APP_ENV, OPEN_SHADER = N.OPEN_SHADER, CLOSE_SHADER = N.CLOSE_SHADER, glslColor = N.glslColor, animBlocks = N.animBlocks, HOT_CORNERS = N.HOT_CORNERS, TRANSFORMS = N.TRANSFORMS, niriTransform = N.niriTransform, logicalSize = N.logicalSize, outputIds = N.outputIds, migrateOutputKeys = N.migrateOutputKeys, NIRI_FILES = N.NIRI_FILES, niriFileOf = N.niriFileOf, GAME_OFF = N.GAME_OFF, niriFiles = N.niriFiles, greeterNiri = N.greeterNiri, privateAppIds = N.privateAppIds;
 var FONT = T.FONT, ICONS = T.ICONS, GNOME_ACCENTS = T.GNOME_ACCENTS, fontPt = T.fontPt, gtkColors = T.gtkColors, gtkCss = T.gtkCss, qtColors = T.qtColors, qtFont = T.qtFont, themeFiles = T.themeFiles, btopTheme = T.btopTheme, themeGsettings = T.themeGsettings, iconTheme = T.iconTheme, iconOverlay = T.iconOverlay;
 var TERM_COLORS = TM.TERM_COLORS, TERM_INCLUDE = TM.TERM_INCLUDE, termFiles = TM.termFiles, termMigrate = TM.termMigrate, termOsc = TM.termOsc;
-var THEMES = P.THEMES, ROLES = P.ROLES, mix = P.mix, palette = P.palette, themeStrip = P.themeStrip;
+var FASTFETCH_STYLES = FF.FASTFETCH_STYLES, FASTFETCH_MARK = FF.FASTFETCH_MARK, fastfetchConfig = FF.fastfetchConfig;
+var THEMES = P.THEMES, ROLES = P.ROLES, mix = P.mix, palette = P.palette, themeStrip = P.themeStrip, hasLight = P.hasLight, wallTheme = P.wallTheme, WALL_SCHEMES = P.WALL_SCHEMES;
 
 function themeLabels() {
     const out = {};
     for (const id in THEMES) out[id] = THEMES[id].name;
+    out.wallpaper = "Wallpaper";
     return out;
 }
 
@@ -46,9 +49,12 @@ function sections(outputs, layout, home) {
     return [
         { id: "look", title: "вид", rows: [
             { header: "цвет и шрифт" },
-            { key: "shell.theme.name", label: "тема", type: "enum", options: Object.keys(THEMES), labels: themeLabels(), def: "gruvbox", hint: "палитра shell и приложений" },
+            { key: "shell.theme.name", label: "тема", type: "enum", options: Object.keys(THEMES).concat("wallpaper"), labels: themeLabels(), def: "gruvbox",
+              hint: "палитра shell и приложений; Wallpaper — из текущих обоев (нужен matugen), пока её нет — Gruvbox" },
+            { key: "shell.theme.scheme", label: "схема из обоев", type: "enum", options: WALL_SCHEMES, def: "tonal-spot",
+              hint: "для темы Wallpaper: tonal-spot — спокойная, content и fidelity — ближе к цветам картинки, expressive, fruit-salad и rainbow — ярче, neutral и monochrome — почти серые" },
             { key: "shell.theme.mode", label: "тёмная или светлая", type: "enum", options: ["dark", "light"], def: "dark",
-              hint: "светлой нет у Nord и Dracula — у них остаётся тёмная; переключить: ochre ipc call theme toggle" },
+              hint: "светлой нет у Nord и Dracula — у них остаётся тёмная; у Wallpaper есть обе; переключить: ochre ipc call theme toggle" },
             { key: "shell.accent", label: "акцентный цвет", type: "enum", options: Object.keys(ACCENTS), def: "ochre", hint: "рамки окон shell, prompt, рамка фокуса niri и акцент в приложениях" },
             { key: "shell.fontSize", label: "размер шрифта", type: "int", min: 10, max: 28, step: 1, def: 16 },
             { key: "shell.lang", label: "язык", type: "enum", options: ["auto", "ru", "en"], def: "auto",
@@ -59,6 +65,9 @@ function sections(outputs, layout, home) {
               hint: "схема (тёмная или светлая), палитра темы, акцент и иконки (Gruvbox Plus или Papirus с папками цвета акцента) в GTK (adw-gtk3, libadwaita) и Qt (qt6ct); открытые окна — после перезапуска приложения" },
             { key: "shell.theme.font", label: "шрифт shell в приложениях", type: "bool", def: true,
               hint: "Terminess в интерфейсе GTK- и Qt-приложений; моноширинный шрифт ставится всегда" },
+            { key: "shell.fastfetch", label: "стиль fastfetch", type: "enum", options: Object.keys(FASTFETCH_STYLES), def: "panel",
+              hint: "panel — как панель, compact — короче, minimal — минимум строк, tty — без логотипа, в рамке, full — всё; для about в меню и ~/.config/fastfetch/config.jsonc, если его поставил ochre" },
+            act("fastfetch", "показать fastfetch", "about в плавающем терминале"),
 
             { header: "обои" },
             act("picker", "выбрать обои", "локальная коллекция ~/Pictures/Wallpapers: картинки, gif, видео, шейдеры (Mod+Shift+W); Ctrl+T — все экраны, экран или стол, Ctrl+N — день или ночь"),
@@ -91,6 +100,10 @@ function sections(outputs, layout, home) {
             { key: "shell.launcher.prefix.remove", label: "префикс: удалить", type: "text", def: "-", hint: "«-htop» — установленные пакеты, ↵ — pacman -Rns; пусто — выключено" },
             { key: "shell.launcher.prefix.timer", label: "префикс: таймер", type: "text", def: "%", hint: "«%25m чай» — таймер; без срока — готовые и стоп; пусто — выключено" },
             { key: "shell.launcher.prefix.calc", label: "префикс: калькулятор", type: "text", def: "=", hint: "«=2^10» — калькулятор, ↵ — копировать ответ; пусто — выключено" },
+            { key: "shell.launcher.prefix.ai", label: "префикс: AI", type: "text", def: "!", hint: "«!вопрос» — спросить AI; пусто — выключено" },
+            { key: "shell.launcher.ai", label: "AI", type: "enum", options: ["claude", "google"], def: "claude",
+              hint: "claude — Claude Code в окне терминала (без вопроса — новая сессия или продолжить); google — Google AI Mode в браузере" },
+            { key: "shell.launcher.ai.cmd", label: "команда AI", type: "text", def: "claude", hint: "что запускать для AI claude; вопрос — последним аргументом" },
             { key: "shell.launcher.files.dir", label: "где искать файлы", type: "text", def: "~", hint: "каталог для поиска файлов; скрытые и из .gitignore пропускаются" },
             { key: "shell.launcher.web", label: "поисковик", type: "enum", options: ["duckduckgo", "google", "startpage", "brave", "custom"], def: "duckduckgo",
               hint: "custom — адрес из строки ниже" },
@@ -147,7 +160,8 @@ function sections(outputs, layout, home) {
 
             { header: "клавиши" },
             act("binds", "бинды", "все сочетания niri и ochre: изменить, добавить, отключить"),
-            act("hotkeys", "подсказка клавиш", "окно niri со всеми сочетаниями (Mod+Shift+/)"),
+            act("cheatsheet", "шпаргалка клавиш", "все сочетания поверх экрана, по группам, с поиском (Mod+/)"),
+            act("hotkeys", "подсказка клавиш niri", "окно niri со всеми сочетаниями (Mod+Shift+/)"),
             { key: "niri.key.micMute", label: "мьют микрофона", type: "combo", def: "", action: MUTE_BINDS["niri.key.micMute"].action, hint: "вкл/выкл микрофон по умолчанию (wpctl); работает и на экране блокировки" },
             { key: "niri.key.audioMute", label: "мьют звука", type: "combo", def: "", action: MUTE_BINDS["niri.key.audioMute"].action, hint: "вкл/выкл звук на устройстве вывода по умолчанию — наушники или колонки (wpctl)" },
 
@@ -174,9 +188,9 @@ function sections(outputs, layout, home) {
             ...barRows(layout),
 
             { header: "панель" },
-            { key: "shell.bar.position", label: "положение", type: "enum", options: ["top", "bottom"], def: "top" },
-            { key: "shell.bar.height", label: "высота", type: "int", min: 18, max: 48, step: 2, def: 26 },
-            { key: "shell.bar.style", label: "стиль", type: "enum", options: ["full", "floating"], def: "full", hint: "floating — с отступами от краёв и рамкой цвета акцента" },
+            { key: "shell.bar.position", label: "положение", type: "enum", options: ["top", "bottom", "left", "right"], def: "top", hint: "left / right — узкая колонка: модули столбиком, длинные (command, media) сжаты до значка" },
+            { key: "shell.bar.height", label: "высота", type: "int", min: 18, max: 48, step: 2, def: 26, hint: "у боковой панели ширина — по тексту, 6 символов" },
+            { key: "shell.bar.style", label: "стиль", type: "enum", options: ["full", "floating", "island", "capsules", "transparent"], def: "full", hint: "floating — с отступами от краёв и рамкой цвета акцента  ·  island — все зоны одним блоком посередине  ·  capsules — каждая зона в своей рамке  ·  transparent — без фона, только текст" },
             { key: "shell.bar.opacity", label: "непрозрачность, %", type: "int", min: 30, max: 100, step: 5, def: 100 },
             { key: "shell.bar.autohide", label: "автоскрытие", type: "bool", def: false, hint: "панель появляется при наведении мыши на край экрана" },
             { key: "shell.bar.monitors", label: "мониторы", type: "enum", options: ["all", "primary"], def: "all" },
@@ -218,6 +232,14 @@ function sections(outputs, layout, home) {
             { key: "shell.weather.units", label: "единицы", type: "enum", options: ["metric", "imperial"], def: "metric", hint: "metric — °C и м/с, imperial — °F и mph" },
             { key: "shell.weather.days", label: "прогноз, дней", type: "int", min: 0, max: 7, step: 1, def: 3 },
 
+            { header: "календарь" },
+            act("calendarEdit", "календари", "~/.config/ochre/calendars.conf: строка на календарь — имя, адрес, пользователь. .ics по ссылке или файлом; Google и Outlook — секретный адрес iCal; CalDAV (Nextcloud, Fastmail) — адрес и пользователь"),
+            act("calendarLogin", "пароли CalDAV", "спросит пароли в терминале и положит в связку ключей (secret-tool), в конфиге их нет"),
+            act("calendarRefresh", "обновить", "сейчас; само — раз в «обновлять» минут и после правки calendars.conf"),
+            { key: "shell.calendar.refresh", label: "обновлять, мин", type: "int", min: 5, max: 240, step: 5, def: 15 },
+            { key: "shell.calendar.remind", label: "напоминать, мин", type: "int", min: 0, max: 120, step: 5, def: 10, hint: "уведомление до начала события; 0 — не напоминать. События на весь день — без напоминаний" },
+            { key: "shell.calendar.days", label: "ближайшие, дней", type: "int", min: 1, max: 31, step: 1, def: 7, hint: "сколько дней вперёд показывать в home и в попапе часов" },
+
             { header: "ночной режим" },
             { key: "shell.night.on", label: "включён", type: "bool", def: false, hint: "тёплые цвета экрана (gammastep); переключатель — и в меню home" },
             { key: "shell.night.temp", label: "температура, K", type: "int", min: 2500, max: 6000, step: 100, def: 4000, hint: "меньше — теплее; днём — 6500" },
@@ -241,7 +263,20 @@ function sections(outputs, layout, home) {
             { key: "shell.notify.mute", label: "мьют микрофона и звука", type: "bool", def: true, hint: "уведомление, когда микрофон или звук по умолчанию выключается и включается — биндом, клавишей, pavucontrol" },
             { key: "shell.notify.typing", label: "эффект набора", type: "bool", def: true, hint: "заголовок уведомления печатается по символу" },
             { key: "shell.notify.anim", label: "анимация", type: "enum", options: SHELL_ANIMS, def: "slide", hint: "появление и исчезновение; slide — от края экрана. " + SHELL_ANIM_HINT },
-            act("notifyTest", "проверить", "прислать тестовое уведомление")
+            act("notifyTest", "проверить", "прислать тестовое уведомление"),
+            { header: "звуки" },
+            { key: "shell.sound", label: "звуки на события", type: "bool", def: true, hint: "короткие сигналы в духе PC-спикера; свой звук — ~/.config/ochre/sounds/<событие>.wav (или .oga, .ogg)" },
+            { key: "shell.sound.level", label: "громкость, %", type: "int", min: 10, max: 100, step: 10, def: 60 },
+            { key: "shell.sound.duck", label: "при музыке, %", type: "int", min: 0, max: 100, step: 10, def: 40, hint: "доля громкости, пока что-то играет (MPRIS); 0 — молчать" },
+            { key: "shell.sound.notify", label: "уведомления", type: "bool", def: true, hint: "notify, critical; в «не беспокоить» — только critical" },
+            { key: "shell.sound.lock", label: "блокировка", type: "bool", def: true, hint: "lock, unlock, auth-fail — неверный пароль" },
+            { key: "shell.sound.shot", label: "скриншоты и запись", type: "bool", def: true, hint: "screenshot, rec-start, rec-stop" },
+            { key: "shell.sound.power", label: "питание", type: "bool", def: true, hint: "plug, unplug, battery-low — заряд 15% и ниже" },
+            { key: "shell.sound.mute", label: "мьют", type: "bool", def: true, hint: "mute, unmute — микрофон и звук по умолчанию" },
+            { key: "shell.sound.volume", label: "громкость", type: "bool", def: false, hint: "volume — тик при каждом изменении" },
+            { key: "shell.sound.timer", label: "таймер", type: "bool", def: true, hint: "timer — конец отсчёта" },
+            { key: "shell.sound.login", label: "мелодия входа", type: "bool", def: true, hint: "login — один раз за сессию, не при перезапуске shell" },
+            act("soundTest", "проверить", "сыграть мелодию входа с текущей громкостью")
         ] },
 
         { id: "lock", title: "блокировка", rows: [

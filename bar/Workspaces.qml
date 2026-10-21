@@ -17,12 +17,38 @@ Item {
     }
     readonly property var shown: wsList.filter(w => w.is_active || w.is_urgent || Niri.windowsOn(w.id).length > 0)
     readonly property bool braces: shown.length > 1
+    readonly property bool vertical: bar?.vertical ?? false
 
-    implicitWidth: row.implicitWidth
-    implicitHeight: row.implicitHeight
+    implicitWidth: vertical ? col.implicitWidth : row.implicitWidth
+    implicitHeight: vertical ? col.implicitHeight : row.implicitHeight
+
+    Column {
+        id: col
+        visible: root.vertical
+
+        Repeater {
+            model: root.vertical ? root.shown : []
+
+            BarText {
+                required property var modelData
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: modelData.name ?? String(modelData.idx)
+                color: modelData.is_urgent ? Theme.red : modelData.is_active ? Theme.accent : Theme.blue
+                font.bold: modelData.is_active
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: Niri.focusWorkspace(parent.modelData)
+                }
+            }
+        }
+        BarText { visible: Niri.overview; anchors.horizontalCenter: parent.horizontalCenter; text: "ov"; color: Theme.purple }
+    }
 
     Row {
         id: row
+        visible: !root.vertical
 
         BarText { text: "~/ws/"; color: Theme.blue }
         BarText { visible: root.braces; text: "{"; color: Theme.gray }

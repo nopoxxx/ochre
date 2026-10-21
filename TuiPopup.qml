@@ -2,7 +2,7 @@ import Quickshell
 import QtQuick
 import QtQuick.Layouts
 
-// Всплывающее окно в TUI-рамке под (или над) модулем панели.
+// Всплывающее окно в TUI-рамке у модуля панели: под, над или сбоку.
 // Закрывается кликом мимо него (grabFocus).
 PopupWindow {
     id: pop
@@ -19,16 +19,27 @@ PopupWindow {
     implicitWidth: frame.width
     implicitHeight: frame.y + frame.height
 
+    readonly property string edge: bar?.edge ?? "top"
+
     anchor.window: bar
-    anchor.edges: bar && bar.onTop ? Edges.Bottom : Edges.Top
-    anchor.gravity: bar && bar.onTop ? Edges.Bottom : Edges.Top
+    anchor.edges: edge === "top" ? Edges.Bottom : edge === "bottom" ? Edges.Top
+        : (edge === "left" ? Edges.Right : Edges.Left) | Edges.Top
+    anchor.gravity: edge === "top" ? Edges.Bottom : edge === "bottom" ? Edges.Top
+        : (edge === "left" ? Edges.Right : Edges.Left) | Edges.Bottom
 
     function show() {
         const p = owner.mapToItem(null, 0, 0);
-        anchor.rect.x = p.x;
-        anchor.rect.width = owner.width;
-        anchor.rect.y = bar.onTop ? bar.height : 0;
-        anchor.rect.height = 1;
+        if (edge === "left" || edge === "right") {
+            anchor.rect.x = edge === "left" ? bar.width : 0;
+            anchor.rect.width = 1;
+            anchor.rect.y = p.y;
+            anchor.rect.height = owner.height;
+        } else {
+            anchor.rect.x = p.x;
+            anchor.rect.width = owner.width;
+            anchor.rect.y = edge === "top" ? bar.height : 0;
+            anchor.rect.height = 1;
+        }
         open = true;
     }
 

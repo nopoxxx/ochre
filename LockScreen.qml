@@ -61,6 +61,7 @@ Scope {
                 root.failures = 0;
                 root.message = "";
             } else {
+                Sounds.play("auth-fail");
                 root.failures++;
                 root.message = result === PamResult.MaxTries ? "Maximum number of tries exceeded" : "Login incorrect";
                 root.messageIsError = true;
@@ -80,6 +81,7 @@ Scope {
 
         onLockedChanged: {
             Hooks.run(locked ? "lock" : "unlock");
+            Sounds.play(locked ? "lock" : "unlock");
             ScreenTime.locked = locked;
             Wallpaper.locked = locked;
         }

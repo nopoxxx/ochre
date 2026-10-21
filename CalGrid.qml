@@ -3,16 +3,20 @@ import QtQuick.Layouts
 import qs.services
 
 // Месяц как вывод `cal`: ‹ › или колёсико — соседние месяцы, сегодня выделено акцентом.
+// Дни с событиями календарей (services/Calendar.qml) подчёркнуты; клик по дню выбирает его (picked).
 // Общий для попапа часов (bar/CalPopup.qml) и секции календаря в меню home.
 ColumnLayout {
     id: grid
 
     spacing: 2
 
-    function today() { now = new Date(); offset = 0; }
+    function today() { now = new Date(); offset = 0; picked = null; }
+
+    signal dayClicked(var day)
 
     property int offset: 0
     property var now: new Date()
+    property var picked: null
     readonly property var loc: I18n.locale
     readonly property var month: new Date(now.getFullYear(), now.getMonth() + offset, 1)
     readonly property int firstDay: loc.firstDayOfWeek % 7   // 0 — воскресенье, как в Date.getDay()
@@ -78,17 +82,32 @@ ColumnLayout {
                 required property int index
                 readonly property bool today: modelData > 0 && grid.offset === 0 && modelData === grid.now.getDate()
                 readonly property int weekday: (grid.firstDay + index) % 7
+                readonly property var date: new Date(grid.month.getFullYear(), grid.month.getMonth(), modelData)
+                readonly property bool busy: modelData > 0 && Calendar.count(date.getFullYear(), date.getMonth(), modelData) > 0
+                readonly property bool chosen: modelData > 0 && grid.picked !== null && Calendar.sameDay(date, grid.picked)
 
                 width: cell.advanceWidth
                 height: dayText.implicitHeight
-                color: today ? Theme.accent : "transparent"
+                color: today ? Theme.accent : chosen ? Theme.bg2 : "transparent"
 
                 T {
                     id: dayText
                     anchors.centerIn: parent
                     text: parent.modelData > 0 ? parent.modelData : ""
                     color: parent.today ? Theme.bg : parent.weekday === 0 || parent.weekday === 6 ? Theme.red : Theme.fg
-                    font.bold: parent.today
+                    font.bold: parent.today || parent.busy
+                    font.underline: parent.busy
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    enabled: parent.modelData > 0
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        const d = parent.date;
+                        grid.picked = d;
+                        grid.dayClicked(d);
+                    }
                 }
             }
         }

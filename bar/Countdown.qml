@@ -11,6 +11,7 @@ Seg {
     available: Countdown.active
     label: "timer"
     value: Countdown.fmt(Countdown.left) + (Countdown.paused ? " ‖" : "") + (Countdown.label ? " " + Countdown.label : "")
+    compact: Countdown.fmt(Countdown.left) + (Countdown.paused ? "\n‖" : "")
     valueColor: Countdown.paused ? Theme.gray : Countdown.left <= 10 ? Theme.red : Theme.accent
     bold: !Countdown.paused
 
