@@ -49,6 +49,14 @@ ShellRoot {
     }
 
     Variants {
+        model: Quickshell.screens
+        DesktopMenu {
+            required property var modelData
+            screen: modelData
+        }
+    }
+
+    Variants {
         model: Settings.get("shell.bar.monitors") === "primary" ? [Quickshell.screens[0]] : Quickshell.screens
         Bar {
             required property var modelData
