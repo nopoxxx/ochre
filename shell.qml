@@ -48,6 +48,8 @@ ShellRoot {
         }
     }
 
+    DesktopWidgets {}
+
     Variants {
         model: Settings.get("shell.bar.monitors") === "primary" ? [Quickshell.screens[0]] : Quickshell.screens
         Bar {

@@ -181,6 +181,7 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
     <li><a href="#bar" class="dir"><span class="mk">▌</span><span class="br">├─ </span><span class="nm">bar/</span></a></li>
     <li><a href="#menu"><span class="mk">▌</span><span class="br">├─ </span><span class="nm">menu</span></a></li>
     <li><a href="#home"><span class="mk">▌</span><span class="br">├─ </span><span class="nm">home</span></a></li>
+    <li><a href="#desktop"><span class="mk">▌</span><span class="br">├─ </span><span class="nm">desktop</span></a></li>
     <li><a href="#settings" class="dir"><span class="mk">▌</span><span class="br">├─ </span><span class="nm">settings/</span></a></li>
     <li><a href="#monitors"><span class="mk">▌</span><span class="br">│  ├─ </span><span class="nm">monitors</span></a></li>
     <li><a href="#binds"><span class="mk">▌</span><span class="br">│  ├─ </span><span class="nm">binds</span></a></li>
@@ -299,6 +300,7 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
     <tr><td><kbd>Mod+E</kbd></td><td>файловый менеджер</td></tr>
     <tr><td><kbd>Mod+Shift+B</kbd></td><td>браузер</td></tr>
     <tr><td><kbd>Mod+Shift+W</kbd></td><td>обои</td></tr>
+    <tr><td><kbd>Mod+Shift+D</kbd></td><td><a href="#desktop">виджеты на столе</a>: расставить</td></tr>
     <tr><td><kbd>Mod+Shift+S</kbd> <kbd>Print</kbd></td><td><a href="#shot">скриншот с разметкой</a></td></tr>
     <tr><td><kbd>Mod+Shift+T</kbd></td><td><a href="#shot">текст с экрана</a> в буфер (tesseract)</td></tr>
     <tr><td><kbd>Mod+Shift+C</kbd></td><td>пипетка: цвет под курсором в буфер</td></tr>
@@ -469,6 +471,22 @@ cloud     https://cloud.example.com/remote.php/dav/calendars/me/  me</code></pre
   <h3>индикатор громкости и яркости</h3>
   <p>При изменении громкости или яркости — клавишами, колёсиком, из других программ — внизу экрана появляется полоска
   <code>vol ▕████████░░░░▏ 62%</code>. Выключить или перенести — <code>look/</code> → <code>индикаторы</code>.</p>
+</section>
+
+<!-- ─────────────────────────── desktop ─────────────────────────── -->
+<section class="win" id="desktop">
+  <div class="ttl">~/docs/desktop</div>
+  <h2>Виджеты на столе</h2>
+  <p>Часы из блоков, «сейчас играет», система (cpu, gpu, память, сеть), полоски звука (cava), стикеры-заметки и картинки —
+  прямо на рабочем столе, над обоями и под окнами. Включаются в <code>look/ → виджеты на столе</code>; клики по пустому
+  месту между виджетами уходят столу.</p>
+  <p><kbd>Mod+Shift+D</kbd> — режим правки поверх окон на мониторе с фокусом: <kbd>a</kbd> — добавить, мышью — перетащить,
+  уголок <code>◢</code> — размер, всё по сетке символа. С клавиатуры: <kbd>Tab</kbd> — следующий, <kbd>←→↑↓</kbd> — сдвинуть,
+  с <kbd>Shift</kbd> — размер, <kbd>↵</kbd> или двойной клик — писать в стикер или путь картинки, <kbd>f</kbd> — рамка,
+  <kbd>b</kbd> — фон (полупрозрачный, сплошной, без фона), <kbd>m</kbd> — на другой монитор, <kbd>Del</kbd> — убрать,
+  <kbd>Esc</kbd> — готово. Картинку можно просто бросить на стол из файлового менеджера.</p>
+  <p>Положение хранится в долях экрана — раскладка переживает смену разрешения и масштаба. Виджеты не строятся (и не читают
+  метрики), пока экран заблокирован, включён игровой режим или на мониторе окно во весь экран.</p>
 </section>
 
 <!-- ─────────────────────────── settings ─────────────────────────── -->
@@ -749,6 +767,7 @@ Password: <span class="blink">█</span></div>
 <span class="p">❯ </span>qs ipc call binds toggle        <span class="cm"># бинды</span>
 <span class="p">❯ </span>qs ipc call clipboard toggle    <span class="cm"># история буфера обмена</span>
 <span class="p">❯ </span>qs ipc call home toggle         <span class="cm"># меню home; home open, home close</span>
+<span class="p">❯ </span>qs ipc call desktop edit        <span class="cm"># расставить виджеты на столе; desktop done, desktop toggle — показывать или нет, desktop get</span>
 <span class="p">❯ </span>qs ipc call theme toggle        <span class="cm"># тёмная ↔ светлая; theme dark, theme light, theme get</span>
 <span class="p">❯ </span>qs ipc call record toggle       <span class="cm"># запись экрана; record region, record screen, record stop</span>
 <span class="p">❯ </span>qs ipc call shot region         <span class="cm"># скриншот; shot window — сразу окно, shot edit &lt;путь&gt; — разметить файл</span>

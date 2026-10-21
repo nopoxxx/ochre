@@ -8,6 +8,7 @@
 .import "settings/themes.js" as P
 .import "settings/term.js" as TM
 .import "settings/fastfetch.js" as FF
+.import "settings/desktop.js" as D
 
 // Схема окна настроек; генерация ~/.config/niri/ochre/*.kdl — в settings/niri.js.
 //   niri.*      — уходят в конфиг niri
@@ -24,6 +25,7 @@ var APP_ENV = N.APP_ENV, OPEN_SHADER = N.OPEN_SHADER, CLOSE_SHADER = N.CLOSE_SHA
 var FONT = T.FONT, ICONS = T.ICONS, GNOME_ACCENTS = T.GNOME_ACCENTS, fontPt = T.fontPt, gtkColors = T.gtkColors, gtkCss = T.gtkCss, qtColors = T.qtColors, qtFont = T.qtFont, themeFiles = T.themeFiles, btopTheme = T.btopTheme, themeGsettings = T.themeGsettings, iconTheme = T.iconTheme, iconOverlay = T.iconOverlay;
 var TERM_COLORS = TM.TERM_COLORS, TERM_INCLUDE = TM.TERM_INCLUDE, termFiles = TM.termFiles, termMigrate = TM.termMigrate, termOsc = TM.termOsc;
 var FASTFETCH_STYLES = FF.FASTFETCH_STYLES, FASTFETCH_MARK = FF.FASTFETCH_MARK, fastfetchConfig = FF.fastfetchConfig;
+var WIDGETS = D.WIDGETS, WIDGET_BGS = D.BGS, widgetById = D.widgetById, normalizeWidgets = D.normalizeWidgets, newWidget = D.newWidget, widgetsOn = D.widgetsOn, updateWidget = D.updateWidget, removeWidget = D.removeWidget;
 var THEMES = P.THEMES, ROLES = P.ROLES, mix = P.mix, palette = P.palette, themeStrip = P.themeStrip, hasLight = P.hasLight, wallTheme = P.wallTheme, WALL_SCHEMES = P.WALL_SCHEMES;
 
 function themeLabels() {
@@ -85,6 +87,13 @@ function sections(outputs, layout, home) {
             { key: "shell.wallpaper.live.battery", label: "пауза от батареи", type: "bool", def: true, hint: "живые обои стоят, пока ноутбук не на зарядке" },
             { key: "shell.wallpaper.live.fps", label: "кадров у шейдеров", type: "int", min: 10, max: 60, step: 5, def: 30,
               hint: "сколько раз в секунду перерисовывать шейдерные обои; видео идёт со своей частотой" },
+
+            { header: "виджеты на столе" },
+            { key: "shell.desktop.on", label: "показывать", type: "bool", def: false,
+              hint: "часы, музыка, система, полоски звука, стикеры и картинки на рабочем столе, под окнами" },
+            act("desktopEdit", "расставить", "режим правки (Mod+Shift+D): a — добавить, мышью — двигать и тянуть за угол, Del — убрать, Esc — готово"),
+            { key: "shell.desktop.pause", label: "пауза", type: "enum", options: ["fullscreen", "never"], def: "fullscreen",
+              hint: "fullscreen — прятать, пока на мониторе окно во весь экран, never — не прятать; на блокировке и в игровом режиме — всегда" },
 
             { header: "меню" },
             { key: "shell.launcher.rows", label: "строк в меню", type: "int", min: 6, max: 24, step: 1, def: 12, hint: "высота меню Mod+D" },
@@ -365,5 +374,6 @@ function find(key, outputs) {
 
 function defaultOf(key, outputs) {
     if (key in LAYOUTS) return JSON.parse(JSON.stringify(LAYOUTS[key].def));
+    if (key === "shell.desktop.widgets") return [];
     return find(key, outputs)?.def;
 }

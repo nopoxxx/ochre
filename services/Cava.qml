@@ -7,8 +7,8 @@ import QtQuick
 import "settings.js" as S
 
 // Полоски звука ▁▃▅▇ из cava (raw ascii в stdout) — для модуля media на панели и секции «сейчас играет» в home.
-// cava работает, только пока что-то играет и полоски где-то видны: модуль media на панели (shell.bar.viz)
-// или открытое меню home с секцией media (shell.home.viz). Нет cava — полосок нет.
+// cava работает, только пока что-то играет и полоски где-то видны: модуль media на панели (shell.bar.viz),
+// открытое меню home с секцией media (shell.home.viz) или виджет полосок на столе (Desktop.wantViz). Нет cava — полосок нет.
 // Звук — shell.viz.source: player — только поток плеера (по умолчанию): его процесс MPRIS по dbusName, а поток вывода
 // PipeWire — тот, чей процесс — потомок плеера (у Electron и Chromium звук выводит дочерний аудиопроцесс); его object.serial —
 // source cava. Потока нет (пауза — Chromium его убирает) — нет и полосок. system — всё, что звучит (монитор вывода по умолчанию).
@@ -26,7 +26,7 @@ Singleton {
         && S.zoneOf(Settings.get("shell.bar.layout"), "media") !== "off"
     readonly property bool onHome: Settings.get("shell.home.viz") && Home.open
         && S.zoneOf(Settings.get("shell.home.layout"), "media", "shell.home.layout") !== "off"
-    readonly property bool wanted: installed && playing && !Settings.greeterMode && (onBar || onHome)
+    readonly property bool wanted: installed && playing && !Settings.greeterMode && (onBar || onHome || Desktop.wantViz)
 
     readonly property bool perPlayer: Settings.get("shell.viz.source") === "player"
     // источник cava: object.serial потока плеера, "auto" — весь звук, "" — потока плеера нет
