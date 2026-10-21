@@ -94,18 +94,3 @@ function filesCmd(term, fm) {
     if (!fm || fm === "none") return null;
     return fm === "yazi" ? termCmd(term, ["yazi"]) : [fm];
 }
-
-// веб-поиск лаунчера и поиска по скриншоту: custom — свой адрес, %s — запрос
-var WEB_ENGINES = {
-    duckduckgo: "https://duckduckgo.com/?q=%s",
-    google: "https://www.google.com/search?q=%s",
-    startpage: "https://www.startpage.com/do/search?q=%s",
-    brave: "https://search.brave.com/search?q=%s"
-};
-
-function webUrl(engine, custom, q) {
-    let t = engine === "custom" ? String(custom) : WEB_ENGINES[engine] ?? WEB_ENGINES.duckduckgo;
-    if (!/^https?:\/\//.test(t)) t = WEB_ENGINES.duckduckgo;
-    if (!t.includes("%s")) t += "%s";
-    return t.replace("%s", encodeURIComponent(q));
-}

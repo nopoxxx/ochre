@@ -18,7 +18,7 @@
 // имена модулей отдаются отсюда как были (S.comboKey, S.niriFiles…).
 var ACCENTS = C.ACCENTS, WIDTHS = C.WIDTHS, SHELL_ANIMS = C.SHELL_ANIMS, SHELL_ANIM_HINT = C.SHELL_ANIM_HINT, NIRI_ANIMS = C.NIRI_ANIMS, q = C.q, f = C.f, head = C.head, text = C.text, SHOT_TOOLS = C.SHOT_TOOLS, SHOT_COLORS = C.SHOT_COLORS;
 var MODULES = L.MODULES, DEFAULT_LAYOUT = L.DEFAULT_LAYOUT, HOME_SECTIONS = L.HOME_SECTIONS, DEFAULT_HOME = L.DEFAULT_HOME, LAYOUTS = L.LAYOUTS, ZONES = L.ZONES, moduleById = L.moduleById, normalizeLayout = L.normalizeLayout, zoneOf = L.zoneOf, moveModule = L.moveModule, placeModule = L.placeModule, setZone = L.setZone, layoutZones = L.layoutZones, zoneLabel = L.zoneLabel, reorderModule = L.reorderModule, layoutRows = L.layoutRows, barRows = L.barRows;
-var TRAY_ICONS = A.TRAY_ICONS, trayGlyph = A.trayGlyph, TERMINALS = A.TERMINALS, FILE_MANAGERS = A.FILE_MANAGERS, SHELLS = A.SHELLS, SHELL_PKGS = A.SHELL_PKGS, BROWSERS = A.BROWSERS, termClass = A.termClass, termCmd = A.termCmd, filesCmd = A.filesCmd, WEB_ENGINES = A.WEB_ENGINES, webUrl = A.webUrl;
+var TRAY_ICONS = A.TRAY_ICONS, trayGlyph = A.trayGlyph, TERMINALS = A.TERMINALS, FILE_MANAGERS = A.FILE_MANAGERS, SHELLS = A.SHELLS, SHELL_PKGS = A.SHELL_PKGS, BROWSERS = A.BROWSERS, termClass = A.termClass, termCmd = A.termCmd, filesCmd = A.filesCmd;
 var MUTE_BINDS = B.MUTE_BINDS, COMBO_RE = B.COMBO_RE, MODS = B.MODS, comboKey = B.comboKey, BIND_GROUPS = B.BIND_GROUPS, titleGroup = B.titleGroup, bindGroup = B.bindGroup, groupBinds = B.groupBinds, parseBinds = B.parseBinds, actionKdl = B.actionKdl, keysKdl = B.keysKdl;
 var APP_ENV = N.APP_ENV, OPEN_SHADER = N.OPEN_SHADER, CLOSE_SHADER = N.CLOSE_SHADER, glslColor = N.glslColor, animBlocks = N.animBlocks, HOT_CORNERS = N.HOT_CORNERS, TRANSFORMS = N.TRANSFORMS, niriTransform = N.niriTransform, logicalSize = N.logicalSize, outputIds = N.outputIds, migrateOutputKeys = N.migrateOutputKeys, NIRI_FILES = N.NIRI_FILES, niriFileOf = N.niriFileOf, GAME_OFF = N.GAME_OFF, niriFiles = N.niriFiles, greeterNiri = N.greeterNiri, privateAppIds = N.privateAppIds;
 var FONT = T.FONT, ICONS = T.ICONS, GNOME_ACCENTS = T.GNOME_ACCENTS, fontPt = T.fontPt, gtkColors = T.gtkColors, gtkCss = T.gtkCss, qtColors = T.qtColors, qtFont = T.qtFont, themeFiles = T.themeFiles, btopTheme = T.btopTheme, themeGsettings = T.themeGsettings, iconTheme = T.iconTheme, iconOverlay = T.iconOverlay;
@@ -311,8 +311,6 @@ function sections(outputs, layout, home) {
             { key: "shell.shot.tool", label: "инструмент", type: "enum", options: SHOT_TOOLS, def: "rect", hint: "последний выбранный в редакторе" },
             { key: "shell.shot.color", label: "цвет", type: "enum", options: SHOT_COLORS, def: "red", hint: "последний выбранный в редакторе (1-9)" },
             { key: "shell.shot.width", label: "толщина", type: "int", min: 1, max: 12, step: 1, def: 3, hint: "линий, текста и шагов ([ ] или колёсико в редакторе)" },
-            { key: "shell.shot.search", label: "поиск", type: "enum", options: ["text", "google", "yandex"], def: "text",
-              hint: "^F в редакторе, Mod+Alt+F; text — распознать текст и искать поисковиком лаунчера, картинка не уходит; google, yandex — отправить картинку им напрямую" },
 
             { header: "конфиги" },
             act("editNiri", "niri", "~/.config/niri/config.kdl — свои настройки niri; ochre/ генерирует shell"),
