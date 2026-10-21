@@ -7,6 +7,7 @@ import qs.services
 import "services/fuzzy.js" as Fuzzy
 import "services/calc.js" as Calc
 import "services/emoji.js" as Emoji
+import "services/settings.js" as S
 
 // Меню в духе omarchy: сначала раздел (apps/, system/ …), потом действие.
 // Разделы ведут себя как каталоги: путь в заголовке, Esc или ← — на уровень выше
@@ -146,19 +147,8 @@ Scope {
 
     // ── веб-поиск ──
 
-    readonly property var engines: ({
-        duckduckgo: "https://duckduckgo.com/?q=%s",
-        google: "https://www.google.com/search?q=%s",
-        startpage: "https://www.startpage.com/do/search?q=%s",
-        brave: "https://search.brave.com/search?q=%s"
-    })
-
     function webUrl(q) {
-        const e = Settings.get("shell.launcher.web");
-        let t = e === "custom" ? String(Settings.get("shell.launcher.web.url")) : engines[e] ?? engines.duckduckgo;
-        if (!/^https?:\/\//.test(t)) t = engines.duckduckgo;
-        if (!t.includes("%s")) t += "%s";
-        return t.replace("%s", encodeURIComponent(q));
+        return S.webUrl(Settings.get("shell.launcher.web"), Settings.get("shell.launcher.web.url"), q);
     }
 
     // ── файлы: fd по имени, нечётко (буквы запроса по порядку) ──
