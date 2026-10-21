@@ -108,6 +108,8 @@ function sections(outputs, layout, home) {
             { key: "shell.launcher.web", label: "поисковик", type: "enum", options: ["duckduckgo", "google", "startpage", "brave", "custom"], def: "duckduckgo",
               hint: "custom — адрес из строки ниже" },
             { key: "shell.launcher.web.url", label: "свой адрес поиска", type: "text", def: "https://duckduckgo.com/?q=%s", hint: "%s — запрос; используется при поисковике custom" },
+            { key: "shell.desktop.menu", label: "меню по правому клику", type: "bool", def: true,
+              hint: "правый клик по пустому рабочему столу — терминал, скриншот, обои, тема, питание" },
 
             { header: "индикаторы" },
             { key: "shell.osd", label: "громкость и яркость", type: "bool", def: true, hint: "полоска на экране при изменении громкости или яркости — клавишами, колёсиком, из других программ" },
