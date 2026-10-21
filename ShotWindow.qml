@@ -10,6 +10,8 @@ import "services/settings.js" as S
 // Экраны замирают (ScreencopyView, live: false): тянешь область, клик или Space — весь экран, w — окно
 // (niri pick-window → screenshot-window: окно целиком, и тайловое тоже). Дальше — разметка поверх и экспорт:
 // ↵ — действие из настроек (system/ → скриншоты), ^C — копировать, ^S — сохранить, ^O — текст (tesseract) в буфер.
+// ^F — поиск по снимку (system/ → скриншоты → поиск): text — распознанный текст в поисковик лаунчера, картинка не уходит;
+// google, yandex — картинка curl'ом прямо в их загрузку (Lens / rpt=imageview), без промежуточных хостингов.
 // i — пипетка (niri pick-color: цвет под курсором в буфер как #rrggbb).
 // Разметка хранится в координатах экрана, область только обрезает — её можно менять ручками, не сдвигая нарисованное.
 // Экспорт — grabToImage обрезки (замороженный кадр + эффекты + разметка) в родном разрешении экрана.
@@ -17,6 +19,7 @@ import "services/settings.js" as S
 //   qs ipc call shot window   — сразу выбор окна
 //   qs ipc call shot edit <путь> — разметить готовую картинку
 //   qs ipc call shot ocr      — выбрать область и сразу распознать текст (Mod+Shift+T)
+//   qs ipc call shot search   — выбрать область и сразу искать по ней (Mod+Alt+F)
 //   qs ipc call shot pick     — пипетка (Mod+Shift+C)
 Scope {
     id: root
@@ -37,7 +40,7 @@ Scope {
     property real factor: 1             // пикселей экрана на логический пиксель
     property string message: ""
     property double textClosedAt: 0     // Enter, закончивший ввод текста, не должен запускать экспорт
-    property string then: ""            // действие сразу после выбора области (shot ocr), без разметки
+    property string then: ""            // действие сразу после выбора области (shot ocr, shot search), без разметки
 
     readonly property string tmp: (Quickshell.env("XDG_RUNTIME_DIR") || "/tmp") + "/ochre-shot"
 
@@ -67,6 +70,7 @@ Scope {
         function window(): void { root.start("window"); }
         function edit(path: string): void { root.openImage(path); }
         function ocr(): void { root.start("screen", "ocr"); }
+        function search(): void { root.start("screen", "search"); }
         function pick(): void { root.pickColor(); }
     }
 
@@ -303,6 +307,7 @@ Scope {
             const dir = String(Settings.get("shell.shot.dir")).replace(/^~(?=\/|$)/, home);
             const name = "Screenshot from " + Qt.formatDateTime(new Date(), "yyyy-MM-dd HH-mm-ss") + ".png";
             if (action === "ocr") { ocr(src); close(); return; }
+            if (action === "search") { search(src); close(); return; }
             Sounds.play("screenshot");
             Quickshell.execDetached(["sh", "-c", `
                 src=$1 act=$2 dest="$3/$4"
@@ -337,6 +342,63 @@ Scope {
             I18n.tr("на снимке нечего распознать"), I18n.tr("Текст скопирован")]);
     }
 
+    // поиск по снимку: скрипт печатает «ok» и ответ — текст или ссылку; без «ok» он уже сам уведомил об ошибке
+    function search(src) {
+        const engine = String(Settings.get("shell.shot.search"));
+        if (engine !== "text" && Settings.get("shell.shot.notify"))
+            Quickshell.execDetached(["notify-send", "-a", "ochre", I18n.tr("Поиск по снимку"), I18n.tr("картинка отправлена в %1", engine)]);
+        searcher.engine = engine;
+        searcher.command = ["sh", "-c", `
+            need() { command -v "$1" >/dev/null || { notify-send -a ochre -u critical "$3" "sudo pacman -S $2"; exit 1; }; }
+            ua="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36"
+            case $2 in
+            text)
+                need tesseract "tesseract tesseract-data-eng tesseract-data-rus" "$3"
+                langs=$(tesseract --list-langs 2>/dev/null | grep -xE 'eng|rus' | paste -sd+)
+                out=$(tesseract "$1" - -l "\${langs:-eng}" 2>/dev/null) || true ;;
+            google)
+                need curl curl "$3"
+                out=$(curl -sS --max-time 30 -A "$ua" -o /dev/null -w '%{redirect_url}' \
+                    -F "encoded_image=@$1;type=image/png" "https://lens.google.com/v3/upload?st=$(date +%s)000") ;;
+            yandex)
+                need curl curl "$3"
+                out=$(curl -sSg --max-time 30 -A "$ua" -F "upfile=@$1;type=image/png" \
+                    'https://yandex.ru/images/search?rpt=imageview&format=json&request={"blocks":[{"block":"b-page_type_search-by-image__link"}]}') ;;
+            esac || exit 1
+            printf 'ok\n%s' "$out"`, "sh", src, engine, I18n.tr("Нужен пакет")];
+        searcher.running = true;
+    }
+
+    function searchUrl(engine, out) {
+        if (engine === "text") {
+            const q = out.replace(/\s+/g, " ").trim().slice(0, 500);
+            return q ? S.webUrl(Settings.get("shell.launcher.web"), Settings.get("shell.launcher.web.url"), q) : "";
+        }
+        if (engine === "google") return /^https:\/\/[^/]*google\.[a-z.]+\//.test(out) ? out.trim() : "";
+        try {
+            const u = JSON.parse(out).blocks[0].params.url;
+            return u ? "https://yandex.ru/images/search?" + u : "";
+        } catch (e) { return ""; }
+    }
+
+    Process {
+        id: searcher
+        property string engine: "text"
+        stdout: StdioCollector {
+            onStreamFinished: {
+                if (!text.startsWith("ok\n")) {
+                    if (searcher.engine !== "text")
+                        Quickshell.execDetached(["notify-send", "-a", "ochre", "-u", "critical", I18n.tr("Поиск по снимку"), I18n.tr("%1 не ответил", searcher.engine)]);
+                    return;
+                }
+                const url = root.searchUrl(searcher.engine, text.slice(3));
+                if (url) Quickshell.execDetached(["xdg-open", url]);
+                else if (searcher.engine === "text") Quickshell.execDetached(["notify-send", "-a", "ochre", I18n.tr("Текст не найден"), I18n.tr("на снимке нечего искать")]);
+                else Quickshell.execDetached(["notify-send", "-a", "ochre", "-u", "critical", I18n.tr("Поиск по снимку"), I18n.tr("%1 не вернул ссылку", searcher.engine)]);
+            }
+        }
+    }
+
     // латинская буква клавиши независимо от раскладки: при ru event.key для R — «К».
     // Буквы — по скан-коду (xkb = evdev + 8), остальное — как есть
     readonly property var scan: ({
@@ -368,6 +430,7 @@ Scope {
         else if (ctrl && ch === "c") exportShot("copy");
         else if (ctrl && ch === "s") exportShot("save");
         else if (ctrl && ch === "o") exportShot("ocr");
+        else if (ctrl && ch === "f") exportShot("search");
         else if (ch === "i" && !ctrl) pickColor();
         else if (k === Qt.Key_Return || k === Qt.Key_Enter) {
             if (Date.now() - textClosedAt > 300) exportShot(shift ? "both" : Settings.get("shell.shot.enter"));
@@ -726,6 +789,7 @@ Scope {
                     T {
                         textFormat: Text.StyledText
                         text: root.then === "ocr" ? root.keys([[I18n.tr("тяни"), I18n.tr("область с текстом")], [I18n.tr("клик"), I18n.tr("весь экран")], ["esc", I18n.tr("выход")]])
+                            : root.then === "search" ? root.keys([[I18n.tr("тяни"), I18n.tr("что искать")], [I18n.tr("клик"), I18n.tr("весь экран")], ["esc", I18n.tr("выход")]])
                             : root.keys([[I18n.tr("тяни"), I18n.tr("область")], [I18n.tr("клик"), I18n.tr("весь экран")], ["w", I18n.tr("окно")], ["i", I18n.tr("пипетка")], ["esc", I18n.tr("выход")]])
                     }
                 }
@@ -782,7 +846,7 @@ Scope {
                     Row {
                         spacing: 0
                         Repeater {
-                            model: [["↵", Settings.get("shell.shot.enter"), Settings.get("shell.shot.enter")], ["^C", "copy", "copy"], ["^S", "save", "save"], ["⇧↵", "both", "both"], ["^O", "ocr", "ocr"]]
+                            model: [["↵", Settings.get("shell.shot.enter"), Settings.get("shell.shot.enter")], ["^C", "copy", "copy"], ["^S", "save", "save"], ["⇧↵", "both", "both"], ["^O", "ocr", "ocr"], ["^F", "search", "search"]]
                             T {
                                 required property var modelData
                                 textFormat: Text.StyledText
