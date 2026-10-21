@@ -123,6 +123,8 @@ function sections(outputs, layout, home) {
             { key: "niri.gaps", label: "отступы", type: "int", min: 0, max: 64, step: 2, def: 8 },
             { key: "niri.colWidth", label: "ширина новой колонки", type: "enum", options: ["1/3", "1/2", "2/3", "1"], def: "1/2" },
             { key: "niri.center", label: "центрировать колонку", type: "enum", options: ["never", "always", "on-overflow"], def: "never" },
+            { key: "shell.autoWidth", label: "окна делят стол", type: "bool", def: true,
+              hint: "одно окно на столе — на всю ширину, два — по половине; третье и дальше — ширина новой колонки" },
 
             { header: "рамки и тени" },
             { key: "niri.ring", label: "рамка фокуса", type: "int", min: 0, max: 12, step: 1, def: 2, hint: "толщина в px, 0 — выключить; цвет — акцент (look/)" },
