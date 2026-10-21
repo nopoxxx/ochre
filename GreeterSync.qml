@@ -3,7 +3,7 @@ import Quickshell.Io
 import QtQuick
 import qs.services
 
-// Копирует настройки, обои и режим заполнения в /var/lib/ochre-greeter/$USER —
+// Копирует настройки, обои (у живых — постер) и режим заполнения в /var/lib/ochre-greeter/$USER —
 // greeter (под пользователем greeter) не может читать домашнюю папку, а оттуда — может.
 // Каталог создаёт extras/install-greeter.sh; без него ничего не делает. Greeter, поставленный ещё под именем
 // nopox-shell, читает /var/lib/nopox-greeter — пишем туда, пока его не переустановят.
@@ -23,7 +23,7 @@ Scope {
 
     Connections {
         target: Wallpaper
-        function onCurrentChanged() { debounce.restart(); }
+        function onStillChanged() { debounce.restart(); }
         function onFillChanged() { debounce.restart(); }
     }
 
@@ -39,6 +39,6 @@ Scope {
             if [ -n "$2" ] && [ -f "$2" ]; then cp -f "$2" "$d/wallpaper"; else rm -f "$d/wallpaper"; fi
             printf '%s\\n' "$3" > "$d/wallpaper-fill"
             chmod 644 "$d"/* 2>/dev/null || true`,
-            "sh", Settings.file, Wallpaper.current, Wallpaper.fill]
+            "sh", Settings.file, Wallpaper.still, Wallpaper.fill]
     }
 }

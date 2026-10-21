@@ -9,7 +9,7 @@ Singleton {
 
     readonly property bool on: Settings.writable && Settings.get("shell.theme.name") === "wallpaper"
     readonly property string scheme: Settings.get("shell.theme.scheme")
-    readonly property string src: Wallpaper.current
+    readonly property string src: Wallpaper.still   // у видео и шейдера — постер: matugen берёт только картинки
     readonly property string want: on && src ? src + "\n" + scheme : ""
     property var cache: ({})
     property bool warned: false

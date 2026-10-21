@@ -110,3 +110,30 @@ test("migrateOutputs: обои экранов и столов — с разъё�
     }));
     assert.equal(W.migrateOutputs(s, ids), null);
 });
+
+test("kindOf: картинки, анимации, видео, шейдеры", () => {
+    assert.equal(W.kindOf("/w/a.PNG"), "image");
+    assert.equal(W.kindOf("/w/a.jpeg"), "image");
+    assert.equal(W.kindOf("/w/a.gif"), "anim");
+    assert.equal(W.kindOf("/w/a.webp"), "anim");
+    assert.equal(W.kindOf("/w/a.webm"), "video");
+    assert.equal(W.kindOf("/w/a.MP4"), "video");
+    assert.equal(W.kindOf("/w/a.frag"), "shader");
+    assert.equal(W.kindOf("/w/a.frag.qsb"), "shader");
+    assert.equal(W.kindOf("/w/space"), "");
+    assert.ok(W.isLive("/w/a.mkv") && W.isLive("/w/a.frag") && !W.isLive("/w/a.gif") && !W.isLive("/w/a.png"));
+});
+
+test("findNames: аргументы find на все форматы", () => {
+    const a = W.findNames();
+    assert.deepEqual(a.slice(0, 5), ["-iname", "*.jpg", "-o", "-iname", "*.jpeg"]);
+    assert.equal(a.filter(x => x === "-o").length, W.EXTS.length - 1);
+    assert.ok(a.includes("*.mp4") && a.includes("*.frag"));
+});
+
+test("resolve: видео и шейдер — как картинка, ночью — свой -night", () => {
+    assert.equal(at(st({ all: { day: "/w/rain.mp4" } })).path, "/w/rain.mp4");
+    const s = st({ all: { day: "/w/sea.frag" } });
+    assert.equal(at(s, { night: true, exists: files(["/w/sea-night.frag"]) }).path, "/w/sea-night.frag");
+    assert.equal(W.nightVariant("/w/rain.webm"), "/w/rain-night.webm");
+});

@@ -340,6 +340,7 @@ PKGS=(
     wl-clipboard cliphist brightnessctl playerctl pavucontrol fastfetch base-devel
     gammastep wf-recorder slurp tesseract tesseract-data-eng tesseract-data-rus cava python-gobject songrec
     python-icalendar python-dateutil libsecret
+    qt6-multimedia-ffmpeg qt6-shadertools ffmpeg
     "$TERMINAL"
 )
 read -ra sp <<<"${SHELL_PKGS[$SHELL_CHOICE]}"
