@@ -83,6 +83,22 @@ Scope {
         event.accepted = true;
     }
 
+    PanelWindow {
+        screen: root.screen
+        visible: Settings.get("shell.desktop.menu")
+        anchors { top: true; bottom: true; left: true; right: true }
+        color: "transparent"
+        exclusionMode: ExclusionMode.Ignore
+        WlrLayershell.layer: WlrLayer.Background
+        WlrLayershell.namespace: "ochre-desktop"
+
+        MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.RightButton
+            onClicked: mouse => root.openAt(mouse.x, mouse.y)
+        }
+    }
+
     LazyLoader {
         active: root.open
 
