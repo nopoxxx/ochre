@@ -82,6 +82,12 @@ Singleton {
             const map = Object.assign({}, windows);
             delete map[ev.WindowClosed.id];
             windows = map;
+        } else if (ev.WindowLayoutsChanged) {
+            // размеры и место окон (fullscreen-окно ставит живые обои на паузу — Wallpaper.fullscreenOn)
+            const map = Object.assign({}, windows);
+            for (const [id, layout] of ev.WindowLayoutsChanged.changes)
+                if (map[id]) map[id] = Object.assign({}, map[id], { layout });
+            windows = map;
         } else if (ev.WindowFocusChanged) {
             const id = ev.WindowFocusChanged.id;
             const map = {};

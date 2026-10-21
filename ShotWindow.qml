@@ -303,6 +303,7 @@ Scope {
             const dir = String(Settings.get("shell.shot.dir")).replace(/^~(?=\/|$)/, home);
             const name = "Screenshot from " + Qt.formatDateTime(new Date(), "yyyy-MM-dd HH-mm-ss") + ".png";
             if (action === "ocr") { ocr(src); close(); return; }
+            Sounds.play("screenshot");
             Quickshell.execDetached(["sh", "-c", `
                 src=$1 act=$2 dest="$3/$4"
                 case $act in copy|both) wl-copy --type image/png < "$src" ;; esac

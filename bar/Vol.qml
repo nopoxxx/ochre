@@ -13,6 +13,7 @@ Seg {
     available: audio !== null
     label: "vol"
     value: audio?.muted ? "muted" : Math.round((audio?.volume ?? 0) * 100) + "%"
+    compact: audio?.muted ? "mute" : value
     valueColor: audio?.muted ? Theme.gray : Theme.fg
 
     onLeftClicked: mixer.toggle()

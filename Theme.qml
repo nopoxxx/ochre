@@ -29,8 +29,8 @@ Singleton {
     readonly property color aqua: scheme.aqua
     readonly property color orange: scheme.orange
     readonly property color accent: scheme.accent
-    readonly property bool hasLight: Object.prototype.hasOwnProperty.call(S.THEMES, Settings.get("shell.theme.name"))
-        && !!S.THEMES[Settings.get("shell.theme.name")].light
+    readonly property var calendars: [blue, green, purple, aqua, orange, yellow, red]   // цвет календаря по номеру (Calendar: src)
+    readonly property bool hasLight: S.hasLight(k => Settings.get(k))
 
     function setMode(m) { Settings.set("shell.theme.mode", m); }
     function toggleMode() { setMode(Settings.get("shell.theme.mode") === "light" ? "dark" : "light"); }
@@ -55,4 +55,13 @@ Singleton {
     readonly property int fontSize: Settings.get("shell.fontSize")
     readonly property int barHeight: Settings.get("shell.bar.height")
     readonly property int pad: 10
+
+    readonly property string barEdge: Settings.get("shell.bar.position")
+    readonly property bool barVertical: barEdge === "left" || barEdge === "right"
+    readonly property string barStyle: Settings.get("shell.bar.style")
+    readonly property bool barBoxed: barStyle === "floating" || barStyle === "island" || barStyle === "capsules"
+    readonly property int barGap: barBoxed ? 8 : 0
+    readonly property int barThickness: (barVertical ? Math.ceil(barCell.advanceWidth * 6) + pad : barHeight) + (barBoxed ? 4 : 0)
+
+    TextMetrics { id: barCell; font.family: root.font; font.pixelSize: root.fontSize; text: "M" }
 }

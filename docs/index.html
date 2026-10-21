@@ -224,7 +224,7 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
     <li><b>меню стола</b> по правому клику на пустом рабочем столе: терминал, скриншот, обои, тема, питание;</li>
     <li><b>настройки</b> <kbd>Mod+S</kbd> в стиле menuconfig с поиском — без правки конфигов руками;</li>
     <li><b>окна</b> мониторов, биндов и обоев (wallhaven.cc);</li>
-    <li><b>темы</b>: Gruvbox, Catppuccin, Rosé Pine, Tokyo Night, Everforest, Kanagawa, Solarized, Nord, Dracula — shell, niri, GTK, Qt, btop, терминал и greeter в одной палитре;</li>
+    <li><b>темы</b>: Gruvbox, Catppuccin, Rosé Pine, Tokyo Night, Everforest, Kanagawa, Solarized, Nord, Dracula и Wallpaper (палитра из обоев через matugen) — shell, niri, GTK, Qt, btop, терминал и greeter в одной палитре;</li>
     <li><b>блокировка и greeter</b> как getty, уведомления как лог, обновление shell одним кликом.</li>
   </ul>
 </section>
@@ -295,6 +295,7 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
     <tr><td><kbd>Mod+D</kbd></td><td>меню</td></tr>
     <tr><td><kbd>Mod+Space</kbd></td><td>сразу список программ</td></tr>
     <tr><td><kbd>Mod+S</kbd></td><td>настройки</td></tr>
+    <tr><td><kbd>Mod+/</kbd></td><td>шпаргалка клавиш: все сочетания по группам, с поиском</td></tr>
     <tr><td><kbd>Mod+Return</kbd></td><td>терминал (выбранный в настройках)</td></tr>
     <tr><td><kbd>Mod+E</kbd></td><td>файловый менеджер</td></tr>
     <tr><td><kbd>Mod+Shift+B</kbd></td><td>браузер</td></tr>
@@ -303,6 +304,7 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
     <tr><td><kbd>Mod+Shift+T</kbd></td><td><a href="#shot">текст с экрана</a> в буфер (tesseract)</td></tr>
     <tr><td><kbd>Mod+Shift+C</kbd></td><td>пипетка: цвет под курсором в буфер</td></tr>
     <tr><td><kbd>Mod+Shift+G</kbd></td><td>игровой режим</td></tr>
+    <tr><td><kbd>Mod+Shift+M</kbd></td><td>распознать песню, что сейчас играет (songrec)</td></tr>
     <tr><td><kbd>Mod+Shift+V</kbd></td><td><a href="#clipboard">история буфера обмена</a></td></tr>
     <tr><td><kbd>Mod+A</kbd></td><td><a href="#home">меню home</a> (или клик по <code>user@host</code>)</td></tr>
     <tr><td><kbd>Mod+Alt+R</kbd></td><td><a href="#home">запись экрана</a>: начать / остановить</td></tr>
@@ -333,7 +335,12 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
   <h2>Панель</h2>
   <p>Строка shell-приглашения из модулей. Модули расставляются по зонам left / center / right в
   <kbd>Mod+S</kbd> → <code>bar/</code>: <kbd>←→</kbd> — зона, <kbd>Shift+↑↓</kbd> — порядок. Там же положение,
-  высота, floating-стиль, автоскрытие, разделитель и вид prompt.</p>
+  высота, стиль, автоскрытие, разделитель и вид prompt.</p>
+  <p>Панель встаёт на любой край: сверху, снизу, слева или справа. Боковая — колонка в 6 символов: модули в ней
+  столбиком, часы — часы над минутами, у <code>cpu</code>, <code>vol</code> и других — только число, <code>command</code> и
+  <code>media</code> сжаты до значка, попапы открываются сбоку. Стили: <code>full</code> — во всю ширину,
+  <code>floating</code> — с отступами и рамкой, <code>island</code> — все зоны одним блоком посередине,
+  <code>capsules</code> — каждая зона в своей рамке, <code>transparent</code> — без фона, только текст.</p>
   <div class="tbl"><table>
     <tr><th>модуль</th><th>что показывает · клики</th></tr>
     <tr><td><code>user</code></td><td><code>user@host</code> — стиль prompt настраивается; клик — <a href="#home">меню home</a></td></tr>
@@ -341,6 +348,7 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
     <tr><td><code>jobs</code></td><td><code>[N]</code> окон на активном столе</td></tr>
     <tr><td><code>command</code></td><td><code>❯ app # title</code> активного окна с эффектом набора; <span class="c-red">❯</span> красный, если окно просит внимания</td></tr>
     <tr><td><code>media</code></td><td>плеер (MPRIS) и полоски звука <span class="c-acc">▂▅▇▃</span>, пока играет (нужен cava; <code>bar/ → модули</code>): клик — пауза, правый — следующий, средний — предыдущий</td></tr>
+    <tr><td><code>songrec</code></td><td><code>♪?</code> — распознать песню через songrec (Shazam): клик — системный звук, правый — микрофон, во время записи — отмена. По умолчанию выключен</td></tr>
     <tr><td><code>rec</code></td><td><span class="c-red">● REC 01:23</span> — идёт запись экрана; клик — остановить. Без записи не виден</td></tr>
     <tr><td><code>timer</code></td><td><span class="c-gray">timer</span> <span class="c-acc b">24:59</span> чай — таймер (меню: <code>%25m чай</code>): клик — пауза, правый — стоп, колёсико — ±1 мин. Без таймера не виден</td></tr>
     <tr><td><code>privacy</code></td><td><span class="c-gray">mic</span> <span class="c-orange b">discord</span> <span class="c-gray">cast</span> <span class="c-red b">obs</span> — кто слушает микрофон и кто показывает экран. Выключенный микрофон не в счёт; когда никого нет, модуль не виден</td></tr>
@@ -354,7 +362,8 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
     <tr><td><code>shellupd</code></td><td><code>ochre ↑N</code> — вышла новая версия shell, см. <a href="#update">update</a></td></tr>
     <tr><td><code>notify</code></td><td><code>log N</code> / <code>dnd</code>: клик — история уведомлений, правый — «не беспокоить»</td></tr>
     <tr><td><code>kbd</code></td><td>раскладка: клик или колёсико — переключить</td></tr>
-    <tr><td><code>clock</code></td><td>часы; клик — календарь как <code>cal</code></td></tr>
+    <tr><td><code>event</code></td><td><span class="c-gray">cal</span> <span class="c-aqua">14:30</span> standup — ближайшее событие <a href="#calendar">календарей</a> на 12 часов; за время напоминания — <span class="c-orange b">через 10м</span>. Клик — календарь, правый — ссылка события. Нет событий — не виден; по умолчанию выключен</td></tr>
+    <tr><td><code>clock</code></td><td>часы; клик — календарь как <code>cal</code> и ближайшие события</td></tr>
     <tr><td><code>home</code></td><td><code>≡</code> — открыть меню home; по умолчанию выключен (его открывает клик по <code>user</code>)</td></tr>
   </table></div>
   <p>Трей показывает значки известных программ — Discord, Steam, Telegram, VPN-клиенты, торренты, облака и др.;
@@ -393,7 +402,8 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
       клик — пауза, правый — стоп, колёсико — ±1 минута; переживает перезапуск shell;</li>
     <li><code>=</code> и выражение — калькулятор: <code>=2^10</code>, <code>=(1,5+2)*3</code>, <code>=sqrt(2)</code>; <kbd>↵</kbd> копирует ответ.
       Есть <code>+ - * / % ^</code>, скобки, <code>sqrt abs round floor ceil ln log sin cos tan</code>, <code>pi</code>, <code>e</code>;</li>
-    <li>префиксы меняются в <code>settings → вид → меню</code> (например <code>!</code> вместо <code>&gt;</code>); пустой — выключен;</li>
+    <li><code>!вопрос</code> — Claude Code в обычном окне терминала из <code>~</code>; просто <code>!</code> — <code>new</code> (новая сессия) и <code>continue</code> (продолжить последнюю). Команду можно сменить в настройках, а вместо Claude Code выбрать Google AI Mode в браузере;</li>
+    <li>префиксы меняются в <code>settings → вид → меню</code> (например <code>$</code> вместо <code>&gt;</code>); пустой — выключен;</li>
     <li>всё настраиваемое — не в меню, а в окне настроек (<code>settings</code>).</li>
   </ul>
 </section>
@@ -414,9 +424,9 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
     <tr><td><code>whoami</code></td><td><code>user@host</code>, время работы, система и ядро</td></tr>
     <tr><td><code>быстро</code></td><td>переключатели: Wi-Fi, bluetooth, ночной режим, «не беспокоить», микрофон, запись экрана</td></tr>
     <tr><td><code>звук и экран</code></td><td>громкость, микрофон и яркость (на ноутбуке): <kbd>←→</kbd> ±5%, <kbd>↵</kbd> — mute</td></tr>
-    <tr><td><code>сейчас играет</code></td><td>обложка, трек, прогресс (клик — перемотка), кнопки и полоски звука (cava — только звук этого плеера, не звонки и не системные звуки; <code>home/ → звук для полосок</code>); текущая строка песни из <a href="https://lrclib.net">LRCLIB</a>; несколько плееров — <code>‹ 1/2 ›</code></td></tr>
+    <tr><td><code>сейчас играет</code></td><td>обложка, трек, прогресс (клик — перемотка), кнопки и полоски звука (cava — только звук этого плеера, не звонки и не системные звуки; <code>home/ → звук для полосок</code>); текущая строка песни из <a href="https://lrclib.net">LRCLIB</a>; кнопка-ухо — распознать песню (songrec, как <kbd>Mod+Shift+M</kbd>); несколько плееров — <code>‹ 1/2 ›</code></td></tr>
     <tr><td><code>погода</code></td><td><a href="https://open-meteo.com">Open-Meteo</a>: сейчас и прогноз на несколько дней; <kbd>↵</kbd> — обновить</td></tr>
-    <tr><td><code>календарь</code></td><td>месяц как <code>cal</code>: <kbd>←→</kbd> — листать, <kbd>↵</kbd> — сегодня</td></tr>
+    <tr><td><code>календарь</code></td><td>месяц как <code>cal</code> (под числом — точки календарей с событиями), события выбранного дня и ближайшие, добавление и удаление — см. <a href="#calendar">календари</a>. Клавиши: <kbd>←→</kbd> — листать, <kbd>↵</kbd> — сегодня, <kbd>a</kbd> — новое событие, <kbd>e</kbd> — <code>calendars.conf</code>, <kbd>r</kbd> — обновить</td></tr>
     <tr><td><code>todo</code></td><td>список дел из <code>~/.config/ochre/todo.txt</code> (формат todo.txt, можно править руками): <kbd>↵</kbd> — сделано,
       <kbd>a</kbd> — добавить, <kbd>Del</kbd> — удалить, <kbd>c</kbd> — убрать сделанное, <kbd>e</kbd> — открыть файл</td></tr>
     <tr><td><code>заметки</code></td><td>начало <code>~/.config/ochre/notes.md</code>; <kbd>↵</kbd> — открыть в редакторе. По умолчанию скрыта</td></tr>
@@ -431,6 +441,28 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
   <p><kbd>Mod+S</kbd> → <code>home/</code>: какие секции показывать и в каком порядке (<kbd>←→</kbd> — показать / скрыть,
   <kbd>Shift+↑↓</kbd> — порядок), край экрана и ширина, город и единицы погоды (пустой город — по IP),
   ночной режим, запись экрана. Секции без устройства — Wi-Fi на десктопе, bluetooth без адаптера, батарея — не видны.</p>
+  <h3 id="calendar">календари</h3>
+  <p>Календарь — в секции <code>календарь</code> меню home и в попапе часов, ближайшее событие — в модуле панели <code>event</code>.
+  Всё делается мышью: клик по дню — его события, колёсико — месяцы, двойной клик по дню или <code>[+ событие]</code> — новое
+  событие (название, день, время — колёсиком по 15 минут, или «весь день» на несколько дней, место или ссылка, календарь).
+  Клик по событию — подробности, справа под мышью — <code>[↗]</code> открыть ссылку и <code>[×]</code> удалить (второй клик подтверждает;
+  у повторяющегося удаляется вся серия). Свои события без настройки попадают в календарь <code>ochre</code> —
+  <code>~/.config/ochre/events.ics</code>; добавлять и удалять можно и в CalDAV, а .ics по ссылке (Google, Outlook) — только читать.</p>
+  <p>Чужие календари — .ics, Google, Outlook и CalDAV.
+  Список календарей — <code>~/.config/ochre/calendars.conf</code> (<code>home/</code> → <code>календарь</code> → <code>календари</code>
+  или <kbd>e</kbd> в секции): строка на календарь — имя, адрес и, для CalDAV, пользователь.</p>
+<pre class="cmd"><code>holidays  https://example.com/holidays.ics
+plan      ~/Documents/plan.ics
+google    https://calendar.google.com/calendar/ical/…/private-…/basic.ics
+cloud     https://cloud.example.com/remote.php/dav/calendars/me/  me</code></pre>
+  <p><b>Google</b>: настройки календаря → «Интеграция календаря» → «Секретный адрес в формате iCal».
+  <b>Outlook</b>: параметры → календарь → общие календари → «Опубликовать календарь» → ссылка ICS.
+  <b>CalDAV</b> (Nextcloud, Fastmail, Radicale, Baikal) — адрес календаря или всей коллекции и пользователь; пароль
+  (лучше пароль приложения) — <code>home/</code> → <code>календарь</code> → <code>пароли CalDAV</code>: он хранится в связке
+  ключей (<code>secret-tool</code>), а не в конфиге. Повторы, исключения и перенесённые встречи учитываются.</p>
+  <p>Обновление — раз в 15 минут (<code>обновлять, мин</code>), после правки файла и командой <code>qs ipc call calendar refresh</code>.
+  За 10 минут до начала — уведомление с кнопкой «открыть», если у события есть ссылка (<code>напоминать, мин</code>, 0 — выключить).
+  Нужны <code>python-icalendar</code> и <code>python-dateutil</code> — их ставит <code>install.sh</code>.</p>
   <h3>ночной режим</h3>
   <p>Тёплые цвета экрана через <code>gammastep</code>: переключатель <code>ночь</code> в меню, температура — в настройках.
   «По закату» включает его только от заката до рассвета в городе погоды.</p>
@@ -462,7 +494,7 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
     <tr><td><code>input/</code></td><td>клавиатура и раскладки, <a href="#binds">бинды</a>, мьют микрофона и звука, горячие углы, мышь и тачпад, курсор</td></tr>
     <tr><td><code>bar/</code></td><td>модули по зонам, положение и стиль панели, prompt, часы, график cpu, трей</td></tr>
     <tr><td><code>home/</code></td><td>секции <a href="#home">меню home</a> и их порядок, край, ширина и анимация, погода, ночной режим, запись экрана</td></tr>
-    <tr><td><code>notify/</code></td><td>«не беспокоить», положение, время показа, максимум на экране, критичные, анимация и тестовое уведомление</td></tr>
+    <tr><td><code>notify/</code></td><td>«не беспокоить», положение, время показа, максимум на экране, критичные, анимация и тестовое уведомление; звуки на события</td></tr>
     <tr><td><code>lock/</code></td><td>блокировка по бездействию, эхо пароля, часы, фраза под приглашением, обои, предпросмотр</td></tr>
     <tr><td><code>system/</code></td><td><a href="#monitors">мониторы</a>, сеть, звук, <a href="#apps">приложения</a>, конфиги, обновления shell</td></tr>
   </table></div>
@@ -519,6 +551,13 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
   <p>Первыми в сетке — фирменные обои ochre: <code>horizon</code>, <code>sundown</code>, <code>field</code>, <code>tty</code>.
   Первые три нарисованы под каждый акцент: пока они стоят, смена акцента в <code>look/</code> меняет и их. При первом запуске
   стоит <code>horizon</code>.</p>
+  <p><b>Живые обои.</b> В коллекцию можно класть видео (<code>mp4</code>, <code>webm</code>, <code>mkv</code>, <code>mov</code>), <code>gif</code>
+  и шейдеры <code>.frag</code>; играют без звука и по кругу, переходы работают как с картинками. За фирменными картинками идут
+  фирменные шейдеры <code>rain</code>, <code>grid</code>, <code>dots</code> — они сами берут цвета темы и акцента.
+  Обои стоят на паузе, пока на мониторе окно во весь экран, на блокировке, в игровом режиме и от батареи
+  (<code>look/ → обои</code>: живые обои, пауза, кадров у шейдеров). Greeter, блокировка и хук <code>wallpaper</code> получают
+  постер — первый кадр. Видео нужны <code>qt6-multimedia-ffmpeg</code> и <code>ffmpeg</code>, своим шейдерам — <code>qt6-shadertools</code>;
+  униформы шейдера описаны в <code>extras/wallpapers/live/README.md</code>.</p>
 <figure class="shot"><a href="shots/wallpapers.webp"><img src="shots/wallpapers.webp" alt="фирменные обои в окне выбора" width="1285" height="262" loading="lazy"></a><figcaption>фирменные обои — первым рядом, в варианте текущего акцента</figcaption></figure>
 </section>
 
@@ -577,6 +616,11 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
   в списке рядом с названием — полоска её цветов. <code>тёмная или светлая</code> — режим; светлой нет у Nord и Dracula.
   Переключить режим: плитка «тема» в <code>home</code> → быстро или <code>qs ipc call theme toggle</code> (<code>dark</code>, <code>light</code>, <code>get</code>).
   Тема меняет сразу shell, рамки niri, терминал (и уже открытые окна), greeter и приложения.</p>
+  <p><code>Wallpaper</code> — палитра из текущих обоев сфокусированного экрана: её строит <code>matugen</code> (ставит установщик),
+  обои сменились — сменилась и палитра. Есть тёмный и светлый вариант. Характер палитры — <code>схема из обоев</code>:
+  <code>tonal-spot</code> (спокойная), <code>content</code> и <code>fidelity</code> (ближе к картинке), <code>expressive</code>,
+  <code>fruit-salad</code>, <code>rainbow</code> (ярче), <code>neutral</code>, <code>monochrome</code>. Акцент выбирается как обычно:
+  <code>ochre</code> — главный цвет обоев, остальные — цвета Gruvbox, сдвинутые к нему.</p>
   <h2>Темы приложений</h2>
   <p><code>look/</code> → <code>темы Qt и GTK</code>: GTK- и Qt-приложения в той же палитре, с тем же акцентом и шрифтом,
   что и shell, — через adw-gtk3 / libadwaita и qt6ct. Firefox и Chromium берут тёмную или светлую схему через портал.
@@ -644,6 +688,13 @@ Password: <span class="blink">█</span></div>
   <code>vol</code> — приходит короткое уведомление «Микрофон выключен» с названием устройства. Такие уведомления не копятся:
   новое заменяет прошлое и в историю не попадает. Выключить — <code>notify/</code> → <code>мьют микрофона и звука</code>.</p>
 
+  <h3>Звуки</h3>
+  <p>Короткие сигналы в духе PC-спикера: уведомление и критичное, блокировка и неверный пароль, скриншот и запись экрана,
+  зарядка и низкий заряд, мьют, конец таймера и мелодия при входе — один раз за сессию. Пока играет музыка, звуки тише;
+  в «не беспокоить» молчат обычные уведомления. Общая громкость, тик громкости (выключен) и каждая группа — <code>notify/</code> → <code>звуки</code>.
+  Свой звук — файл <code>~/.config/ochre/sounds/&lt;событие&gt;.wav</code> (или <code>.oga</code>, <code>.ogg</code>) с именем из
+  <code>extras/sounds/ochre/</code>, например <code>notify.wav</code> или <code>login.wav</code>.</p>
+
   <h3>Steam</h3>
   <p>Steam рисует свои уведомления отдельным окном, и в niri оно оказывается посреди экрана. Плагин
   <a href="https://steambrew.app">Millennium</a> <a href="https://github.com/nopoxxx/nopox-notify">nopox-notify</a> забирает их у Steam
@@ -682,6 +733,8 @@ Password: <span class="blink">█</span></div>
     <tr><td><code>~/.local/state/ochre/</code></td><td>текущие обои и режим заполнения</td></tr>
     <tr><td><code>~/Pictures/Wallpapers/</code></td><td>коллекция обоев и загрузки с wallhaven</td></tr>
     <tr><td><code>~/.cache/cliphist/db</code></td><td>история буфера обмена</td></tr>
+    <tr><td><code>~/.config/ochre/calendars.conf</code></td><td>список календарей — см. <a href="#calendar">календари</a>; события — в <code>~/.cache/ochre/calendar.json</code></td></tr>
+    <tr><td><code>~/.config/ochre/events.ics</code></td><td>свой календарь <code>ochre</code>: события, добавленные в shell</td></tr>
     <tr><td><code>~/Videos/Screencasts/</code></td><td>записи экрана (папка — в <code>home/</code>)</td></tr>
     <tr><td><code>/var/lib/ochre-greeter/</code></td><td>копия настроек и обоев для greeter</td></tr>
   </table></div>
@@ -708,9 +761,11 @@ Password: <span class="blink">█</span></div>
 <span class="p">❯ </span>qs ipc call timer start "25m чай" <span class="cm"># таймер; timer pause, timer stop, timer get</span>
 <span class="p">❯ </span>qs ipc call welcome open        <span class="cm"># окно первого запуска: клавиши и подсказки</span>
 <span class="p">❯ </span>qs ipc call shell reload        <span class="cm"># перечитать конфиг shell без перезапуска</span>
+<span class="p">❯ </span>qs ipc call songrec recognize   <span class="cm"># распознать песню (10 с системного звука); songrec mic — с микрофона, songrec cancel, songrec get</span>
 <span class="p">❯ </span>qs ipc call game toggle         <span class="cm"># игровой режим; game on, game off, game get</span>
 <span class="p">❯ </span>qs ipc call errors get          <span class="cm"># ошибки shell и niri текстом; errors open, errors clear, errors report</span>
 <span class="p">❯ </span>qs ipc call privacy get         <span class="cm"># кто слушает микрофон и показывает экран</span>
+<span class="p">❯ </span>qs ipc call calendar get        <span class="cm"># ближайшие события; calendar refresh — обновить сейчас</span>
 <span class="p">❯ </span>qs ipc call screentime get      <span class="cm"># время за экраном сегодня: всего и по приложениям</span>
 <span class="p">❯ </span>qs ipc call settings set shell.accent blue   <span class="cm"># любая настройка из Mod+S; "" — по умолчанию, settings get &lt;ключ&gt; — прочитать</span></code></pre>
 </section>
@@ -723,7 +778,7 @@ Password: <span class="blink">█</span></div>
   Нет файла или он не исполняемый — ничего не происходит. При запуске shell хуки не срабатывают — только на изменения.</p>
   <div class="tbl"><table>
     <tr><th>файл</th><th>когда</th><th>аргументы</th></tr>
-    <tr><td><code>wallpaper</code></td><td>сменились обои на мониторе в фокусе</td><td>путь, монитор</td></tr>
+    <tr><td><code>wallpaper</code></td><td>сменились обои на мониторе в фокусе</td><td>картинка (у видео и шейдера — постер), монитор, файл обоев</td></tr>
     <tr><td><code>theme</code></td><td>сменились акцент, тема или режим</td><td>цвет акцента <code>#rrggbb</code>, акцент, тема, <code>dark</code>|<code>light</code></td></tr>
     <tr><td><code>lock</code>, <code>unlock</code></td><td>экран заблокирован, разблокирован</td><td>—</td></tr>
     <tr><td><code>game</code></td><td>игровой режим</td><td><code>on</code>|<code>off</code></td></tr>

@@ -18,9 +18,14 @@ ShellRoot {
     readonly property var _countdown: Countdown   // таймер: конец отсчёта, даже если модуль timer убран
     readonly property var _cast: Cast             // бэкенд портала для демонстрации экрана: файлы и мост к демону
     readonly property var _game: Game             // IPC game (Mod+Shift+G)
+    readonly property var _songRec: SongRec       // IPC songrec (Mod+Shift+M)
     readonly property var _errors: Errors         // ошибки shell и niri — с запуска, а не с первой ошибки
     readonly property var _hooks: Hooks           // ~/.config/ochre/hooks/<событие>
+    readonly property var _sounds: Sounds
     readonly property var _screenTime: ScreenTime // время за экраном считается с запуска, а не с открытия home
+    readonly property var _wallPalette: WallPalette
+    readonly property var _autoWidth: AutoWidth
+    readonly property var _calendar: Calendar     // напоминания о событиях, даже если календарь нигде не открыт
 
     // поставлен пакетом: pacman меняет файлы под работающим shell, и перезагрузка посреди обновления
     // ломает его — перезапуск только по уведомлению после обновления (ShellUpdate)
@@ -60,6 +65,7 @@ ShellRoot {
     GreeterSync {}
     DisplaysWindow {}
     BindsWindow {}
+    CheatSheet {}
     ClipboardWindow {}
     HomePanel {}
     OsdWindow {}

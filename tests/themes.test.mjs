@@ -62,7 +62,7 @@ test("THEMES: у каждого варианта все роли и 16 цвет�
 test("схема: shell.theme.name — темы из THEMES, по умолчанию gruvbox", () => {
     const row = S.sections([], undefined, undefined).flatMap(s => s.rows).find(r => r.key === "shell.theme.name");
     assert.ok(row, "нет строки shell.theme.name");
-    assert.deepEqual(row.options, Object.keys(P.THEMES));
+    assert.deepEqual(row.options, Object.keys(P.THEMES).concat("wallpaper"));
     assert.equal(S.defaultOf("shell.theme.name", []), "gruvbox");
 });
 
@@ -97,7 +97,7 @@ test("THEMES: девять семейств, текст и акцент ochre ч
 
 test("схема: в списке тем — названия, а не id", () => {
     const row = S.sections([], undefined, undefined).flatMap(s => s.rows).find(r => r.key === "shell.theme.name");
-    for (const id of row.options) assert.equal(row.labels[id], P.THEMES[id].name);
+    for (const id of row.options) assert.equal(row.labels[id], id === "wallpaper" ? "Wallpaper" : P.THEMES[id].name);
 });
 
 test("палитра доходит до niri и приложений", () => {

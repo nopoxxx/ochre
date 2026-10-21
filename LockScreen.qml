@@ -61,6 +61,7 @@ Scope {
                 root.failures = 0;
                 root.message = "";
             } else {
+                Sounds.play("auth-fail");
                 root.failures++;
                 root.message = result === PamResult.MaxTries ? "Maximum number of tries exceeded" : "Login incorrect";
                 root.messageIsError = true;
@@ -80,7 +81,9 @@ Scope {
 
         onLockedChanged: {
             Hooks.run(locked ? "lock" : "unlock");
+            Sounds.play(locked ? "lock" : "unlock");
             ScreenTime.locked = locked;
+            Wallpaper.locked = locked;
         }
 
         WlSessionLockSurface {
@@ -89,13 +92,12 @@ Scope {
 
             readonly property string wall: Wallpaper.imageFor(screen?.name ?? "", Wallpaper.activeWs(screen?.name ?? ""))
 
-            // приглушённые обои под приглашением
-            Image {
+            // приглушённые обои под приглашением; живые — стоят на первом кадре
+            WallLayer {
                 anchors.fill: parent
                 visible: Settings.get("shell.lock.wallpaper") && surface.wall !== ""
-                source: surface.wall ? "file://" + encodeURI(surface.wall) : ""
-                fillMode: Image.PreserveAspectCrop
-                asynchronous: true
+                path: visible ? surface.wall : ""
+                playing: false
                 opacity: 0.15
             }
 
@@ -124,12 +126,11 @@ Scope {
             WlrLayershell.namespace: "ochre-lock-preview"
             color: Theme.bg
 
-            Image {
+            WallLayer {
                 anchors.fill: parent
                 visible: Settings.get("shell.lock.wallpaper") && Wallpaper.current !== ""
-                source: Wallpaper.current ? "file://" + encodeURI(Wallpaper.current) : ""
-                fillMode: Image.PreserveAspectCrop
-                asynchronous: true
+                path: visible ? Wallpaper.current : ""
+                playing: false
                 opacity: 0.15
             }
 

@@ -27,7 +27,9 @@ const MODULES = [
     { id: "shellupd", file: "ShellUpd", desc: "ochre ↑3 — обновления ochre с GitHub: клик — список и [обновить]" },
     { id: "notify", file: "Notify", desc: "уведомления: клик — история, правый — «не беспокоить»" },
     { id: "kbd", file: "Kbd", desc: "раскладка, клик — переключить" },
+    { id: "event", file: "Event", desc: "cal 14:30 standup — ближайшее событие календарей на 12 часов: клик — календарь, правый — ссылка; нет событий — скрыт" },
     { id: "clock", file: "Clock", desc: "часы, клик — календарь" },
+    { id: "songrec", file: "SongRec", desc: "распознать песню (songrec): клик — системный звук, правый — микрофон" },
     { id: "rec", file: "Rec", desc: "● REC 01:23 — идёт запись экрана, клик — остановить (видно только во время записи)" },
     { id: "home", file: "Home", desc: "значок меню home — для тех, у кого user@host убран с панели" }
 ];
@@ -48,7 +50,7 @@ const HOME_SECTIONS = [
     { id: "levels", dash: 0, label: "звук и экран", file: "Levels", desc: "громкость, микрофон, яркость (если есть подсветка экрана)" },
     { id: "media", dash: 1, label: "сейчас играет", file: "Media", desc: "плеер: обложка, трек, прогресс, кнопки; несколько плееров — ‹ › переключают" },
     { id: "weather", dash: 1, label: "погода", file: "Weather", desc: "погода Open-Meteo: сейчас и на несколько дней; город — ниже, в погоде" },
-    { id: "calendar", dash: 1, label: "календарь", file: "Calendar", desc: "календарь месяца: ←→ — листать" },
+    { id: "calendar", dash: 1, label: "календарь", file: "Calendar", desc: "календарь месяца и ближайшие события: ←→ — листать, ↵ — открыть ссылку события; календари — ниже, в календаре" },
     { id: "todo", dash: 2, label: "todo", file: "Todo", desc: "список дел ~/.config/ochre/todo.txt: ↵ — сделано, a — добавить, del — удалить, e — редактор" },
     { id: "notes", dash: 2, label: "заметки", file: "Notes", desc: "начало ~/.config/ochre/notes.md; ↵ — открыть в редакторе" },
     { id: "notifs", dash: 2, label: "уведомления", file: "Notifs", desc: "последние уведомления: ↵ — действие, del — убрать" },

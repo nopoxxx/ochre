@@ -21,6 +21,7 @@ Seg {
     value: !dev ? "offline"
         : isWifi ? (wifi ? wifi.name + " " + pct(wifi.signalStrength) : "wifi")
         : "eth"
+    compact: !dev ? "off" : isWifi ? (wifi ? pct(wifi.signalStrength) : "wifi") : "eth"
     valueColor: !dev ? Theme.red : limited ? Theme.yellow : Theme.fg
     onLeftClicked: Term.float(["nmtui"])
 }

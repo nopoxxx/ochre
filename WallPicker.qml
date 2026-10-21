@@ -6,7 +6,7 @@ import QtQuick.Layouts
 import qs.services
 import "services/fuzzy.js" as Fuzzy
 
-// Выбор обоев: локальная коллекция и wallhaven.cc.
+// Выбор обоев: локальная коллекция (картинки, gif, видео, шейдеры .frag) и wallhaven.cc.
 // Enter применяет и оставляет окно открытым — удобно перебирать.
 //   qs ipc call wallpaper picker      — открыть/закрыть
 //   qs ipc call wallpaper set <path>  — поставить файл на все экраны
@@ -64,17 +64,29 @@ Scope {
             property string error: ""
             property string status: ""
 
+            // превью: у видео — постер (пока его нет — имя), у шейдера — он сам (WallLayer в плитке)
+            function thumbFor(p) {
+                const k = Wallpaper.kindOf(p);
+                const f = k === "video" ? Wallpaper.stillOf(p) : k === "shader" ? "" : p;
+                return f ? "file://" + encodeURI(f) : "";
+            }
+
+            function infoFor(p) {
+                return ({ anim: "gif", video: "video", shader: "live" })[Wallpaper.kindOf(p)] ?? "";
+            }
+
             readonly property var items: {
                 const q = input.text.trim();
                 if (source === "local")
-                    // фирменные — первыми, в варианте текущего акцента
+                    // фирменные — первыми, в варианте текущего акцента, за ними живые
                     return Wallpaper.brand
                         .map((p, i) => ({ path: p, thumb: "file://" + encodeURI(p), name: "ochre/" + Wallpaper.brandNames[i], info: "" }))
+                        .concat(Wallpaper.brandLive.map((p, i) => ({ path: p, thumb: "", name: "ochre/" + Wallpaper.brandLiveNames[i], info: "live" })))
                         .concat([[Wallpaper.dir, Wallpaper.local[0] ?? ""]].concat(Wallpaper.folders)
-                        .map(([p, first]) => ({ path: p, thumb: first ? "file://" + encodeURI(first) : "",
+                        .map(([p, first]) => ({ path: p, thumb: first ? thumbFor(first) : "",
                             name: "▸" + (p === Wallpaper.dir ? I18n.tr("все") : p.slice(p.lastIndexOf("/") + 1)) + "/", info: "" })))
                         .concat(Wallpaper.local
-                        .map(p => ({ path: p, thumb: "file://" + encodeURI(p), name: p.slice(p.lastIndexOf("/") + 1), info: "" })))
+                        .map(p => ({ path: p, thumb: thumbFor(p), name: p.slice(p.lastIndexOf("/") + 1), info: infoFor(p) })))
                         .filter(it => !q || Fuzzy.match(q, it.name));
                 return remote.map(w => ({ w, path: Wallpaper.localPathFor(w), thumb: w.thumbs.small, name: w.id, info: w.resolution }));
             }
@@ -313,6 +325,19 @@ Scope {
                             color: Theme.gray
                             elide: Text.ElideMiddle
                         }
+                        T {
+                            visible: win.assigned !== ""
+                            text: "  [" + I18n.tr("сброс") + "]"
+                            color: resetArea.containsMouse ? Theme.fg : Theme.accent
+                            font.bold: true
+                            MouseArea {
+                                id: resetArea
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: win.clearTarget()
+                            }
+                        }
                     }
 
                     Rectangle {
@@ -369,9 +394,18 @@ Scope {
                                     sourceSize.width: win.thumbW
                                 }
 
+                                // шейдер — живьём, пока плитка выбрана
+                                WallLayer {
+                                    id: live
+                                    anchors { fill: parent; margins: 2 }
+                                    path: Wallpaper.kindOf(tile.modelData.path) === "shader" ? tile.modelData.path : ""
+                                    playing: tile.sel
+                                    fps: 30
+                                }
+
                                 T {
                                     anchors.centerIn: parent
-                                    visible: img.status !== Image.Ready
+                                    visible: img.status !== Image.Ready && !live.ready
                                     text: !tile.modelData.thumb ? tile.modelData.name : img.status === Image.Error ? I18n.tr("ошибка") : "…"
                                     color: Theme.gray
                                 }

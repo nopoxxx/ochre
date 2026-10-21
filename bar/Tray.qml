@@ -22,6 +22,7 @@ Item {
     readonly property int hidden: collapsed ? plain.length : 0
 
     readonly property bool icons: Settings.get("shell.bar.trayStyle") === "icons"
+    readonly property bool vertical: bar?.vertical ?? false
 
     function shortName(it) {
         return (it.title || it.id || "?").toLowerCase().split(/[\s._-]+/)[0].slice(0, 12);
@@ -79,14 +80,17 @@ Item {
     implicitWidth: row.implicitWidth
     implicitHeight: row.implicitHeight
 
-    Row {
+    Grid {
         id: row
+        rows: root.vertical ? -1 : 1
+        columns: root.vertical ? 1 : -1
+        horizontalItemAlignment: Grid.AlignHCenter
 
         // переключатель «[‹» / «[+N»: ‹ — свернуть, +N — развернуть.
         // Кликабельна и скобка, и немного вокруг — один символ слишком мелкая цель.
         BarText {
             textFormat: Text.StyledText
-            text: `<font color="${Theme.gray}">[</font>`
+            text: (root.vertical ? "" : `<font color="${Theme.gray}">[</font>`)
                 + `<font color="${root.collapsed ? Theme.accent : Theme.gray}">${root.collapsed ? "+" + root.hidden : "‹"}</font>`
 
             MouseArea {
@@ -105,11 +109,11 @@ Item {
                 required property var modelData
                 readonly property bool attention: modelData.status === Status.NeedsAttention
                 readonly property bool isGlyph: root.glyph(modelData) !== ""
-                readonly property var full: Array.from(" " + root.label(modelData))
+                readonly property var full: root.vertical ? Array.from(root.label(modelData)).slice(0, 6) : Array.from(" " + root.label(modelData))
                 readonly property int start: attention ? 0 : root.offsetOf(modelData)
 
                 visible: text.length > 0
-                text: (attention ? full : full.slice(0, Math.max(0, Math.min(full.length, root.typed - start)))).join("")
+                text: (attention || root.vertical && !root.collapsed ? full : root.vertical ? [] : full.slice(0, Math.max(0, Math.min(full.length, root.typed - start)))).join("")
                 color: attention ? Theme.accent : Theme.fg
                 // в Mono глифы ужаты в одну клетку и почти не читаются — значки берём из обычного варианта
                 font.family: isGlyph ? "Terminess Nerd Font" : Theme.font
@@ -133,9 +137,9 @@ Item {
         }
 
         // курсор, пока названия печатаются или стираются
-        BarText { visible: root.typing; text: "█"; color: Theme.fg }
+        BarText { visible: root.typing && !root.vertical; text: "█"; color: Theme.fg }
 
-        BarText { text: "]"; color: Theme.gray }
+        BarText { visible: !root.vertical; text: "]"; color: Theme.gray }
     }
 
     // своё меню вместо it.display(): нативному QMenu нужен режим QApplication, и он не в стиле shell

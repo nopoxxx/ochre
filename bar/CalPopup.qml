@@ -1,15 +1,18 @@
 import QtQuick
-import QtQuick.Layouts
 import qs
 import qs.bar
+import qs.services
 
-// Календарь под часами — CalGrid в TUI-рамке
+// Календарь под часами — CalView в TUI-рамке: месяц, события дня, добавление и удаление мышью
 TuiPopup {
     id: pop
 
     title: "cal"
 
-    onOpenChanged: if (open) grid.today()
+    onOpenChanged: if (open) view.today()
 
-    CalGrid { id: grid }
+    CalView {
+        id: view
+        onCloseRequested: pop.open = false
+    }
 }
