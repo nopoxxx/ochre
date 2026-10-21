@@ -29,6 +29,7 @@ Singleton {
     readonly property color aqua: scheme.aqua
     readonly property color orange: scheme.orange
     readonly property color accent: scheme.accent
+    readonly property var calendars: [blue, green, purple, aqua, orange, yellow, red]   // цвет календаря по номеру (Calendar: src)
     readonly property bool hasLight: S.hasLight(k => Settings.get(k))
 
     function setMode(m) { Settings.set("shell.theme.mode", m); }
