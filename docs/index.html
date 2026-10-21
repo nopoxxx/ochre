@@ -221,6 +221,7 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
   <ul>
     <li><b>панель</b> из 17 модулей по зонам left / center / right, TUI-попапы по клику;</li>
     <li><b>меню</b> <kbd>Mod+D</kbd> для действий: программы, обои, пакеты pacman/AUR, питание;</li>
+    <li><b>меню стола</b> по правому клику на пустом рабочем столе: терминал, скриншот, обои, тема, питание;</li>
     <li><b>настройки</b> <kbd>Mod+S</kbd> в стиле menuconfig с поиском — без правки конфигов руками;</li>
     <li><b>окна</b> мониторов, биндов и обоев (wallhaven.cc);</li>
     <li><b>темы</b>: Gruvbox, Catppuccin, Rosé Pine, Tokyo Night, Everforest, Kanagawa, Solarized, Nord, Dracula — shell, niri, GTK, Qt, btop, терминал и greeter в одной палитре;</li>
@@ -368,6 +369,9 @@ footer { color: var(--gray); text-align: center; padding: 1em 2ch 3em; }
   Разделы ведут себя как каталоги: <kbd>↵</kbd> или <kbd>→</kbd> — войти, <kbd>Esc</kbd> или <kbd>←</kbd> — на уровень выше.
   Набор в корне ищет сразу по всему меню: программы, открытые окна и вложенные действия (<code>firefox</code>, <code>update</code>,
   <code>settings</code>, <code>reboot</code>). Часто запускаемые программы стоят выше остальных — и в <code>apps/</code>, и в поиске. <code>logout</code>, <code>reboot</code> и <code>poweroff</code> просят второе <kbd>↵</kbd>.</p>
+  <p>Правый клик по пустому рабочему столу открывает у курсора короткое меню <code>~/desktop/</code>: <code>terminal</code>, <code>apps</code>,
+  <code>screenshot</code>, <code>wallpaper</code>, переключатели <code>theme</code>, <code>night</code> и <code>dnd</code> (меню остаётся открытым),
+  <code>home</code>, <code>settings</code> и <code>system/</code>. Выключается в <code>look/ → меню → меню по правому клику</code>.</p>
 <figure class="shot"><a href="shots/launcher-full.webp"><img src="shots/launcher.webp" alt="меню Mod+D" width="558" height="320" loading="lazy"></a><figcaption><kbd>Mod+D</kbd> — корень меню</figcaption></figure>
 <figure class="shot"><div class="shots"><a href="shots/launcher-blue-full.webp"><img src="shots/launcher-blue.webp" alt="меню в акценте blue" width="558" height="320" loading="lazy"></a><a href="shots/launcher-orange-full.webp"><img src="shots/launcher-orange.webp" alt="меню в акценте orange" width="558" height="320" loading="lazy"></a></div><figcaption>оно же в акцентах blue и orange</figcaption></figure>
 <div class="mock"><div class="win"><div class="ttl">~/</div><span class="row"><span class="c-acc">❯</span> <span class="blink">█</span></span><span class="row"> </span><span class="sel"><span class="c-acc">▌</span> <span class="c-blue">apps/</span>        <span class="c-gray">запуск программ (Mod+Space)</span></span><span class="row">  wallpaper    <span class="c-gray">обои; Tab — wallhaven</span></span><span class="row">  settings     <span class="c-gray">все настройки, мониторы, сеть, звук</span></span><span class="row">  <span class="c-blue">system/</span>      <span class="c-gray">питание и сессия</span></span><span class="row">  about        <span class="c-gray">о системе: fastfetch</span></span></div></div>

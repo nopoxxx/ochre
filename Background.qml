@@ -180,4 +180,16 @@ PanelWindow {
         color: Theme.accent
         opacity: 0.9
     }
+
+    MouseArea {
+        anchors.fill: parent
+        enabled: Settings.get("shell.desktop.menu")
+        acceptedButtons: Qt.RightButton
+        onClicked: mouse => desktopMenu.openAt(mouse.x, mouse.y)
+    }
+
+    DesktopMenu {
+        id: desktopMenu
+        screen: bg.screen
+    }
 }
