@@ -19,7 +19,8 @@ Item {
     readonly property bool videoBroken: kind === "video" && (video.status === Loader.Error || (video.item?.failed ?? false))
     readonly property bool ready: !path ? false
         : kind === "video" ? (videoBroken ? still.status === Image.Ready : video.item?.ready ?? false)
-        : kind === "shader" ? qsb !== "" && media.item?.status === ShaderEffect.Compiled
+        // не Compiled: шейдер собирается только при отрисовке, а невидимый слой (под маской перехода) не рисуется
+        : kind === "shader" ? qsb !== "" && !!media.item && media.item.status !== ShaderEffect.Error
         : media.item?.status === Image.Ready
     signal shown()
 
@@ -95,6 +96,7 @@ Item {
             readonly property color bg: Theme.bg0
             readonly property color fg: Theme.fg
             fragmentShader: "file://" + encodeURI(root.qsb)
+            onStatusChanged: if (status === ShaderEffect.Error) console.warn("wallpaper shader:", root.path, log)
         }
     }
 
