@@ -386,6 +386,7 @@ function niriFiles(get0, outs, sel) {
         '    Mod+D hotkey-overlay-title="Menu"' + ipc("launcher", "toggle"),
         '    Mod+Space hotkey-overlay-title="Run an Application"' + ipc("launcher", "apps"),
         '    Mod+Shift+W hotkey-overlay-title="Wallpapers"' + ipc("wallpaper", "picker"),
+        '    Mod+Shift+D hotkey-overlay-title="Desktop Widgets"' + ipc("desktop", "edit"),
         '    Mod+Shift+V hotkey-overlay-title="Clipboard History"' + ipc("clipboard", "toggle"),
         '    Mod+A hotkey-overlay-title="Home Menu"' + ipc("home", "toggle"),
         '    Mod+Alt+R hotkey-overlay-title="Record the Screen"' + ipc("record", "toggle"),

@@ -123,7 +123,7 @@ for (const sec of S.sections([], undefined, undefined)) {
     add(sec.title);
     for (const r of sec.rows) { add(r.header); add(r.label); add(r.hint); add(r.zoneLabel); }
 }
-for (const m of S.MODULES.concat(S.HOME_SECTIONS)) { add(m.label); add(m.desc); add(m.title); }
+for (const m of S.MODULES.concat(S.HOME_SECTIONS, S.WIDGETS)) { add(m.label); add(m.desc); add(m.title); }
 for (const L of Object.values(S.LAYOUTS)) { Object.values(L.labels).forEach(add); add(L.hint); }
 console.log(JSON.stringify([...out]));
 """

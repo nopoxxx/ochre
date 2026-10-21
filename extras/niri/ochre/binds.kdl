@@ -9,6 +9,7 @@ binds {
     Mod+D hotkey-overlay-title="Menu" { spawn "qs" "ipc" "call" "launcher" "toggle"; }
     Mod+Space hotkey-overlay-title="Run an Application" { spawn "qs" "ipc" "call" "launcher" "apps"; }
     Mod+Shift+W hotkey-overlay-title="Wallpapers" { spawn "qs" "ipc" "call" "wallpaper" "picker"; }
+    Mod+Shift+D hotkey-overlay-title="Desktop Widgets" { spawn "qs" "ipc" "call" "desktop" "edit"; }
     Mod+Shift+V hotkey-overlay-title="Clipboard History" { spawn "qs" "ipc" "call" "clipboard" "toggle"; }
     Mod+A hotkey-overlay-title="Home Menu" { spawn "qs" "ipc" "call" "home" "toggle"; }
     Mod+Alt+R hotkey-overlay-title="Record the Screen" { spawn "qs" "ipc" "call" "record" "toggle"; }

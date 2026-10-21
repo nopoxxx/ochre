@@ -48,6 +48,8 @@ ShellRoot {
         }
     }
 
+    DesktopWidgets {}
+
     Variants {
         model: Quickshell.screens
         DesktopMenu {

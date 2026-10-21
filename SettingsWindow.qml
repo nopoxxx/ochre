@@ -93,7 +93,7 @@ Scope {
             function runAction(name) {
                 Settings.open = false;
                 // из этих окон Esc возвращает сюда же
-                Settings.returnHere = ["picker", "wallhaven", "binds", "cheatsheet", "displays", "lockPreview"].includes(name);
+                Settings.returnHere = ["picker", "wallhaven", "binds", "cheatsheet", "displays", "lockPreview", "desktopEdit"].includes(name);
                 const ipc = (...args) => Ochre.ipc(...args);
                 switch (name) {
                 case "picker": Wallpaper.pickerSource = "local"; Wallpaper.pickerOpen = true; break;
@@ -105,6 +105,7 @@ Scope {
                 case "lock": ipc("lock", "lock"); break;
                 case "lockPreview": ipc("lock", "preview"); break;
                 case "home": ipc("home", "open"); break;
+                case "desktopEdit": ipc("desktop", "edit"); break;
                 case "record": ipc("record", "toggle"); break;
                 case "calendarEdit": Calendar.edit(); break;
                 case "calendarLogin": Calendar.login(); break;
