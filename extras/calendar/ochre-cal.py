@@ -4,6 +4,9 @@
 #   ochre-cal.py sync [--days N]   обновить кэш (так зовёт shell)
 #   ochre-cal.py init              создать calendars.conf с примерами, если его нет
 #   ochre-cal.py login             спросить пароли CalDAV и положить в связку ключей (secret-tool)
+#   ochre-cal.py add --cal ИМЯ --title … --start … --end … [--all-day] [--location …]   новое событие
+#   ochre-cal.py delete --cal ИМЯ --uid UID [--href …]                                    удалить событие (серию — целиком)
+# Свой календарь «ochre» — ~/.config/ochre/events.ics, есть всегда; писать можно в него и в CalDAV.
 # Нужны python-icalendar и python-dateutil. Пароли — только в связке ключей, в конфиге их нет.
 import argparse
 import base64
@@ -22,6 +25,8 @@ import xml.etree.ElementTree as ET
 HOME = os.path.expanduser("~")
 CONF = os.path.join(os.environ.get("XDG_CONFIG_HOME") or HOME + "/.config", "ochre", "calendars.conf")
 CACHE = os.path.join(os.environ.get("XDG_CACHE_HOME") or HOME + "/.cache", "ochre", "calendar.json")
+LOCAL = os.path.join(os.path.dirname(CONF), "events.ics")
+LOCAL_NAME = "ochre"
 SECRET = ["service", "ochre-calendar"]
 NS = {"d": "DAV:", "c": "urn:ietf:params:xml:ns:caldav"}
 
@@ -60,6 +65,10 @@ def parse_conf(path):
     return out
 
 
+def all_sources():
+    return [{"name": LOCAL_NAME, "url": LOCAL, "user": "", "local": True}] + parse_conf(CONF)
+
+
 def is_ics(src):
     u = src["url"]
     return not re.match(r"^https?://", u) or u.startswith("webcal") or re.search(r"\.ics(\?|$)", u) is not None
@@ -76,13 +85,15 @@ def password(src):
     return r.stdout.rstrip("\n") if r.returncode == 0 and r.stdout else None
 
 
-def request(url, src, method="GET", body=None, depth=None):
+def request(url, src, method="GET", body=None, depth=None, ctype="application/xml; charset=utf-8", headers=None):
     req = urllib.request.Request(url, data=body, method=method)
     req.add_header("User-Agent", "ochre-calendar")
     if body is not None:
-        req.add_header("Content-Type", "application/xml; charset=utf-8")
+        req.add_header("Content-Type", ctype)
     if depth is not None:
         req.add_header("Depth", depth)
+    for k, v in (headers or {}).items():
+        req.add_header(k, v)
     pw = password(src)
     if pw is not None:
         token = base64.b64encode(f"{src['user']}:{pw}".encode()).decode()
@@ -94,9 +105,14 @@ def request(url, src, method="GET", body=None, depth=None):
 def fetch_ics(src):
     u = src["url"]
     if not re.match(r"^(https?|webcal)://", u):
-        with open(os.path.expanduser(u), encoding="utf-8") as f:
-            return [f.read()]
-    return [request(re.sub(r"^webcal://", "https://", u), src)]
+        try:
+            with open(os.path.expanduser(u), encoding="utf-8") as f:
+                return [("", f.read())]
+        except FileNotFoundError:
+            if src.get("local"):
+                return []
+            raise
+    return [("", request(re.sub(r"^webcal://", "https://", u), src))]
 
 
 def caldav_query(url, src, start, end):
@@ -109,11 +125,16 @@ def caldav_query(url, src, start, end):
   </c:comp-filter></c:comp-filter></c:filter>
 </c:calendar-query>"""
     xml = ET.fromstring(request(url, src, "REPORT", body.encode(), "1"))
-    return [e.text for e in xml.iterfind(".//c:calendar-data", NS) if e.text]
+    out = []
+    for r in xml.iterfind("d:response", NS):
+        data = r.findtext(".//c:calendar-data", "", NS)
+        if data:
+            out.append((urllib.parse.urljoin(url, r.findtext("d:href", "", NS)), data))
+    return out
 
 
-# адрес календаря — запрос к нему; адрес коллекции — ко всем календарям внутри
-def fetch_caldav(src, start, end):
+# адрес календаря — он сам; адрес коллекции — все календари внутри
+def calendars(src):
     url = src["url"]
     body = b"""<?xml version="1.0" encoding="utf-8"?>
 <d:propfind xmlns:d="DAV:"><d:prop><d:resourcetype/></d:prop></d:propfind>"""
@@ -126,8 +147,12 @@ def fetch_caldav(src, start, end):
     base = urllib.parse.urlparse(url).path.rstrip("/")
     if any(urllib.parse.urlparse(c).path.rstrip("/") == base for c in cals):
         cals = [url]
+    return cals
+
+
+def fetch_caldav(src, start, end):
     out = []
-    for c in cals:
+    for c in calendars(src):
         out += caldav_query(c, src, start, end)
     return out
 
@@ -179,7 +204,7 @@ def rule_set(ev, start):
     return rs
 
 
-def expand(text, idx, name, start, end):
+def expand(text, idx, name, start, end, href="", rw=False):
     from icalendar import Calendar
     masters, overrides = [], {}
     for ev in Calendar.from_ical(text).walk("VEVENT"):
@@ -209,6 +234,8 @@ def expand(text, idx, name, start, end):
             "start": ls.strftime(fmt), "end": le.strftime(fmt), "allDay": all_day,
             "location": str(ev.get("LOCATION") or "").strip(),
             "link": link_of(ev),
+            "uid": str(ev.get("UID") or ""), "href": href, "rw": rw,
+            "recurring": "RRULE" in ev or "RECURRENCE-ID" in ev,
         })
 
     def span(ev):
@@ -243,26 +270,34 @@ def expand(text, idx, name, start, end):
     return out
 
 
+def deps():
+    try:
+        import icalendar  # noqa: F401
+        import dateutil  # noqa: F401
+    except ImportError:
+        return False
+    return True
+
+
 def sync(days):
-    sources = parse_conf(CONF)
+    sources = all_sources()
     result = {"updated": dt.datetime.now().isoformat(timespec="seconds"), "error": "", "sources": [], "events": []}
-    if sources:
-        try:
-            import icalendar  # noqa: F401
-            import dateutil  # noqa: F401
-        except ImportError:
+    if not deps():
+        if len(sources) > 1 or os.path.exists(LOCAL):
             result["error"] = "deps"
-            sources = []
+        sources = []
     today = dt.datetime.combine(dt.date.today(), dt.time())
     start, end = today - dt.timedelta(days=7), today + dt.timedelta(days=days + 1)
     utc = (start.astimezone(dt.timezone.utc), end.astimezone(dt.timezone.utc))
     for i, src in enumerate(sources):
-        info = {"name": src["name"], "error": "", "count": 0}
+        caldav = not is_ics(src)
+        rw = caldav or bool(src.get("local"))
+        info = {"name": src["name"], "error": "", "count": 0, "rw": rw, "local": bool(src.get("local"))}
         try:
-            texts = fetch_ics(src) if is_ics(src) else fetch_caldav(src, *utc)
+            texts = fetch_caldav(src, *utc) if caldav else fetch_ics(src)
             events = []
-            for t in texts:
-                events += expand(t, i, src["name"], start, end)
+            for href, t in texts:
+                events += expand(t, i, src["name"], start, end, href, rw)
             info["count"] = len(events)
             result["events"] += events
         except urllib.error.HTTPError as e:
@@ -278,6 +313,84 @@ def sync(days):
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump(result, f, ensure_ascii=False)
     os.replace(tmp, CACHE)
+
+
+def write_local(cal):
+    os.makedirs(os.path.dirname(LOCAL), exist_ok=True)
+    tmp = LOCAL + ".tmp"
+    with open(tmp, "wb") as f:
+        f.write(cal.to_ical())
+    os.replace(tmp, LOCAL)
+
+
+def read_local():
+    from icalendar import Calendar
+    try:
+        with open(LOCAL, "rb") as f:
+            return Calendar.from_ical(f.read())
+    except FileNotFoundError:
+        cal = Calendar()
+        cal.add("prodid", "-//ochre//calendar//RU")
+        cal.add("version", "2.0")
+        return cal
+
+
+def when(text, all_day):
+    t = dt.datetime.fromisoformat(text)
+    return t.date() if all_day else t.astimezone().astimezone(dt.timezone.utc)
+
+
+def source(name):
+    for s in all_sources():
+        if s["name"] == name:
+            return s
+    raise SystemExit(f"нет календаря {name}")
+
+
+def add(a):
+    import uuid
+    from icalendar import Calendar, Event
+    src = source(a.cal)
+    if not src.get("local") and is_ics(src):
+        raise SystemExit(f"{a.cal}: в календарь .ics по ссылке писать нельзя")
+    start, end = when(a.start, a.all_day), when(a.end, a.all_day)
+    if end <= start:
+        end = start + (dt.timedelta(days=1) if a.all_day else dt.timedelta(hours=1))
+    uid = f"{uuid.uuid4()}@ochre"
+    ev = Event()
+    ev.add("uid", uid)
+    ev.add("dtstamp", dt.datetime.now(dt.timezone.utc))
+    ev.add("summary", a.title.strip() or "без названия")
+    ev.add("dtstart", start)
+    ev.add("dtend", end)
+    if a.location.strip():
+        ev.add("location", a.location.strip())
+    if src.get("local"):
+        cal = read_local()
+        cal.add_component(ev)
+        write_local(cal)
+        return
+    cal = Calendar()
+    cal.add("prodid", "-//ochre//calendar//RU")
+    cal.add("version", "2.0")
+    cal.add_component(ev)
+    target = calendars(src)
+    if not target:
+        raise SystemExit(f"{a.cal}: на сервере нет календарей")
+    url = target[0].rstrip("/") + "/" + uid.split("@")[0] + ".ics"
+    request(url, src, "PUT", cal.to_ical(), ctype="text/calendar; charset=utf-8", headers={"If-None-Match": "*"})
+
+
+def delete(a):
+    src = source(a.cal)
+    if src.get("local"):
+        cal = read_local()
+        cal.subcomponents = [c for c in cal.subcomponents if not (c.name == "VEVENT" and str(c.get("UID")) == a.uid)]
+        write_local(cal)
+        return
+    if is_ics(src) or not a.href:
+        raise SystemExit(f"{a.cal}: удалить можно только из CalDAV")
+    request(a.href, src, "DELETE")
 
 
 def init():
@@ -306,10 +419,27 @@ def login():
 
 def main():
     p = argparse.ArgumentParser(prog="ochre-cal")
-    p.add_argument("cmd", choices=["sync", "init", "login"])
+    p.add_argument("cmd", choices=["sync", "init", "login", "add", "delete"])
     p.add_argument("--days", type=int, default=31)
+    p.add_argument("--cal", default=LOCAL_NAME)
+    p.add_argument("--title", default="")
+    p.add_argument("--start", default="")
+    p.add_argument("--end", default="")
+    p.add_argument("--all-day", action="store_true")
+    p.add_argument("--location", default="")
+    p.add_argument("--uid", default="")
+    p.add_argument("--href", default="")
     a = p.parse_args()
-    if a.cmd == "sync":
+    if a.cmd in ("add", "delete"):
+        if not deps():
+            raise SystemExit("нужны python-icalendar и python-dateutil")
+        try:
+            add(a) if a.cmd == "add" else delete(a)
+        except urllib.error.HTTPError as e:
+            raise SystemExit(f"{a.cal}: HTTP {e.code}")
+        except urllib.error.URLError as e:
+            raise SystemExit(f"{a.cal}: {e.reason}")
+    elif a.cmd == "sync":
         sync(max(1, a.days))
     elif a.cmd == "init":
         init()

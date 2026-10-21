@@ -6,6 +6,7 @@ import QtQuick
 // События календарей: extras/calendar/ochre-cal.py читает ~/.config/ochre/calendars.conf (.ics, Google и Outlook
 // по секретному адресу iCal, CalDAV) и пишет ~/.cache/ochre/calendar.json, сервис его читает. Обновление — раз в
 // shell.calendar.refresh минут, при правке calendars.conf и по IPC. Напоминания — за shell.calendar.remind минут.
+// Свой календарь «ochre» (~/.config/ochre/events.ics) есть всегда; add / remove пишут в него или в CalDAV.
 //   qs ipc call calendar refresh | get
 Singleton {
     id: root
@@ -16,16 +17,21 @@ Singleton {
     readonly property int days: Settings.get("shell.calendar.days")
     readonly property int remind: Settings.get("shell.calendar.remind")
 
-    property var events: []         // [{ id, src, cal, title, start: Date, end: Date, allDay, location, link }]
-    property var sources: []        // [{ name, error, count }]
-    property var byDay: ({})        // "y-m-d" → число событий
+    property var events: []         // [{ id, src, cal, title, start: Date, end: Date, allDay, location, link, uid, href, rw, recurring }]
+    property var sources: []        // [{ name, error, count, rw, local }]
+    property var byDay: ({})        // "y-m-d" → номера календарей событий этого дня (с повторами)
     property string error: ""
+    property string writeError: ""
     property bool loading: false
+    property bool busy: false       // идёт add / remove
+    property bool again: false
     property date updated
     property date now: new Date()
     property var reminded: ({})
 
     readonly property bool configured: sources.length > 0
+    readonly property var writable: sources.filter(s => s.rw).map(s => s.name)
+    readonly property bool external: sources.some(s => !s.local)
     readonly property var failed: sources.filter(s => s.error)
     readonly property var upcoming: events.filter(e => e.end > now && e.start < new Date(now.getTime() + days * 86400000))
     readonly property var next: upcoming.find(e => !e.allDay && e.start - now < 12 * 3600000) ?? null
@@ -37,7 +43,32 @@ Singleton {
     }
 
     function dayKey(d) { return d.getFullYear() + "-" + d.getMonth() + "-" + d.getDate(); }
-    function count(y, m, d) { return byDay[y + "-" + m + "-" + d] ?? 0; }
+    function count(y, m, d) { return (byDay[y + "-" + m + "-" + d] ?? []).length; }
+    function srcsOn(y, m, d) { return [...new Set(byDay[y + "-" + m + "-" + d] ?? [])]; }
+
+    // «2026-10-23T10:00» / «2026-10-23» — так ждёт ochre-cal.py
+    function iso(d, allDay) {
+        const two = x => String(x).padStart(2, "0");
+        const day = d.getFullYear() + "-" + two(d.getMonth() + 1) + "-" + two(d.getDate());
+        return allDay ? day : day + "T" + two(d.getHours()) + ":" + two(d.getMinutes());
+    }
+
+    // ev: { cal, title, start: Date, end: Date, allDay, location }; для allDay end — следующий день после последнего
+    function add(ev) {
+        const argv = ["add", "--cal", ev.cal, "--title", ev.title, "--start", iso(ev.start, ev.allDay), "--end", iso(ev.end, ev.allDay),
+            "--location", ev.location ?? ""];
+        run(ev.allDay ? argv.concat(["--all-day"]) : argv);
+    }
+
+    function remove(e) {
+        if (e.rw) run(["delete", "--cal", e.cal, "--uid", e.uid, "--href", e.href ?? ""]);
+    }
+
+    function run(argv) {
+        busy = true;
+        writeError = "";
+        job.createObject(root, { command: ["python3", script].concat(argv) });
+    }
 
     function on(day) {
         const a = new Date(day.getFullYear(), day.getMonth(), day.getDate()), b = new Date(a.getTime() + 86400000);
@@ -66,6 +97,7 @@ Singleton {
     function errorText() {
         if (error === "deps") return I18n.tr("нужны python-icalendar и python-dateutil");
         if (error) return error;
+        if (writeError) return writeError;
         return failed.map(s => s.name + ": " + s.error).join(" · ");
     }
 
@@ -83,7 +115,7 @@ Singleton {
     }
 
     function refresh() {
-        if (sync.running) return;
+        if (sync.running) { again = true; return; }
         loading = true;
         sync.running = true;
     }
@@ -98,7 +130,7 @@ Singleton {
             const d = new Date(e.start.getFullYear(), e.start.getMonth(), e.start.getDate());
             for (let i = 0; i < 62 && d <= last; i++, d.setDate(d.getDate() + 1)) {
                 const k = dayKey(d);
-                map[k] = (map[k] ?? 0) + 1;
+                map[k] = (map[k] ?? []).concat([e.src]);
             }
         }
         events = list;
@@ -135,6 +167,23 @@ Singleton {
             root.loading = false;
             if (code !== 0) root.error = err.text.trim().split("\n").pop() || "ochre-cal: " + code;
             cacheFile.reload();
+            if (root.again) { root.again = false; retry.restart(); }
+        }
+    }
+
+    // запись — свой процесс на запрос: ответ сервера CalDAV может прийти позже следующего
+    Component {
+        id: job
+        Process {
+            id: p
+            running: true
+            stderr: StdioCollector { id: jobErr }
+            onExited: code => {
+                root.busy = false;
+                if (code !== 0) root.writeError = jobErr.text.trim().split("\n").pop() || "ochre-cal: " + code;
+                root.refresh();
+                p.destroy();
+            }
         }
     }
 
