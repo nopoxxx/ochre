@@ -392,7 +392,6 @@ function niriFiles(get0, outs, sel) {
         '    Mod+Shift+S hotkey-overlay-title="Screenshot"' + ipc("shot", "region"),
         '    Print hotkey-overlay-title="Screenshot"' + ipc("shot", "region"),
         '    Mod+Shift+T hotkey-overlay-title="Copy Text from the Screen"' + ipc("shot", "ocr"),
-        '    Mod+Alt+F hotkey-overlay-title="Search the Screen"' + ipc("shot", "search"),
         '    Mod+Shift+C hotkey-overlay-title="Pick a Color"' + ipc("shot", "pick"),
         '    Mod+Shift+G hotkey-overlay-title="Game Mode"' + ipc("game", "toggle"),
         '    Mod+Shift+M hotkey-overlay-title="Recognize a Song"' + ipc("songrec", "recognize"),
